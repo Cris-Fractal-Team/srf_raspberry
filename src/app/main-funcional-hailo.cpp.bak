@@ -1,0 +1,183 @@
+
+
+#include <iostream>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+
+using namespace std;
+
+// **************************************************************
+
+#include <iostream>
+#include <opencv2/opencv.hpp>
+#include "hailo/hailort.hpp"
+#include "lib/hailolib/DetectorCaraHaloScrfd.h"
+#include "lib/hailolib/FaceRecHailo.h"
+
+using namespace std;
+using namespace cv;
+
+#define IMAGE_SIZE 640
+#define MODEL_PATH "./models/scrfd_2.5g.hef"
+#define CONFIDENCE_THRESHOLD 0.5
+
+#include <iostream>
+#include "hailo/hailort.hpp"
+
+int main()
+{
+    cout << "Hola mundo" << endl;
+   
+    DetectorCarasHailoSCRFD detector;
+    FaceRecHailo recFacial;
+    std::vector<DeteccionCaraHailo> lstCaras;
+    std::vector<std::vector<SIMD_TYPE>> lstUniverso(10000,std::vector<SIMD_TYPE>(512));
+    DeteccionCaraHailo det;
+    std::vector<SIMD_TYPE> descriptorFacial;
+    cv::Mat descFacialMat;
+    int dimension = 512;
+    cv::Mat listaVectores;
+    int i,n;
+    int capacidadInicial = 2000;
+    int numVectores = 0;
+
+    cv::Rect caja;
+    cv::Point punto;
+    Scalar rojo(0,0,255);
+
+    // simula la creacion de un universo de 11000 registros
+    for(i=0;i<10000;i++)
+    {
+        std::vector<SIMD_TYPE>desc;
+        for(int j=0;j<512;j++)
+        {
+            lstUniverso[i][j] = (SIMD_TYPE)rand();
+        }        
+    }
+    cout << endl;
+
+    // Crea el dispositivo virtual
+    cout << "Creando VDevice" << endl;
+    hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();    
+    if (!device) 
+    {
+        cerr << "Error: No se pudo inicializar el dispositivo Hailo." << endl;
+        return -1;
+    }
+
+    detector.setDimImagenes(640,640);
+    detector.runner.device = &device;
+
+    // cargamos el modelo de red scrfd_2.5g--640x640_quant_hailort_hailo8l_1
+    // if ( detector.cargarModelo("./models/scrfd_2.5g.hef") != 0 )    
+    //if ( detector.cargarModelo("./models/scrfd_500m.hef") != 0 )
+    if ( detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0 )
+    {
+        return -1;
+    }           
+    cout << "Red detectora cargada con exito" << endl;
+    detector.runner.printInfoStreamSalida();
+
+    // cargamos facenet
+    recFacial.runner.device = &device;
+    if ( recFacial.cargarModelo("./models/arcface_mobilefacenet.hef") != 0 )
+    {
+        cout << "Error al cargar modelo de FaceNet" << endl;
+        return -1;
+    }
+    cout << "Red FaceNet cargada con exito" << endl;
+    recFacial.runner.printInfoStreamSalida();
+    
+        
+    // Cargar la imagen de prueba
+    cv::Mat image = imread("./data/personas1.jpg");
+    if (image.empty()) {
+        cerr << "Error: No se pudo cargar la imagen." << endl;
+        return -1;
+    }
+
+
+    // ejecutamos la inferencia
+    auto inicio = std::chrono::high_resolution_clock::now();
+
+    if ( detector.ejecutar(image) == false )
+        cout << "Error en la inferencia" << endl;
+
+    auto tfinInf = std::chrono::high_resolution_clock::now();
+
+    lstCaras = detector.getDetecciones_2_5g(0.40);
+
+    auto tFinExtrae = std::chrono::high_resolution_clock::now();
+
+    n = lstCaras.size();
+    for(i=0;i<n;i++)
+    {
+        det = lstCaras.at(i);
+
+        if ( recFacial.ejecutar(image, det) == true )
+        {
+            descriptorFacial = recFacial.extraeDescriptor();
+            for(int j=0;j<10000;j++)
+            {
+                float dif = FaceRecHailo::calculaDiferenciaSIMD(descriptorFacial, lstUniverso[j]);
+            }
+            // descFacialMat = recFacial.extraeDescriptorMat();
+            // std::pair<int, float>  indiceCercano = encontrarVectorMasCercanoRapido(listaVectores, descFacialMat, numVectores);
+            cout << "Exito en reconocimiento facial" << endl;
+        }
+        else
+        {
+            cout << "Error en reconocimiento facial" << endl;
+        }
+
+        caja.x = det.ptoSupIzq.x;
+        caja.y = det.ptoSupIzq.y;
+        caja.width = det.ptoInfDer.x - det.ptoSupIzq.x + 1;
+        caja.height = det.ptoInfDer.y - det.ptoSupIzq.y + 1;
+        cv::rectangle(image,caja,rojo,1);
+
+        punto.x = det.ojoIzq.x;   
+        punto.y = det.ojoIzq.y;   
+        cv::circle(image, punto, 3, rojo, -1);
+
+        punto.x = det.ojoDer.x;   
+        punto.y = det.ojoDer.y;   
+        cv::circle(image, punto, 3, rojo, -1);
+
+        punto.x = det.nariz.x;   
+        punto.y = det.nariz.y;   
+        cv::circle(image, punto, 3, rojo, -1);
+        
+        punto.x = det.bocaIzq.x;   
+        punto.y = det.bocaIzq.y;   
+        cv::circle(image, punto, 3, rojo, -1);
+
+        punto.x = det.bocaDer.x;   
+        punto.y = det.bocaDer.y;   
+        cv::circle(image, punto, 3, rojo, -1);
+
+    }
+
+    auto fin = std::chrono::high_resolution_clock::now(); // Finaliza el cronómetro
+
+    auto duracion = std::chrono::duration_cast<std::chrono::microseconds>(fin - inicio);
+    auto duracion1 = std::chrono::duration_cast<std::chrono::microseconds>(tfinInf - inicio);
+    auto duracion2 = std::chrono::duration_cast<std::chrono::microseconds>(tFinExtrae - tfinInf);
+    auto duracion3 = std::chrono::duration_cast<std::chrono::microseconds>(fin - tFinExtrae);
+    
+    std::cout << "* Tiempo Total : " << duracion.count() << " us\n";
+    std::cout << "* Tiempo inferencia : " << duracion1.count() << " us\n";
+    std::cout << "* Tiempo extrae datos : " << duracion2.count() << " us\n";
+    std::cout << "* Tiempo dibuja : " << duracion3.count() << " us\n";
+
+    cout << "Total de caras detectadas " << n << endl;
+
+    cv::imshow("foto",image);
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+
+    return 0;
+}
+

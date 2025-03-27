@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <script>
+
+            var exampleSocket = null;
+            var socketConectado = false;
+            var bufferImagen;
+
+            function iniciar()
+            {
+                exampleSocket = new WebSocket("ws://localhost:8080/ws/hola.php");
+
+                exampleSocket.onopen= function( event ) {
+                    var elem = document.getElementById("msg");
+                    elem.innerHTML="Conectado";
+                    socketConectado = true;
+                }
+
+                exampleSocket.onmessage= function( event ) {
+                    var elem = document.getElementById("msg");
+                    var obj = JSON.parse(event.data);
+                
+                    if ( obj.operacion == 'saludo' )
+                    {
+                        elem.innerHTML=elem.innerHTML + "Mensaje recibido:" + obj.valor + "<br>";                        
+                    }
+                    else
+                    if ( obj.operacion == 'setImage' )
+                    {
+                        if ( obj.parte == 1 )
+                        {
+                            bufferImagen = "";
+                        }
+                        bufferImagen = bufferImagen + obj.data;
+                        if ( obj.parte == obj.total )
+                        {
+                            var img = document.getElementById('foto');
+
+                            // console.log("");
+                            // console.log(bufferImagen);
+
+                            img.src = "data:image/jpeg;base64," + bufferImagen;
+                        }
+                    }                                
+                }
+
+                exampleSocket.onclose= function( event ) {
+                    var elem = document.getElementById("msg");
+                    elem.innerHTML="WebSocket cerrado:" + event.data;
+                }
+
+                exampleSocket.onerror= function( event ) {
+                    var elem = document.getElementById("msg");
+                    elem.innerHTML="Error en el webSocket:" + event;
+                }
+            }
+
+            function enviaMensaje()
+            {
+                if (( socketConectado == true ) && ( exampleSocket != null ))
+                {
+                    exampleSocket.send("Este es un mensaje con menos de 126 caracteres.");
+                    exampleSocket.send("Este es un mensaje por otro lado tiene mas de 126 caracteres pues la idea es que se envien datos con mas de 2 bytes de longitud, para que se pueda mandar fotos");
+                }
+                else
+                {
+                    alert('No hay conexion con el servidor WebSocket')
+                }
+            }
+        </script>
+    </head>
+    <bod>
+        Test de WebSocket:<br>
+        <input type="button" id="btniniciar" onclick="iniciar()" value="Iniciar"><br>
+        <input type="button" id="btnEnviar" onclick="enviaMensaje()" value="Enviar Mensaje"><br>
+        <div id="msg"></div>
+        <br>
+        <img id="foto">
+    </bod>
+</html>

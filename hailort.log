@@ -1,0 +1,943 @@
+[2025-03-27 11:06:52.304] [2351] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 11:06:52.310] [2351] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 11:06:52.310] [2351] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 11:06:52.318] [2351] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 14.944013 milliseconds
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 18.669516 milliseconds
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 11:06:52.322] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 11:06:52.323] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 11:06:52.324] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 11:06:52.324] [2351] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 11:06:52.324] [2351] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 11:06:52.324] [2351] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 11:06:52.324] [2351] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 11:06:52.324] [2351] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 11:06:52.324] [2351] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 11:06:53.300] [2370] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 11:06:53.300] [2370] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 11:06:53.300] [2370] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 11:06:53.301] [2370] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 50688. memory to edge layer usage factor is 1
+[2025-03-27 11:06:53.301] [2370] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 11:06:53.309] [2370] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 9.324748 milliseconds
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 9.93049 milliseconds
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632)
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating arcface_mobilefacenet/input_layer1...
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'arcface_mobilefacenet/input_layer1': (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632) >> HW
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512)
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating arcface_mobilefacenet/fc1...
+[2025-03-27 11:06:53.310] [2370] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'arcface_mobilefacenet/fc1': HW >> (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512) >> (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 11:10:07.251] [2435] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 11:10:07.263] [2435] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 11:10:07.265] [2435] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 11:10:07.265] [2435] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 11:10:07.291] [2449] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 11:10:07.291] [2449] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 11:10:07.292] [2449] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 11:10:07.298] [2449] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 11:10:07.298] [2449] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 11:10:07.310] [2449] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 18.485817 milliseconds
+[2025-03-27 11:10:07.313] [2449] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 22.014759 milliseconds
+[2025-03-27 11:10:07.313] [2449] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 11:10:07.313] [2449] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 11:10:07.313] [2449] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 11:10:07.314] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 11:10:07.315] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 11:10:07.316] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 11:10:07.316] [2449] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 11:10:07.319] [2449] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 11:10:07.319] [2449] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 11:10:07.320] [2449] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 11:10:07.320] [2449] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 11:10:07.320] [2449] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 11:10:08.290] [2468] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 11:10:08.290] [2468] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 11:10:08.290] [2468] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 11:10:08.291] [2468] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 50688. memory to edge layer usage factor is 1
+[2025-03-27 11:10:08.291] [2468] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 11:10:08.300] [2468] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 10.166139 milliseconds
+[2025-03-27 11:10:08.301] [2468] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 10.99912 milliseconds
+[2025-03-27 11:10:08.301] [2468] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632)
+[2025-03-27 11:10:08.301] [2468] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating arcface_mobilefacenet/input_layer1...
+[2025-03-27 11:10:08.301] [2468] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'arcface_mobilefacenet/input_layer1': (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632) >> HW
+[2025-03-27 11:10:08.301] [2468] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512)
+[2025-03-27 11:10:08.302] [2468] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 11:10:08.302] [2468] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating arcface_mobilefacenet/fc1...
+[2025-03-27 11:10:08.302] [2468] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'arcface_mobilefacenet/fc1': HW >> (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512) >> (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 12:03:44.020] [2129] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 12:03:44.039] [2129] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 12:03:44.041] [2129] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 12:03:44.043] [2129] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 12:03:44.137] [2140] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 12:03:44.140] [2140] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:03:44.141] [2140] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:03:44.151] [2140] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 12:03:44.151] [2140] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:03:44.160] [2140] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 19.202399 milliseconds
+[2025-03-27 12:03:44.162] [2140] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 23.344924 milliseconds
+[2025-03-27 12:03:44.163] [2140] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 12:03:44.163] [2140] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 12:03:44.163] [2140] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 12:03:44.163] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:03:44.164] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 12:03:44.165] [2140] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:03:45.159] [2157] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 12:03:45.159] [2157] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:03:45.159] [2157] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:04:59.087] [2232] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 12:04:59.100] [2232] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 12:04:59.102] [2232] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 12:04:59.102] [2232] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 12:04:59.133] [2243] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 12:04:59.133] [2243] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:04:59.134] [2243] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:04:59.139] [2243] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 12:04:59.139] [2243] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:04:59.149] [2243] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 15.835507 milliseconds
+[2025-03-27 12:04:59.152] [2243] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 18.882697 milliseconds
+[2025-03-27 12:04:59.152] [2243] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 12:04:59.152] [2243] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 12:04:59.152] [2243] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 12:04:59.152] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 12:04:59.153] [2243] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 12:04:59.154] [2243] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:05:00.128] [2261] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 12:05:00.128] [2261] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:05:00.128] [2261] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:05:29.774] [2309] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 12:05:29.785] [2309] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 12:05:29.786] [2309] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 12:05:29.786] [2309] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 12:05:29.811] [2323] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 12:05:29.812] [2323] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:05:29.812] [2323] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:05:29.820] [2323] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 12:05:29.820] [2323] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:05:29.833] [2323] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 21.461404 milliseconds
+[2025-03-27 12:05:29.837] [2323] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 25.162207 milliseconds
+[2025-03-27 12:05:29.837] [2323] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 12:05:29.837] [2323] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 12:05:29.837] [2323] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 12:05:29.837] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 12:05:29.838] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 12:05:29.839] [2323] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 12:05:29.840] [2323] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:05:30.810] [2342] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 12:05:30.810] [2342] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:05:30.810] [2342] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:05:30.811] [2342] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 50688. memory to edge layer usage factor is 1
+[2025-03-27 12:05:30.811] [2342] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:05:30.821] [2342] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 10.543479 milliseconds
+[2025-03-27 12:05:30.821] [2342] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 11.217315 milliseconds
+[2025-03-27 12:05:30.821] [2342] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632)
+[2025-03-27 12:05:30.821] [2342] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating arcface_mobilefacenet/input_layer1...
+[2025-03-27 12:05:30.821] [2342] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'arcface_mobilefacenet/input_layer1': (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632) >> HW
+[2025-03-27 12:05:30.821] [2342] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512)
+[2025-03-27 12:05:30.822] [2342] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 12:05:30.822] [2342] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating arcface_mobilefacenet/fc1...
+[2025-03-27 12:05:30.822] [2342] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'arcface_mobilefacenet/fc1': HW >> (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512) >> (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 12:14:24.160] [167412] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 12:14:24.172] [167412] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 12:14:24.175] [167412] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 12:14:24.175] [167412] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 12:14:24.204] [167423] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 12:14:24.204] [167423] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:24.204] [167423] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:24.210] [167423] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 12:14:24.210] [167423] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:14:24.218] [167423] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 13.394229 milliseconds
+[2025-03-27 12:14:24.222] [167423] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 18.242092 milliseconds
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:14:24.223] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 12:14:24.224] [167423] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:14:25.198] [167440] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 12:14:25.198] [167440] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:25.199] [167440] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:55.017] [167547] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 12:14:55.029] [167547] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 12:14:55.030] [167547] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 12:14:55.030] [167547] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 12:14:55.057] [167561] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 12:14:55.058] [167561] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:55.058] [167561] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:55.066] [167561] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 12:14:55.066] [167561] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:14:55.081] [167561] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 23.567108 milliseconds
+[2025-03-27 12:14:55.085] [167561] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 27.665539 milliseconds
+[2025-03-27 12:14:55.086] [167561] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 12:14:55.086] [167561] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 12:14:55.086] [167561] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 12:14:55.086] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 12:14:55.087] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:14:55.087] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 12:14:55.087] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:14:55.087] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 12:14:55.088] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:14:55.088] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 12:14:55.088] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:14:55.088] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:14:55.089] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 12:14:55.090] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:14:55.090] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 12:14:55.090] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:14:55.090] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 12:14:55.090] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:14:55.091] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 12:14:55.091] [167561] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 12:14:55.091] [167561] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 12:14:55.091] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:14:55.091] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 12:14:55.092] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:14:55.092] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 12:14:55.092] [167561] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 12:14:55.092] [167561] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 12:14:55.092] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:14:55.092] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 12:14:55.092] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:14:55.093] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 12:14:55.093] [167561] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 12:14:55.093] [167561] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 12:14:55.093] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:14:55.093] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 12:14:55.093] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:14:55.093] [167561] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 12:14:55.094] [167561] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 12:14:55.094] [167561] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 12:14:55.094] [167561] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:14:55.094] [167561] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 12:14:55.094] [167561] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:14:56.057] [167580] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 12:14:56.057] [167580] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:56.058] [167580] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:14:56.058] [167580] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 50688. memory to edge layer usage factor is 1
+[2025-03-27 12:14:56.058] [167580] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:14:56.068] [167580] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 10.687448 milliseconds
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 11.515946 milliseconds
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632)
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating arcface_mobilefacenet/input_layer1...
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'arcface_mobilefacenet/input_layer1': (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632) >> HW
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512)
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating arcface_mobilefacenet/fc1...
+[2025-03-27 12:14:56.069] [167580] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'arcface_mobilefacenet/fc1': HW >> (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512) >> (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 12:26:48.163] [354024] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 12:26:48.175] [354024] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 12:26:48.178] [354024] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 12:26:48.178] [354024] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 12:26:48.205] [354034] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 12:26:48.205] [354034] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:26:48.206] [354034] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:26:48.211] [354034] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 12:26:48.211] [354034] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:26:48.218] [354034] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 12.988586 milliseconds
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 15.650641 milliseconds
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 12:26:48.221] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:26:48.222] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 12:26:48.223] [354034] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 12:26:48.224] [354034] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:26:49.202] [354052] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 12:26:49.202] [354052] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:26:49.202] [354052] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:27:14.253] [354161] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 12:27:14.265] [354161] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 12:27:14.266] [354161] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 12:27:14.266] [354161] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 12:27:14.297] [354179] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 12:27:14.297] [354179] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:27:14.298] [354179] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:27:14.305] [354179] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 12:27:14.305] [354179] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:27:14.316] [354179] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 18.0301 milliseconds
+[2025-03-27 12:27:14.320] [354179] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 23.026521 milliseconds
+[2025-03-27 12:27:14.322] [354179] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 12:27:14.322] [354179] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 12:27:14.322] [354179] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 12:27:14.323] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 12:27:14.323] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:27:14.323] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 12:27:14.323] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 12:27:14.323] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 12:27:14.325] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:27:14.325] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 12:27:14.325] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 12:27:14.325] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 12:27:14.328] [354179] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 12:27:14.328] [354179] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 12:27:14.333] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:27:14.333] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 12:27:14.333] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 12:27:14.333] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 12:27:14.333] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:27:14.333] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 12:27:14.334] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 12:27:14.334] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 12:27:14.335] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:27:14.335] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 12:27:14.335] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 12:27:14.335] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 12:27:14.336] [354179] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 12:27:14.341] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:27:14.341] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 12:27:14.341] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 12:27:14.341] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 12:27:14.342] [354179] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 12:27:14.342] [354179] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 12:27:14.342] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:27:14.342] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 12:27:14.342] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 12:27:14.342] [354179] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 12:27:14.344] [354179] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 12:27:14.344] [354179] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 12:27:14.348] [354179] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:27:14.349] [354179] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 12:27:14.349] [354179] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 12:27:15.294] [354198] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 12:27:15.294] [354198] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:27:15.294] [354198] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 12:27:15.297] [354198] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 50688. memory to edge layer usage factor is 1
+[2025-03-27 12:27:15.297] [354198] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 12:27:15.308] [354198] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 13.757868 milliseconds
+[2025-03-27 12:27:15.308] [354198] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 14.479651 milliseconds
+[2025-03-27 12:27:15.308] [354198] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632)
+[2025-03-27 12:27:15.308] [354198] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating arcface_mobilefacenet/input_layer1...
+[2025-03-27 12:27:15.308] [354198] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'arcface_mobilefacenet/input_layer1': (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632) >> HW
+[2025-03-27 12:27:15.308] [354198] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512)
+[2025-03-27 12:27:15.309] [354198] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 12:27:15.309] [354198] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating arcface_mobilefacenet/fc1...
+[2025-03-27 12:27:15.309] [354198] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'arcface_mobilefacenet/fc1': HW >> (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512) >> (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 15:32:28.877] [1913] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 15:32:28.900] [1913] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 15:32:28.901] [1913] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 15:32:28.903] [1913] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 15:32:28.998] [1922] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 15:32:29.001] [1922] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:32:29.002] [1922] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:32:29.013] [1922] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 15:32:29.013] [1922] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 15:32:29.022] [1922] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 19.766444 milliseconds
+[2025-03-27 15:32:29.024] [1922] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 24.186056 milliseconds
+[2025-03-27 15:32:29.025] [1922] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 15:32:29.025] [1922] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 15:32:29.025] [1922] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 15:32:29.025] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:32:29.026] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 15:32:29.027] [1922] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:32:30.017] [1939] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 15:32:30.017] [1939] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:32:30.018] [1939] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:36:20.659] [1948] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 15:36:20.671] [1948] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 15:36:20.673] [1948] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 15:36:20.673] [1948] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 15:36:20.716] [1962] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 15:36:20.716] [1962] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:36:20.719] [1962] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:36:20.727] [1962] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 15:36:20.727] [1962] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 15:36:20.757] [1962] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 37.895148 milliseconds
+[2025-03-27 15:36:20.762] [1962] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 45.399408 milliseconds
+[2025-03-27 15:36:20.762] [1962] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 15:36:20.762] [1962] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 15:36:20.762] [1962] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 15:36:20.762] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 15:36:20.763] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:36:20.763] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 15:36:20.763] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:36:20.763] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 15:36:20.763] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:36:20.763] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 15:36:20.763] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 15:36:20.764] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:36:20.765] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 15:36:20.766] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:36:20.767] [1962] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 15:36:20.767] [1962] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 15:36:20.767] [1962] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 15:36:20.767] [1962] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:36:20.767] [1962] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 15:36:20.767] [1962] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:36:21.697] [1979] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 15:36:21.697] [1979] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:36:21.697] [1979] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:36:21.698] [1979] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 50688. memory to edge layer usage factor is 1
+[2025-03-27 15:36:21.698] [1979] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 15:36:21.707] [1979] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 10.120352 milliseconds
+[2025-03-27 15:36:21.707] [1979] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 10.709222 milliseconds
+[2025-03-27 15:36:21.708] [1979] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632)
+[2025-03-27 15:36:21.708] [1979] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating arcface_mobilefacenet/input_layer1...
+[2025-03-27 15:36:21.708] [1979] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'arcface_mobilefacenet/input_layer1': (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632) >> HW
+[2025-03-27 15:36:21.708] [1979] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512)
+[2025-03-27 15:36:21.708] [1979] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 15:36:21.708] [1979] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating arcface_mobilefacenet/fc1...
+[2025-03-27 15:36:21.708] [1979] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'arcface_mobilefacenet/fc1': HW >> (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512) >> (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 15:37:41.742] [12465] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 15:37:41.755] [12465] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 15:37:41.756] [12465] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 15:37:41.756] [12465] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 15:37:41.791] [12479] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 15:37:41.791] [12479] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:37:41.792] [12479] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:37:41.804] [12479] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 15:37:41.804] [12479] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 15:37:41.822] [12479] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 30.931089 milliseconds
+[2025-03-27 15:37:41.829] [12479] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 37.898908 milliseconds
+[2025-03-27 15:37:41.830] [12479] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 15:37:41.831] [12479] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 15:37:41.831] [12479] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 15:37:41.831] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 15:37:41.831] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 15:37:41.832] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 15:37:41.833] [12479] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 15:37:41.834] [12479] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:37:41.834] [12479] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 15:37:41.834] [12479] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/co[2025-03-27 15:38:51.185] [12534] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 15:38:51.197] [12534] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 15:38:51.199] [12534] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 15:38:51.199] [12534] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 15:38:51.223] [12545] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 15:38:51.224] [12545] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:38:51.224] [12545] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:38:51.229] [12545] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 15:38:51.229] [12545] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 15:38:51.238] [12545] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 13.84815 milliseconds
+[2025-03-27 15:38:51.240] [12545] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 16.794466 milliseconds
+[2025-03-27 15:38:51.240] [12545] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 15:38:51.240] [12545] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 15:38:51.240] [12545] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 15:38:51.241] [12545] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:38:51.242] [12545] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 15:38:51.243] [12545] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 15:38:51.243] [12545] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 15:38:51.243] [12545] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:38:51.243] [12545] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 15:38:51.243] [12545] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:38:52.223] [12562] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 15:38:52.223] [12562] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:38:52.223] [12562] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:39:08.070] [12669] [HailoRT] [info] [vdevice.cpp:523] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-03-27 15:39:08.083] [12669] [HailoRT] [info] [device.cpp:49] [Device] OS Version: Linux 6.6.74+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.6.74-1+rpt1 (2025-01-27) aarch64
+[2025-03-27 15:39:08.084] [12669] [HailoRT] [info] [control.cpp:108] [control__parse_identify_results] firmware_version is: 4.20.0
+[2025-03-27 15:39:08.084] [12669] [HailoRT] [info] [vdevice.cpp:651] [create] VDevice Infos: 0000:01:00.0
+[2025-03-27 15:39:08.114] [12683] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: scrfd_2_5g
+[2025-03-27 15:39:08.114] [12683] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:39:08.115] [12683] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:39:08.125] [12683] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 462336. memory to edge layer usage factor is 1
+[2025-03-27 15:39:08.125] [12683] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 15:39:08.148] [12683] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 33.700663 milliseconds
+[2025-03-27 15:39:08.153] [12683] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 39.680521 milliseconds
+[2025-03-27 15:39:08.154] [12683] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800)
+[2025-03-27 15:39:08.154] [12683] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating scrfd_2_5g/input_layer1...
+[2025-03-27 15:39:08.154] [12683] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'scrfd_2_5g/input_layer1': (HwWriteEl3scrfd_2_5g/input_layer1 | hw_frame_size: 1228800) >> HW
+[2025-03-27 15:39:08.155] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800)
+[2025-03-27 15:39:08.155] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:39:08.155] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv42...
+[2025-03-27 15:39:08.155] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv42': HW >> (HwReadEl3scrfd_2_5g/conv42 | hw_frame_size: 12800) >> (UserBuffQEl3scrfd_2_5g/conv42 | timeout: 10s)
+[2025-03-27 15:39:08.155] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200)
+[2025-03-27 15:39:08.159] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:39:08.160] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv43...
+[2025-03-27 15:39:08.160] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv43': HW >> (HwReadEl0scrfd_2_5g/conv43 | hw_frame_size: 51200) >> (UserBuffQEl0scrfd_2_5g/conv43 | timeout: 10s)
+[2025-03-27 15:39:08.160] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600)
+[2025-03-27 15:39:08.163] [12683] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read2scrfd_2_5g/conv44)
+[2025-03-27 15:39:08.163] [12683] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20))
+[2025-03-27 15:39:08.163] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:39:08.163] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv44...
+[2025-03-27 15:39:08.163] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv44': HW >> (HwReadEl2scrfd_2_5g/conv44 | hw_frame_size: 153600) >> (PullQEl_hw_read2scrfd_2_5g/conv44) >> (PostInferEl2scrfd_2_5g/conv44 | Reorder - src_order: FCR, src_shape: (80, 80, 24), dst_order: FCR, dst_shape: (80, 80, 20)) >> (UserBuffQEl2scrfd_2_5g/conv44 | timeout: 10s)
+[2025-03-27 15:39:08.163] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200)
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv49...
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv49': HW >> (HwReadEl14scrfd_2_5g/conv49 | hw_frame_size: 3200) >> (UserBuffQEl14scrfd_2_5g/conv49 | timeout: 10s)
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800)
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv50...
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv50': HW >> (HwReadEl12scrfd_2_5g/conv50 | hw_frame_size: 12800) >> (UserBuffQEl12scrfd_2_5g/conv50 | timeout: 10s)
+[2025-03-27 15:39:08.165] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400)
+[2025-03-27 15:39:08.166] [12683] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read1scrfd_2_5g/conv51)
+[2025-03-27 15:39:08.166] [12683] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20))
+[2025-03-27 15:39:08.166] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:39:08.166] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv51...
+[2025-03-27 15:39:08.166] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv51': HW >> (HwReadEl1scrfd_2_5g/conv51 | hw_frame_size: 38400) >> (PullQEl_hw_read1scrfd_2_5g/conv51) >> (PostInferEl1scrfd_2_5g/conv51 | Reorder - src_order: FCR, src_shape: (40, 40, 24), dst_order: FCR, dst_shape: (40, 40, 20)) >> (UserBuffQEl1scrfd_2_5g/conv51 | timeout: 10s)
+[2025-03-27 15:39:08.166] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800)
+[2025-03-27 15:39:08.171] [12683] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read10scrfd_2_5g/conv55)
+[2025-03-27 15:39:08.171] [12683] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2))
+[2025-03-27 15:39:08.179] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:39:08.179] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv55...
+[2025-03-27 15:39:08.179] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv55': HW >> (HwReadEl10scrfd_2_5g/conv55 | hw_frame_size: 800) >> (PullQEl_hw_read10scrfd_2_5g/conv55) >> (PostInferEl10scrfd_2_5g/conv55 | Reorder - src_order: NHCW, src_shape: (20, 20, 2), dst_order: NHWC, dst_shape: (20, 20, 2)) >> (UserBuffQEl10scrfd_2_5g/conv55 | timeout: 10s)
+[2025-03-27 15:39:08.179] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200)
+[2025-03-27 15:39:08.182] [12683] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read9scrfd_2_5g/conv56)
+[2025-03-27 15:39:08.182] [12683] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8))
+[2025-03-27 15:39:08.191] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:39:08.191] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv56...
+[2025-03-27 15:39:08.191] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv56': HW >> (HwReadEl9scrfd_2_5g/conv56 | hw_frame_size: 3200) >> (PullQEl_hw_read9scrfd_2_5g/conv56) >> (PostInferEl9scrfd_2_5g/conv56 | Reorder - src_order: NHCW, src_shape: (20, 20, 8), dst_order: NHWC, dst_shape: (20, 20, 8)) >> (UserBuffQEl9scrfd_2_5g/conv56 | timeout: 10s)
+[2025-03-27 15:39:08.193] [12683] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600)
+[2025-03-27 15:39:08.194] [12683] [HailoRT] [info] [queue_elements.cpp:657] [create] Created (PullQEl_hw_read13scrfd_2_5g/conv57)
+[2025-03-27 15:39:08.194] [12683] [HailoRT] [info] [filter_elements.cpp:375] [create] Created (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20))
+[2025-03-27 15:39:08.197] [12683] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:39:08.197] [12683] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating scrfd_2_5g/conv57...
+[2025-03-27 15:39:08.197] [12683] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'scrfd_2_5g/conv57': HW >> (HwReadEl13scrfd_2_5g/conv57 | hw_frame_size: 9600) >> (PullQEl_hw_read13scrfd_2_5g/conv57) >> (PostInferEl13scrfd_2_5g/conv57 | Reorder - src_order: FCR, src_shape: (20, 20, 24), dst_order: FCR, dst_shape: (20, 20, 20)) >> (UserBuffQEl13scrfd_2_5g/conv57 | timeout: 10s)
+[2025-03-27 15:39:09.109] [12702] [HailoRT] [info] [hef.cpp:1929] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: arcface_mobilefacenet
+[2025-03-27 15:39:09.109] [12702] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:39:09.110] [12702] [HailoRT] [warning] [device_internal.cpp:616] [check_hef_is_compatible] HEF was compiled for Hailo8L device, while the device itself is Hailo8. This will result in lower performance.
+[2025-03-27 15:39:09.110] [12702] [HailoRT] [info] [internal_buffer_manager.cpp:204] [print_execution_results] Planned internal buffer memory: CMA memory 0, user memory 50688. memory to edge layer usage factor is 1
+[2025-03-27 15:39:09.110] [12702] [HailoRT] [info] [internal_buffer_manager.cpp:212] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 11.071454 milliseconds
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [vdevice.cpp:749] [configure] Configuring HEF on VDevice took 11.730889 milliseconds
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [edge_elements.cpp:52] [create] Created (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632)
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [vstream.cpp:754] [InputVStreamImpl] Creating arcface_mobilefacenet/input_layer1...
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [vstream_builder.cpp:102] [create_inputs] Input pipeline 'arcface_mobilefacenet/input_layer1': (HwWriteEl1arcface_mobilefacenet/input_layer1 | hw_frame_size: 37632) >> HW
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [edge_elements.cpp:287] [create] Created (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512)
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [queue_elements.cpp:800] [create] Created (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [vstream.cpp:1114] [OutputVStreamImpl] Creating arcface_mobilefacenet/fc1...
+[2025-03-27 15:39:09.121] [12702] [HailoRT] [info] [vstream_builder.cpp:220] [create_outputs] Output pipeline 'arcface_mobilefacenet/fc1': HW >> (HwReadEl0arcface_mobilefacenet/fc1 | hw_frame_size: 512) >> (UserBuffQEl0arcface_mobilefacenet/fc1 | timeout: 10s)

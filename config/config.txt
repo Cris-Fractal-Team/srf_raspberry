@@ -1,0 +1,57 @@
+# Configura la fuente de las imagenes
+# Las altarnativas son:
+#   camaraint : se refiere a la camara interna
+#   socket : se refiere a un dispositivo que via sockets envia JPEGs codificados
+#   onvif : se refiere a una camara IP con protocolo ONVIF
+#   webcam : se refiere a una camara web
+source=onvif
+
+# Configura la resolucion de las imagenes de la fuente de datos
+# Para algunas fuentes como la camara interna o la camara web
+# uno puede cambiar con esta opcion la resolucion con la que 
+# se extraen las imagenes desde la fuente, para las otras fuentes
+# esta es la resolucion con la que la fuente envia las imagenes
+anchoImgFuente=1920
+alturaImgFuente=1080
+
+# Configura la resolucion con la que se visualizaa los datos
+# y con la que se envian en caso se solicite ver las imagenes
+anchoImgVisualizacion=1280
+alturaImgVisualizacion=720
+
+# Configura la resolucion minima de una cara para visualizar el recuadro al rededor de ella
+anchoMinCaraVis=70
+alturaMinCaraVis=70
+
+# Configura la resolucion minima de una cara procesar un cara y hacerle reconocimiento facial
+anchoMinCaraRec=90
+alturaMinCaraRec=90
+
+# Configura la resolucion de las caras a las que se hace el reconocimiento facial
+# todas las caras no importa su resolucion se escalan a esta resolucion
+anchoCaraRec=112
+alturaCaraRec=112
+
+# Diferencia maxima entre dos rostro para considerar a la misma persona
+deltaRostroMax=0.52
+
+# Presicion o accuracy de la deteccion de rostros
+presicionDeteccion=0.5
+
+# Tiempo de revalidar rostros detectados en ms
+tiempoRevalidacion=1000
+
+# ****************** Configuracion para camaras onvif ****************** 
+
+# Parte final o sufijo del URL para camaras Dahua
+urlServidor=/cam/realmonitor?channel=1&subtype=0
+
+# Parte final o fuijo del URL para camaras TAPO TP-Link
+# urlServidor=/stream1
+
+# RUTA del archivo con la base de datos de personas
+# pathBDPersonas=./data/rostros_conocidos.txt
+# pathBDPersonas=./data/archivos1/rostros-conocidos.txt
+pathBDPersonas=./data/rostros-conocidos.txt
+
+

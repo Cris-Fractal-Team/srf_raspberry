@@ -1,0 +1,34 @@
+# Se almacenan datos asociados a la fuente de datos
+
+# El archivo final se llamara sourceconfig.dat , el cual podria ser sobreescrito
+# por la misma configuracon del sensor.
+
+# Si no se encuentra el archivo sourceconfig.dat, se leera el presente archivo
+
+# Parametro que indica si la data esta encriptada o no
+# Sus alternativas son:
+#   si : indica que el valor de los parametros esta encriptado
+#   no : indica que el valor de los parametros no esta encriptado
+
+# En caso los parametros esten encriptados, los valores deberan empezar inmediantamente
+# despues que el caracter igual (=).
+
+# En caso que los parametros no esten encriptados, los valores pueden tener espacios y estos
+# espacios seran ignorados
+
+dataencriptada = no
+
+# Para una camara socket IP el siguiente parametro es la IP de la camara:
+
+sourceip=192.168.3.98
+
+# Para una camara IP el siguinte parametro representa el URL al que se debe acceder
+
+urlcamaraip=https://camaraip/sitio/
+
+# usuario de la camara
+usuariocamara=admin
+
+# password de la camara
+passwordcamara=123456
+

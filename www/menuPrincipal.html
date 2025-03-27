@@ -1,0 +1,369 @@
+<html>
+    <head>
+        <title>Sensor Facial</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            var configImagenes = <% configImagenes %>;
+
+            function getValorSeleccionadoCombo( idComboBox )
+            {
+                var cmb = document.getElementById(idComboBox);
+                var i,opt,valSel;
+                               
+                valSel = '';
+                for(i=0;i<cmb.options.length;i++)
+                {
+                    opt = cmb.options[i];
+                    if ( opt.selected == true )
+                    {
+                        valSel = opt.value;
+                        break;
+                    }
+                }
+
+                return valSel;
+            }
+
+            function seleccionaOpcionCombo( idComboBox, valor )
+            {
+                var cmbRangoHora = document.getElementById(idComboBox);
+                var i,opt,valSel;
+                
+                valSel = '';
+                for(i=0;i<cmbRangoHora.options.length;i++)
+                {
+                    opt = cmbRangoHora.options[i];
+                    if ( opt.value == valor )
+                    {
+                        opt.selected = true;
+                        break;
+                    }
+                }                
+            }
+
+            function seleccionaOpcionFloatCombo( idComboBox, valor )
+            {
+                var cmbRangoHora = document.getElementById(idComboBox);
+                var i,opt,valSel,valOpt;
+                
+                valSel = parseFloat(valor);
+                for(i=0;i<cmbRangoHora.options.length;i++)
+                {
+                    opt = cmbRangoHora.options[i];
+                    valOpt = parseFloat(opt.value);
+                    if ( valOpt == valor )
+                    {
+                        opt.selected = true;
+                        break;
+                    }
+                }                
+            }
+            
+            function getIndiceRangoHora()
+            {
+                var indice = parseInt(getValorSeleccionadoCombo("cmbRangoHora"));
+
+                if ( indice >= 0 ) return indice;
+
+                var i;
+                var hoy = new Date();
+                var hora = hoy.getHours();
+
+                for(i=0;i<configImagenes.length;i++)
+                {
+                    if (( configImagenes[i].horaInicial <= hora ) && ( configImagenes[i].horaFinal > hora ))
+                    {
+                        return i;
+                    }   
+                }
+
+                return 0;
+            }
+
+            function ajustaImagen( rangoImagen, params )
+            {
+                var ctrlOperacion = document.getElementById("operacion");
+                var ctrlParamOperacion = document.getElementById("paramsOperacion");
+                var lstRadRango = document.getElementsByName("radRangoHoraConfig");
+                var idControl = params + rangoImagen;
+                var ctrlParam = document.getElementById(idControl);
+
+                lstRadRango[rangoImagen-1].checked = true;
+
+                ctrlOperacion.value = "ajustaImagen";
+                ctrlParamOperacion.value = params + ',' + rangoImagen;
+                
+                // document.forms[0].submit();
+
+                var data = ''; 
+                var xmlhttp = new XMLHttpRequest();
+                
+                data = 'operacion=ajustaImagen';
+                data = data + '&paramsOperacion=' + params + ',' + rangoImagen;
+                data = data + '&radRangoHoraConfig=' + rangoImagen; 
+                data = data + '&' + idControl + '=' + ctrlParam.value;
+
+                xmlhttp.open('POST','/menuprincipal',true);
+                xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                xmlhttp.send(data);
+            }
+
+            function btnSalir_onClick()
+            {
+                document.getElementById("operacion").value = "btnSalir_onClick";
+                document.forms[0].submit();
+            }
+
+            function btnGuardar_onClick()
+            {
+                var data = ''; 
+                var xmlhttp = new XMLHttpRequest();
+                var rangoSel = getIndiceRangoHora();
+                var i;
+                var ctrl;
+                var txtInicio = document.getElementById('horaIni');
+                var txtFin = document.getElementById('horaFin');
+
+                configImagenes[rangoSel].horaInicio = txtInicio.value;
+                configImagenes[rangoSel].horaFin = txtFin.value;
+                                                
+                data = 'operacion=btnGuardar_onClick';
+
+                data = data + '&reportarDesconocidos=' + getValorSeleccionadoCombo('reportarDesconocidos');
+                data = data + '&reflejarVerticalmente=' + getValorSeleccionadoCombo('cmbReflejarVerticalmente');
+                data = data + '&urlBaseServidor=' + document.getElementById('urlBaseServidor').value;
+
+                for(i=0;i<configImagenes.length;i++)
+                {
+                    data = data + '&horaInicio' + (i+1) + '=' + configImagenes[i].horaInicio;
+                    data = data + '&horaFin' + (i+1) + '=' + configImagenes[i].horaFin;
+                    data = data + '&brillo' + (i+1) + '=' + configImagenes[i].brillo;
+                    data = data + '&contraste' + (i+1) + '=' + configImagenes[i].contraste;
+                    data = data + '&exposicion' + (i+1) + '=' + configImagenes[i].exposicion;
+                }
+
+                xmlhttp.open('POST','/menuprincipal',true);
+                xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                xmlhttp.send(data);                
+
+            }
+            
+            function cmbRangoHora_onChange()
+            {
+                var data = ''; 
+                var xmlhttp = new XMLHttpRequest();
+                var rangoSel = getIndiceRangoHora();
+                var cmbBrillo = configImagenes[rangoSel].brillo;
+                var cmbContraste = configImagenes[rangoSel].contraste;
+                var txtExposicion = document.getElementById("txtExposicion");
+                var txtHoraIni = document.getElementById("horaIni");
+                var txtHoraFin = document.getElementById("horaFin");
+
+                seleccionaOpcionFloatCombo("cmbBrillo", cmbBrillo);
+                seleccionaOpcionFloatCombo("cmbContraste", cmbContraste);
+
+                txtExposicion.value = '' + configImagenes[rangoSel].exposicion;
+                txtHoraIni.value = '' + configImagenes[rangoSel].horaInicio;
+                txtHoraFin.value = '' + configImagenes[rangoSel].horaFin;
+                
+                data = 'operacion=cmbRangoHora_onChange';
+                data = data + '&cmbRangoHora=' + rangoSel ;
+                data = data + '&cmbBrillo=' + cmbBrillo ;
+                data = data + '&cmbContraste=' + cmbContraste ;
+                data = data + '&txtExposicion=' + txtExposicion.value ;
+                
+                xmlhttp.open('POST','/menuprincipal',true);
+                xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                xmlhttp.send(data);                
+            }
+
+            function cmbBrillo_onChange()
+            {
+                var rangoSel = getIndiceRangoHora();
+                var brilloSel = getValorSeleccionadoCombo('cmbBrillo');
+                
+                var data = ''; 
+                var xmlhttp = new XMLHttpRequest();
+                
+                data = 'operacion=cmbBrillo_onChange';
+                data = data + '&cmbRangoHora=' + rangoSel ;
+                data = data + '&cmbBrillo=' + brilloSel ;
+
+                configImagenes[rangoSel].brillo = brilloSel;
+                
+                xmlhttp.open('POST','/menuprincipal',true);
+                xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                xmlhttp.send(data);
+            }
+
+            function cmbContraste_onChange()
+            {
+                var rangoSel = getIndiceRangoHora();
+                var contrasteSel = getValorSeleccionadoCombo('cmbContraste');
+                
+                var data = ''; 
+                var xmlhttp = new XMLHttpRequest();
+
+                configImagenes[rangoSel].contraste = contrasteSel;
+                
+                data = 'operacion=cmbContraste_onChange';
+                data = data + '&cmbRangoHora=' + rangoSel ;
+                data = data + '&cmbContraste=' + contrasteSel ;
+                
+                xmlhttp.open('POST','/menuprincipal',true);
+                xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                xmlhttp.send(data);
+            }
+
+            function txtExposicion_onChange()
+            {
+                var rangoSel = getIndiceRangoHora();
+                var txtExposicion = document.getElementById("txtExposicion");
+                
+                var data = ''; 
+                var xmlhttp = new XMLHttpRequest();
+
+                configImagenes[rangoSel].exposicion = txtExposicion.value;
+                
+                data = 'operacion=txtExposicion_onChange';
+                data = data + '&cmbRangoHora=' + rangoSel ;
+                data = data + '&txtExposicion=' + txtExposicion.value;
+                
+                xmlhttp.open('POST','/menuprincipal',true);
+                xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                xmlhttp.send(data);
+            }
+ 
+            function cmbReflejarVerticalmente_onChange()
+            {
+                var data = ''; 
+                var xmlhttp = new XMLHttpRequest();
+                var reflejarVerticalmente = getValorSeleccionadoCombo("cmbReflejarVerticalmente");
+                                
+                data = 'operacion=cmbReflejarVerticalmente_onChange';
+                data = data + '&cmbReflejarVerticalmente=' + reflejarVerticalmente ;
+                
+                xmlhttp.open('POST','/menuprincipal',true);
+                xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+                xmlhttp.send(data);
+            }
+
+            function actualizaHoraIni()
+            {
+                var rangoSel = getIndiceRangoHora();
+
+                if ( rangoSel == -1 )
+                {
+                    return;
+                }
+
+                var ctrlIni = document.getElementById('horaIni');                             
+                configImagenes[rangoSel].horaInicio = ctrlIni.value;                
+            }
+
+            function actualizaHoraFin()
+            {
+                var rangoSel = getIndiceRangoHora();
+
+                if ( rangoSel == -1 )
+                {
+                    return;
+                }
+                
+                var ctrlFin = document.getElementById('horaFin');
+                configImagenes[rangoSel].horaFin = ctrlFin.value;
+            }
+
+        </script>
+    </head>
+    <body>
+        <t1>Configuraci&oacute;n</t1><br>
+        <form action="/menuprincipal" method="POST">
+            Sensor Facial Version : <% versionSensor %><br>
+            N&Uacute;mero de serie : <% numSerie %><br><br>
+            
+            URL base servidor :             
+            <input type="hidden" name="operacion" id="operacion" value="">
+            <input type="hidden" name="paramsOperacion" id="paramsOperacion" value="">
+
+            <input type="text" value="<% urlBaseServidor %>" size="60" name="urlBaseServidor" id="urlBaseServidor"><br>
+                        
+            Reportar desconocidos: 
+            <select name="reportarDesconocidos" id="reportarDesconocidos">
+                <option value="N" <% reportarDesconocidos_si %>>No</option>
+                <option value="S" <% reportarDesconocidos_no %>>Si</option>
+            </select><br>
+
+            Reflejar Verticalmente:
+            <select name="cmbReflejarVerticalmente" id="cmbReflejarVerticalmente" onchange="cmbReflejarVerticalmente_onChange()">
+                <option value="N" <% reflejarVerticalmente_no %>>No</option>
+                <option value="S" <% reflejarVerticalmente_si %>>Si</option>
+            </select><br><br>      
+
+            Ajustes de imagen: <br>          
+            Rango de hora:
+            <select name="cmbRangoHora" id="cmbRangoHora" onchange="cmbRangoHora_onChange()">
+                <option value="-1">Ninguno</option>
+                <option value="0">Primer Rango</option>
+                <option value="1">Segundo Rango</option>
+                <option value="2">Tercer Rango</option>
+            </select>
+            <ul>
+                <li>Hora Inicial: <input type="text" name="horaIni" id="horaIni" value="" onchange="actualizaHoraIni()"></li>
+                <li>Hora Final: <input type="text" name="horaFin" id="horaFin" value="" onchange="actualizaHoraFin()"></li>
+                <li>Brillo: 
+                    <select name="cmbBrillo" id = "cmbBrillo" onchange="cmbBrillo_onChange()">
+                        <option value="-1.20" <% brillo1_-120 %>>- 120 %</option>
+                        <option value="-1.05" <% brillo1_-105 %>>- 105 %</option>
+                        <option value="-0.90" <% brillo1_-90 %>>- 90 %</option>
+                        <option value="-0.75" <% brillo1_-75 %>>- 75 %</option>
+                        <option value="-0.60" <% brillo1_-60 %>>- 60 %</option>
+                        <option value="-0.45" <% brillo1_-45 %>>- 45 %</option>
+                        <option value="-0.30" <% brillo1_-30 %>>- 30%</option>
+                        <option value="-0.15" <% brillo1_-15 %>>- 15 %</option>
+                        <option value="0.00" <% brillo1_0 %>> 0 %</option>
+                        <option value="0.15" <% brillo1_15 %>>+ 15 %</option>
+                        <option value="0.30" <% brillo1_30 %>>+ 30 %</option>
+                        <option value="0.45" <% brillo1_45 %>>+ 45 %</option>
+                        <option value="0.60" <% brillo1_60 %>>+ 60 %</option>
+                        <option value="0.75" <% brillo1_75 %>>+ 75 %</option>
+                        <option value="0.90" <% brillo1_90 %>>+ 90%</option>
+                        <option value="1.05" <% brillo1_105 %>>+ 105 %</option>
+                        <option value="1.20" <% brillo1_120 %>>+ 120 %</option>
+                    </select>
+                </li>
+                <li>Contraste:
+                    <select name="cmbContraste" id="cmbContraste" onchange="cmbContraste_onChange()">                        
+                        <option value="0.10" <% contraste_-150 %>>- 90 %</option>
+                        <option value="0.25" <% contraste_-125 %>>- 75 %</option>
+                        <option value="0.40" <% contraste_-100 %>>- 60 %</option>
+                        <option value="0.55" <% contraste_-75 %>>- 45 %</option>
+                        <option value="0.70" <% contraste_-50 %>>- 30%</option>
+                        <option value="0.85" <% contraste_-25 %>>- 15 %</option>
+                        <option value="1.00" <% contraste_0 %>> 0 %</option>
+                        <option value="1.15" <% contraste_25 %>>+ 15 %</option>
+                        <option value="1.30" <% contraste_50 %>>+ 30 %</option>
+                        <option value="1.45" <% contraste_75 %>>+ 45 %</option>
+                        <option value="1.60" <% contraste_100 %>>+ 60 %</option>
+                        <option value="1.75" <% contraste_125 %>>+ 75 %</option>
+                        <option value="1.90" <% contraste_150 %>>+ 90%</option>
+                        <option value="2.05" <% contraste_175 %>>+ 105 %</option>
+                        <option value="2.20" <% contraste_200 %>>+ 120 %</option>
+                    </select>
+                </li>                      
+                <li>
+                    Exposicion : <input type="text" name="txtExposicion" id="txtExposicion" onchange="txtExposicion_onChange()" value="*">
+                </li>  
+            </ul>                                
+            <img src="/preview">
+
+            <a href="/video" target="_blank">Ver Video a tama&nacute;o completo</a><br><br>
+            <center>
+                <input type="button" name="guardar" value="Guardar" onclick="btnGuardar_onClick()">&nbsp;&nbsp;
+                <input type="button" name="salir" value="Salir" onclick="btnSalir_onClick()">
+            </center>
+            
+        </form>
+    </body>
+</html>

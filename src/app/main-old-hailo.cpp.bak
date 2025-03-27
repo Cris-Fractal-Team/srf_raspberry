@@ -1,0 +1,411 @@
+
+#include <stdio.h>
+#include <iostream>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "app/IdentificadorFacial.h"
+
+#include "lib/facerecdlib/facerecdlib.h"
+#include "lib/facerec/facerecyn.h"
+#include "lib/graphics/ImageSource.h"
+#include "lib/utils/fileutils.h"
+
+#include "opencv2/opencv.hpp"
+#include "opencv2/core/types.hpp"
+
+using namespace std;
+
+// **************************************************************
+
+#include <iostream>
+#include <opencv2/opencv.hpp>
+#include "hailo/hailort.hpp"
+
+using namespace std;
+using namespace cv;
+
+#define IMAGE_SIZE 640
+#define MODEL_PATH "./models/scrfd_2.5g.hef"
+#define CONFIDENCE_THRESHOLD 0.5
+
+#include <iostream>
+#include "hailo/hailort.hpp"
+
+
+// Estructura para almacenar detecciones
+struct Detection {
+    float x_min, y_min, x_max, y_max;  // Bounding box
+    float confidence;                  // Confianza
+};
+
+
+float dequantize(uint8_t value, const hailo_quant_info_t &quant_info) 
+{
+    // Aplicar la ecuación de conversión
+    float result = (static_cast<float>(value) - quant_info.qp_zp) * quant_info.qp_scale;
+    
+    // Opcional: Asegurar que el valor esté dentro de los límites
+    if (result < quant_info.limvals_min) result = quant_info.limvals_min;
+    if (result > quant_info.limvals_max) result = quant_info.limvals_max;
+
+    return result;
+}
+
+void analizaSalida( hailo_vstream_info_t *infoVstr, std::vector<uint8_t> *salida )
+{
+    int i,n;
+    uint8_t value;
+    float valorFloat;
+
+    cout << endl;
+    cout << "Analizando " << infoVstr->name << endl;
+    
+    n = salida->size();
+    for(i=0;i<n;i++)
+    {
+        value = salida->at(i);
+        valorFloat = dequantize(value, infoVstr->quant_info);
+        cout << valorFloat << "  ";
+    }           
+    cout << endl;
+    cout << endl;
+}    
+
+
+
+
+int main() 
+{
+    // Cargar la imagen de prueba
+    cv::Mat image = imread("./data/mesi_01.jpg");
+    if (image.empty()) {
+        cerr << "Error: No se pudo cargar la imagen." << endl;
+        return -1;
+    }
+
+    // convierte la imagen a RGB
+    cv::Mat imagenRgb;
+    cv::cvtColor(image, imagenRgb, cv::COLOR_BGR2RGB);
+
+    // redimensiona la imagen a la resolucion de entrada
+    cv::Mat imagenRedim;
+    cv::resize(imagenRgb, imagenRedim, cv::Size(IMAGE_SIZE,IMAGE_SIZE));
+
+    try {
+        
+        // Crea el dispositivo virtual
+        hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();
+        if (!device) 
+        {
+            cerr << "Error: No se pudo inicializar el dispositivo Hailo." << endl;
+            return -1;
+        }
+
+        // Cargar el modelo HEF
+        hailort::Expected<hailort::Hef> hef = hailort::Hef::create(MODEL_PATH);
+        if (!hef) 
+        {
+            cerr << "Error: No se pudo cargar el modelo " << MODEL_PATH << endl;
+            return -1;
+        }
+
+        // Obtiene informacion de los streams de salida
+        hailort::Expected<std::vector<hailo_vstream_info_t>> output_vstream_info = hef->get_output_vstream_infos();
+        if (!hef) 
+        {
+            cerr << "Error: No se pudo obtener informacion de los streams de salida " << MODEL_PATH << endl;
+            return -1;
+        }
+
+        int i,numSalidas;
+        hailo_vstream_info_t infoVstr;
+        
+        numSalidas = output_vstream_info->size();        
+
+        cout << endl;
+        cout << "Num salidas :" << numSalidas << endl;
+        for(i=0;i<numSalidas;i++)
+        {
+            infoVstr = output_vstream_info->at(i);
+            cout << infoVstr.name << endl ;
+            cout << "\t" << "Escala Cuantizacion : " << infoVstr.quant_info.qp_scale << endl;
+            cout << "\t" << "Zero Point : " << infoVstr.quant_info.qp_zp << endl;
+            cout << "\t" << "Lim.Min : " << infoVstr.quant_info.limvals_min << endl;
+            cout << "\t" << "Lim.Max : " << infoVstr.quant_info.limvals_max << endl;
+            cout << "\t" << "Features : " << infoVstr.shape.features << endl;          
+            cout << "\t" << "Width : " << infoVstr.shape.width << endl;          
+            cout << "\t" << "Height : " << infoVstr.shape.height << endl;                        
+            cout << endl;
+        }   
+        cout << endl;
+
+        // crea los parametros por defecto
+        hailort::Expected<hailort::NetworkGroupsParamsMap> parametros = device.value()->create_configure_params(hef.value()); 
+        if ( !parametros )
+        {
+            cerr << "Error: No se pudo crear los parametros por defecto." << endl;
+            return -1;
+        }
+
+        // crea el grupo de red
+        hailort::Expected<hailort::ConfiguredNetworkGroupVector> network_groups = device.value()->configure(hef.value(), parametros.value());
+        if ( !network_groups )
+        {
+            cerr << "Error: No se pudo crear la lista de redes configuradas." << endl;
+            return -1;
+        }
+
+        int numElem = network_groups->size();
+        if ( 1 != numElem )
+        {
+            cerr << "Error: La lista de redes configuradas no tiene un elemento." << endl;
+            return -1;
+        }
+
+        // obtenemos la primera red
+        std::shared_ptr<hailort::ConfiguredNetworkGroup> network_group = std::move(network_groups->at(0));
+
+        // Creamos parametros para el stream de entrada
+        hailort::Expected<std::map<std::string, hailo_vstream_params_t>> input_params = network_group->make_input_vstream_params({}, HAILO_FORMAT_TYPE_AUTO, HAILO_DEFAULT_VSTREAM_TIMEOUT_MS, HAILO_DEFAULT_VSTREAM_QUEUE_SIZE);
+        if ( !input_params )
+        {
+            cerr << "Error: No se pudo crear los parametros para el stream de entrada." << endl;
+            return -1;
+        }
+
+        // Creamos parametros para el stream de salida
+        hailort::Expected<std::map<std::string, hailo_vstream_params_t>> output_params = network_group->make_output_vstream_params({}, HAILO_FORMAT_TYPE_AUTO, HAILO_DEFAULT_VSTREAM_TIMEOUT_MS, HAILO_DEFAULT_VSTREAM_QUEUE_SIZE);
+        if ( !output_params )
+        {
+            cerr << "Error: No se pudo crear los parametros para el stream de salida." << endl;
+            return -1;
+        }
+
+        // crea los streams para la inferencia
+        hailort::Expected<hailort::InferVStreams> pipeline = hailort::InferVStreams::create(*network_group.get(), input_params.value(), output_params.value()) ;
+        if ( !pipeline )
+        {
+            cerr << "Error: No se pudo crear los streams de entrada y salida." << endl;
+            return -1;
+        }
+
+        // Obtiene la lista de streams de entrada
+        std::vector<std::reference_wrapper<hailort::InputVStream>> input_vstreams = pipeline->get_input_vstreams();
+        if ( input_vstreams.empty() )
+        {
+            cerr << "Error: No se encontro el stream de entrada." << endl;
+            return -1;
+        }
+
+        // crea el buffer para ingresar la imagen
+        std::vector<uint8_t> input_buffer(imagenRedim.total() * imagenRedim.elemSize());
+        std::memcpy(input_buffer.data(), imagenRedim.data, input_buffer.size());
+
+        // crea un memory view para el ingreso de datos
+        std::map<std::string, hailort::MemoryView> input_data_mem_views;
+        input_data_mem_views.emplace(input_vstreams[0].get().name(), hailort::MemoryView(input_buffer.data(), input_buffer.size()));
+
+        // Crear buffer para la salida de la inferencia
+        auto output_vstreams = pipeline->get_output_vstreams();
+        std::map<std::string, std::vector<uint8_t>> output_data;
+        std::map<std::string, hailort::MemoryView> output_data_mem_views;
+        
+        for (const auto &output_vstream : output_vstreams) {
+            output_data[output_vstream.get().name()] = std::vector<uint8_t>(output_vstream.get().get_frame_size());
+            output_data_mem_views.emplace(output_vstream.get().name(), hailort::MemoryView(output_data[output_vstream.get().name()].data(), output_vstream.get().get_frame_size()));
+        }
+
+        // Ejecutar la inferencia
+        hailo_status status = pipeline->infer(input_data_mem_views, output_data_mem_views, 1);
+        
+        if (status != HAILO_SUCCESS) 
+        {
+            std::cerr << "Error en la inferencia: " << hailo_get_status_message(status) << std::endl;
+        }
+
+        // analiza cada salida
+        int pos;
+        std::vector<uint8_t> salida;
+        for(i=0;i<numSalidas;i++)
+        {   
+            infoVstr = output_vstream_info->at(i);
+            salida = output_data.at(infoVstr.name);
+            cout << "Salida " << infoVstr.name << " num elem : " << salida.size() << endl;
+            // analizaSalida(&infoVstr,&salida);
+        }
+
+        // procesa la deteccion
+        const std::string output_name = "detection_output"; // Cambiar según el nombre de la salida en tu modelo
+        if (output_data.find(output_name) == output_data.end()) {
+            std::cerr << "Error: No se encontró el tensor de salida esperado." << std::endl;
+            return -1;
+        }
+
+        const std::vector<uint8_t> &raw_output = output_data.at(output_name);
+        const float *detections = reinterpret_cast<const float *>(raw_output.data());
+
+        const int num_detections = raw_output.size() / (6 * sizeof(float)); // 6 valores por detección
+
+        for (int i = 0; i < num_detections; i++) {
+            float x_min = detections[i * 6 + 0] * image.cols;
+            float y_min = detections[i * 6 + 1] * image.rows;
+            float x_max = detections[i * 6 + 2] * image.cols;
+            float y_max = detections[i * 6 + 3] * image.rows;
+            float confidence = detections[i * 6 + 4];
+            int class_id = static_cast<int>(detections[i * 6 + 5]);
+
+            // Filtrar detecciones con baja confianza
+            if (confidence > 0.5) {
+                // Dibujar bounding box
+                cv::rectangle(image, cv::Point(x_min, y_min), cv::Point(x_max, y_max), cv::Scalar(0, 255, 0), 2);
+
+                // Mostrar clase y confianza
+                std::string label = "Clase: " + std::to_string(class_id) + " Conf: " + std::to_string(confidence);
+                cv::putText(image, label, cv::Point(x_min, y_min - 5), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+            }
+        }
+
+        
+        // Guardar la imagen con las detecciones
+        imwrite("./output.jpg", image);
+        cout << "Imagen guardada con detecciones en 'output.jpg'" << endl;
+
+    } catch (const std::exception& e) {
+        cerr << "Error en la ejecución de Hailo: " << e.what() << endl;
+        return -1;
+    }
+
+    return 0;
+}
+
+
+// **************************************************************
+
+
+
+/**
+ * Punto de inicio de la aplicacion
+ */
+int main1( int argc, char* argv[] )
+{             
+    // Objeto que hace todo el proceso de identificacion facial
+    IdentificadorFacial identificadorFacial;
+
+    // limita el numero de threads
+    cv::setNumThreads(2);
+    setenv("OMP_NUM_THREADS","2",1);
+
+    // lee la configuracion
+    shared_ptr<GHashMap> lstParams = leeArchivoConfig("./config/config.txt");
+    // identificadorFacial.lstParamsApp = leeArchivoConfig("./config/params.txt");
+    identificadorFacial.leeParametros("./config/params.txt");
+
+    cout << "Reflejar Verticalmente : " << identificadorFacial.lstParamsApp->getStringBool("reflejarVerticalmente",false) << endl;
+    cout << "Giro : " << identificadorFacial.lstParamsApp->getStringBool("giro",0) << endl;
+    
+    // Crea el procesador de rostros que usa DLIB, con el se hace reconocimiento
+    // FaceRecProcDlib faceRec;
+    // faceRec.cargaModeloFaceLandMark("/home/mchu/proyectos/vc_tensorflow_2024-dlib-64bits/shape_predictor_5_face_landmarks.dat", 5);
+    // faceRec.cargaModeloFaceLandMark("/home/mchu/proyectos/vc_tensorflow_2024-dlib-64bits/shape_predictor_68_face_landmarks.dat", 68);
+    // faceRec.cargaModeloFaceRec("/home/mchu/proyectos/vc_tensorflow_2024-dlib-64bits/dlib_face_recognition_resnet_model_v1.dat");
+    // identificadorFacial.alturaRostroDet = 150;
+    // identificadorFacial.anchoRostroDet = 150;
+
+    // Crea el procesador de rostros que usa SFace con el se hace reconocimiento
+    FaceRecProcessorSFace faceRec;
+    faceRec.cargaModeloFaceRec("./models/face_recognition_sface_2021dec_int8.onnx");
+    identificadorFacial.alturaRostroDet = 112;
+    identificadorFacial.anchoRostroDet = 112;
+    
+
+    // Configura el detector de caras que usa YuNet
+    identificadorFacial.detectorCaras = dynamic_pointer_cast<DetectorObjetos>(make_shared<DetectorRostrosYN>());
+    identificadorFacial.detectorCaras->setDimImgModelo(320,320,3);   
+    identificadorFacial.detectorCaras->confianza = identificadorFacial.toleranciaDetec;
+    identificadorFacial.detectorCaras->cargaModelo("./models/face_detection_yunet_2023mar.onnx");
+        
+    // configura parametros para las detecciones
+    identificadorFacial.thCalculadorDesc.faceDescProc = &faceRec;
+    identificadorFacial.toleranciaIden = lstParams->getStringDouble("deltaRostroMax", 0.9);
+    cout << "Delta Maximo de reconocimiento: " << identificadorFacial.toleranciaIden << endl;
+
+    identificadorFacial.toleranciaDetec = lstParams->getStringDouble("presicionDeteccion", 0.35);
+    cout << "Presicion Minima de deteccion: " << identificadorFacial.toleranciaDetec << endl;
+
+    identificadorFacial.tiempoRenovacionMs = lstParams->getStringLong("tiempoRevalidacion", 1500);
+    cout << "Tiempo para recalcular rostro: " << identificadorFacial.tiempoRenovacionMs << " ms" << endl;
+
+    // establece la dimension minima de un rostro para poder calcular su descripcion
+    identificadorFacial.anchoRostroMinimo = lstParams->getStringLong("anchoMinCaraRec", 100);
+    identificadorFacial.alturaRostroMinima = lstParams->getStringLong("alturaMinCaraRec", 100);
+    cout << "Dim.Minima Cara Reconocimiento : " << identificadorFacial.anchoRostroMinimo << "x" << identificadorFacial.alturaRostroMinima << endl;
+
+    // establece la dimension minima de un rostro para que sea visualizado con un recuadro
+    identificadorFacial.anchoRostroMinVis = lstParams->getStringLong("anchoMinCaraVis", 70);
+    identificadorFacial.alturaRostroMinVis = lstParams->getStringLong("alturainCaraVis", 70);
+    cout << "Dim.Minima Cara : " << identificadorFacial.anchoRostroMinVis << "x" << identificadorFacial.alturaRostroMinVis << endl;
+        
+    // Carga la lista de rostros conocidos
+    // para mostrar el nombre de ello en la pantalla
+    identificadorFacial.cargaRostrosConocidos("./data/rostros_conocidos.txt");
+
+    // Se configura la resolucion de la camara
+    identificadorFacial.anchoCamara = lstParams->getStringLong("anchoImgFuente", 1280);
+    identificadorFacial.alturaCamara = lstParams->getStringLong("alturaImgFuente", 720);
+    cout << "Resolucion camara : " << identificadorFacial.anchoCamara << "x" << identificadorFacial.alturaCamara << endl;
+
+    // Se configura la resolucion con la que se visualiza las imagenes
+    identificadorFacial.anchoVisualiza = lstParams->getStringLong("anchoImgVisualizacion", 800);
+    identificadorFacial.alturaVisualiza = lstParams->getStringLong("alturaImgVisualizacion", 600);
+    cout << "Resolucion Visualizacion : " << identificadorFacial.anchoVisualiza << "x" << identificadorFacial.alturaVisualiza << endl;
+
+    // Establece el objeto que crea la fuente de imagenes
+    shared_ptr<InterImgSourceFactory> factory;
+    string fuente = lstParams->getString("source");
+    cout << "Fuente de imagenes: " << fuente << endl;
+
+    if ( fuente.length() == 0 ) fuente = "camaraint";
+    
+    if ( "camaraint" == fuente )
+    {
+        // en este caso usamos la camara interna    
+        factory = make_shared<InterImgSourceFactory>();
+        factory->lstParams.putInt(InternalCameraSource::PARAM_RES_HORIZONTAL, identificadorFacial.anchoCamara);
+        factory->lstParams.putInt(InternalCameraSource::PARAM_RES_VERTICAL, identificadorFacial.alturaCamara);
+        identificadorFacial.imgFactory = dynamic_pointer_cast<ImageSourceFactory>(factory);
+    }
+    else
+    if ( "socket" == fuente )
+    {
+        // En este caso usamos una camara con ESP32 o cualquiera que implemente el protocolo
+
+        shared_ptr<GHashMap> lstParams = leeArchivoConfig("./config/sourceconfig.txt");
+        string ipCamara = lstParams->getString("sourceip");
+
+        if ( ipCamara.length() == 0 )
+        {
+            cout << "Error : No se encontro la IP de la camara externa" << endl;
+            cout << "Se finaliza la aplicacion" << endl;            
+            return 1;
+        }
+        cout << "La IP de la camara es: " << ipCamara << endl;
+
+        shared_ptr<Esp32SocketCamFactory> factory = make_shared<Esp32SocketCamFactory>();
+        factory->lstParams.putString(Esp32SocketCamera::PARAM_IP, ipCamara);        
+        identificadorFacial.imgFactory = dynamic_pointer_cast<ImageSourceFactory>(factory);
+    }       
+    else
+    {
+        cout << "Error : No se encontro la configuracion de la fuente de imagenes" << endl;
+        cout << "Se finaliza la aplicacion" << endl;            
+        return 2;
+    }       
+        
+    // Inicia el proceso
+    identificadorFacial.iniciar();
+
+    return 0;
+}
+
