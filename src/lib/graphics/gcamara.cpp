@@ -711,3 +711,5 @@ void GCamara::ajustaVideo( int parametro, double valor )
     parametroConf->add(valor);
     lstParamsVideo->add(parametroConf);
 }
+
+

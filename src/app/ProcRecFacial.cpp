@@ -25,6 +25,7 @@ vector<TrackedDetectionHailo *> ProcesoRecFacial::lstUltCarasDet;
 ProcesoRecFacial::ProcesoRecFacial()
 {
     invertirVertical = false;
+    usarDistEuclideana = true;
 }
 
 /**
@@ -44,7 +45,9 @@ void ProcesoRecFacial::iniciar()
     GImage imagenVisor;
     Mat flipped;
     vector<DeteccionCaraHailo> lstDet;
+    vector<DeteccionCaraHailo> lstDetFiltrado;
     vector<TrackedDetectionHailo *> lstCaras;
+    vector<TrackedDetectionHailo *> lstCarasTrack;
     hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr;
     DetectorCarasHailoSCRFD detector;        
     FaceRecHailo generadorDesc;
@@ -96,6 +99,7 @@ void ProcesoRecFacial::iniciar()
         
     // bucle principal
     finalizar = false;
+    idDesconocidoSgte = 0;
     while( finalizar == false )
     {
         auto inicio = std::chrono::high_resolution_clock::now();
@@ -122,7 +126,19 @@ void ProcesoRecFacial::iniciar()
             cout << "Error al detectar rostros" << endl;
             break;
         }
-        lstCaras = detTracker.analizaRapido(&lstDet);
+        // elimina rostros pequeños
+        lstDetFiltrado.clear();
+        for(DeteccionCaraHailo cara : lstDet)
+        {
+            if (( cara.getAncho() > anchoRostroMinimo ) || ( cara.getAltura() > alturaRostroMinima))
+            {
+                lstDetFiltrado.push_back(cara);
+            }
+        }
+
+        // Analiza tracking 
+        // lstCaras = detTracker.analizaRapido(&lstDetFiltrado);
+        lstCaras = detTracker.generaListaTrackTemporal(&lstDetFiltrado);
         auto finDeteccion = std::chrono::high_resolution_clock::now();
 
         // genera descriptores faciales
@@ -138,11 +154,16 @@ void ProcesoRecFacial::iniciar()
         identificarPersonas(&lstCaras);
         auto finIdentificacion = std::chrono::high_resolution_clock::now();
 
+        // Hace el tracking de las caras procesadas
+        lstCarasTrack = detTracker.analizaPorIdentificacion(&lstCaras);
+
         // Notifica al servidor web las incidencias o detecciones
-        notificaDetecciones(imagenCapturada, &lstCaras);
+        // notificaDetecciones(imagenCapturada, &lstCaras);
+        notificaDetecciones(imagenCapturada, &lstCarasTrack);
         auto finNotifica = std::chrono::high_resolution_clock::now();
 
-        imagenVisor = dibujaCaras(imagenCapturada,&lstCaras);
+        // imagenVisor = dibujaCaras(imagenCapturada,&lstCaras);
+        imagenVisor = dibujaCaras(imagenCapturada,&lstCarasTrack);
         auto finDibuja = std::chrono::high_resolution_clock::now();
 
         // calcula los tiempos transcurridos
@@ -154,18 +175,19 @@ void ProcesoRecFacial::iniciar()
         auto durDibuja = std::chrono::duration_cast<std::chrono::microseconds>(finDibuja - finNotifica);
         auto durTotal = std::chrono::duration_cast<std::chrono::microseconds>(finDibuja - inicio);
 
-        //cout << "Tiempos microsegundos " << endl << endl;
-        //cout << "Captura      : " << durCaptura.count() << endl;
-        //cout << "Detecta      : " << durDetecta.count() << endl;
-        //cout << "Descriptores : " << durDescriptor.count() << endl;
-        //cout << "Identifica : " << durIdentificacion.count() << endl;
-        //cout << "notifica : " << durNotifica.count() << endl;
-        //cout << "Dibujo       : " << durDibuja.count() << endl;
-        //cout << "** TOTA      : " << durTotal.count() << endl;
-        //cout << endl;
+        // cout << "Tiempos microsegundos " << endl << endl;
+        // cout << "Captura      : " << durCaptura.count() << endl;
+        // cout << "Detecta      : " << durDetecta.count() << endl;
+        // cout << "Descriptores : " << durDescriptor.count() << endl;
+        // cout << "Identifica : " << durIdentificacion.count() << endl;
+        // cout << "notifica : " << durNotifica.count() << endl;
+        // cout << "Dibujo       : " << durDibuja.count() << endl;
+        // cout << "** TOTA      : " << durTotal.count() << endl;
+        // cout << endl;
 
         // Envia la imagen al servidor web de configuracion
-        ProcesoRecFacial::lstUltCarasDet = lstCaras;
+        // ProcesoRecFacial::lstUltCarasDet = lstCaras;
+        ProcesoRecFacial::lstUltCarasDet = lstCarasTrack;
         servidorWeb->setImage(imagenVisor);
         
         // Envia la imagen a la pantalla local
@@ -175,7 +197,7 @@ void ProcesoRecFacial::iniciar()
         cv::setMouseCallback("Visor", onMouse, this);
 
         // Lee el teclada para finalziar si presiona ESC
-        if ( GDibujo::waitForKey(1) == 27 )
+        if ( GDibujo::waitForKey(10) == 'q' )
         {
             break;
         }
@@ -206,22 +228,15 @@ void ProcesoRecFacial::calculaDescriptores( FaceRecHailo *generador, GImage foto
     for(int i=0; i<n; i++)
     {
         deteccion = lstRostros->at(i);        
-        if (( deteccion->cara.deteccion.getAncho() < anchoRostroMinimo ) && ( deteccion->cara.deteccion.getAltura() < alturaRostroMinima ))
-        {
-            // la cara es muy chica
-            deteccion->cara.descCalculado = false;
-            // deteccion->cara.personaIdent = false;
-        }
-        else 
-        {            
-            deteccion->cara.detRelCara = deteccion->cara.deteccion;            
-            deteccion->cara.detRelCara.desplazaPtosCara(-deteccion->cara.deteccion.ptoSupIzq.x, -deteccion->cara.deteccion.ptoSupIzq.y);
+              
+        // calcula la deteccion relativa al rectangulo en el que se detecto
+        deteccion->cara.detRelCara = deteccion->cara.deteccion;            
+        deteccion->cara.detRelCara.desplazaPtosCara(-deteccion->cara.deteccion.ptoSupIzq.x, -deteccion->cara.deteccion.ptoSupIzq.y);
 
-            deteccion->cara.descCalculado = true;        
-            deteccion->cara.calculaFotoCara(foto);
-            
-            deteccion->cara.descriptor = generador->calculaDescriptor(deteccion->cara.fotoCara, deteccion->cara.detRelCara);
-        }
+        deteccion->cara.descCalculado = true;        
+        deteccion->cara.calculaFotoCara(foto);
+        
+        deteccion->cara.descriptor = generador->calculaDescriptor(deteccion->cara.fotoCara, deteccion->cara.detRelCara);
     }
 }
 
@@ -232,7 +247,8 @@ void ProcesoRecFacial::calculaDescriptores( FaceRecHailo *generador, GImage foto
 void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lstRostros )
 {
     TrackedDetectionHailo *deteccion;
-    DescPersonaExterno *personaConocida;
+    DescPersonaExterno *personaConocida, *validaDetec;
+    IdentificacionPersona idenPersonaValidaDec;
     int i,n;
     long long fecDet;
     float distEucli;
@@ -247,8 +263,8 @@ void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lst
             continue;
         }            
 
-        // solo se identifica a la persona si es nueva
-        personaConocida = universoPersonas.buscaPersonaCon(&deteccion->cara.descriptor, toleranciaIden, &distEucli);
+        // solo se identifica a la persona si es nueva        
+        personaConocida = universoPersonas.buscaPersonaCon(&deteccion->cara.descriptor, toleranciaIden, &distEucli, usarDistEuclideana);
         if ( personaConocida != NULL )
         {
             IdentificacionPersona iden;
@@ -256,8 +272,47 @@ void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lst
             iden.fecDet = fecDet;
             iden.vecDescripcion = deteccion->cara.descriptor;
             iden.comparacion = distEucli;
-            deteccion->cara.personaIdent = true;            
+            deteccion->cara.personaIdent = true;                        
             deteccion->cara.identificador.agregaIdentif(personaConocida, iden , fecDet);
+
+            idenPersonaValidaDec = deteccion->cara.identificador.getUltimaIdentificacion();            
+        }
+        else
+        {
+            personaConocida = universoPersonas.buscaPersonaDesc(&deteccion->cara.descriptor, toleranciaIden, &distEucli);
+            if ( personaConocida != NULL )
+            {
+                IdentificacionPersona iden;
+
+                iden.fecDet = fecDet;
+                iden.vecDescripcion = deteccion->cara.descriptor;
+                iden.comparacion = distEucli;
+                deteccion->cara.personaIdent = true;            
+                deteccion->cara.identificador.agregaIdentif(personaConocida, iden , fecDet);             
+                
+                idenPersonaValidaDec = deteccion->cara.identificador.getUltimaIdentificacion();                
+            }
+            else
+            {                
+                IdentificacionPersona iden;
+
+                iden.fecDet = fecDet;
+                iden.vecDescripcion = deteccion->cara.descriptor;
+                iden.comparacion = 100;
+                deteccion->cara.personaIdent = true;            
+                
+                DescPersonaExterno personaExterna;
+
+                personaExterna.anonimo = true;
+                personaExterna.vecDescripcion = iden.vecDescripcion;
+                personaExterna.id = std::to_string(idDesconocidoSgte);
+                personaExterna.nombre = "Desc." + personaExterna.id;
+                idDesconocidoSgte++;
+                universoPersonas.lstPerNoIdent.add(personaExterna);
+                
+                deteccion->cara.identificador.agregaIdentif(universoPersonas.lstPerNoIdent.getAddrUltimo(), iden , fecDet);
+                idenPersonaValidaDec = deteccion->cara.identificador.getUltimaIdentificacion();
+            }
         }
     }
 }
@@ -314,6 +369,8 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
             {
                 id.append(" - ");
                 id.append(datosPersona->nombre);
+                id.append(" : ");
+                id.append(to_string(det->cara.identificador.getUltimaIdentificacion().comparacion));
             }                
             GDibujo::drawRect(imagenVisor, caja, verde, 2);
         }        

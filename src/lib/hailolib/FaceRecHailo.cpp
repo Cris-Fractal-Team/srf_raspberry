@@ -75,7 +75,7 @@ void UnivIdenPersona::agregaIdentif( DescPersonaExterno *descExterno, Identifica
             indiceGrupoPrin = 0;
             numIden = 1;
             cambioIdentificacion = true;
-        }
+        }        
     }
 }
 
@@ -90,6 +90,15 @@ DescPersonaExterno* UnivIdenPersona::getDatosPerIden()
         return NULL;
 
     return lstGrupoIden.getAddr(indiceGrupoPrin)->descExterno;
+}
+
+
+/**
+ * Retorna la ultima identificacion
+ */
+IdentificacionPersona UnivIdenPersona::getUltimaIdentificacion()
+{
+    return lstGrupoIden.getLast().lstIdentificaciones.getLast();
 }
 
 

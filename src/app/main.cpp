@@ -82,35 +82,37 @@ int main( int argc, char *argv[])
     proc.toleranciaDetec = lstParams->getStringDouble("presicionDeteccion",0.40);
     proc.toleranciaIden = lstParams->getStringDouble("deltaRostroMax",0.60);
 
+    proc.usarDistEuclideana = lstParams->getStringBool("usarDistEcuclideana", true);
+    proc.universoPersonas.setNumThreadsIdentificacion(lstParams->getStringLong("numThreadsIdentificacion",1));
     proc.tiempoReEvento = proc.lstParamsApp->getStringLong("tiempoReEvento",30) * 1000;
+    
         
-    // Crea el factory para la camara interna
+    // COnfigura la fuente de imagenes del sensor
     shared_ptr<ImageSourceFactory> imageSource;    
     string fuenteImages = lstParams->getString("source");
+
+    cout << "Fuente de imagenes: " << fuenteImages <<  endl;
 
     if ( fuenteImages.compare("onvif") == 0 )
     {
         shared_ptr<OnvifCameraFactory>onvifFactory = make_shared<OnvifCameraFactory>();
         imageSource =  dynamic_pointer_cast<ImageSourceFactory>(onvifFactory);
 
-        imageSource->lstParams.putString(OnvifCamera::PARAM_IP_SERVIDOR, proc.lstParamsApp->getString("onvifIP"));
-        imageSource->lstParams.putString(OnvifCamera::PARAM_PUERTO_SERVIDOR, proc.lstParamsApp->getString("onvifPuerto"));
-        imageSource->lstParams.putString(OnvifCamera::PARAM_USUARIO_SERVIDOR, proc.lstParamsApp->getString("onvifLogin"));
-        imageSource->lstParams.putString(OnvifCamera::PARAM_PASSWORD_SERVIDOR, proc.lstParamsApp->getString("onvifPassword"));
+        imageSource->lstParams.putString(OnvifCamera::PARAM_IP_SERVIDOR, proc.lstParamsApp->getString(OnvifCamera::PARAM_IP_SERVIDOR));
+        imageSource->lstParams.putString(OnvifCamera::PARAM_PUERTO_SERVIDOR, proc.lstParamsApp->getString(OnvifCamera::PARAM_PUERTO_SERVIDOR));
+        imageSource->lstParams.putString(OnvifCamera::PARAM_USUARIO_SERVIDOR, proc.lstParamsApp->getString(OnvifCamera::PARAM_USUARIO_SERVIDOR));
+        imageSource->lstParams.putString(OnvifCamera::PARAM_PASSWORD_SERVIDOR, proc.lstParamsApp->getString(OnvifCamera::PARAM_PASSWORD_SERVIDOR));
 
-        imageSource->lstParams.putString(OnvifCamera::PARAM_URL_SERVIDOR, lstParams->getString("urlServidor"));
-
-        // imageSource->lstParams.putString(OnvifCamera::PARAM_IP_SERVIDOR,"192.168.18.108");
-        // imageSource->lstParams.putString(OnvifCamera::PARAM_PUERTO_SERVIDOR,"554");
-
-        // imageSource->lstParams.putString(OnvifCamera::PARAM_USUARIO_SERVIDOR,"admin");
-        // imageSource->lstParams.putString(OnvifCamera::PARAM_PASSWORD_SERVIDOR,"12345678@");     
-
-        // URL para Tapo de TPLINK
-        // imageSource->lstParams.putString(OnvifCamera::PARAM_URL_SERVIDOR,"/stream1");
-
-        // URL para Dahua
-        // imageSource->lstParams.putString(OnvifCamera::PARAM_URL_SERVIDOR,"/cam/realmonitor?channel=1&subtype=0");        
+        imageSource->lstParams.putString(OnvifCamera::PARAM_URL_SERVIDOR, lstParams->getString(OnvifCamera::PARAM_URL_SERVIDOR));       
+    }
+    else
+    if ( fuenteImages.compare("video") == 0 )
+    {
+        shared_ptr<VideoCameraFactory> videoImgFac = make_shared<VideoCameraFactory>();
+        imageSource =  dynamic_pointer_cast<ImageSourceFactory>(videoImgFac);        
+        imageSource->lstParams.putString(VideoCamera::PARAM_PATH_VIDEO, proc.lstParamsApp->getString(VideoCamera::PARAM_PATH_VIDEO));
+        imageSource->lstParams.putString(VideoCamera::PARAM_VELOCIDAD_VIDEO, proc.lstParamsApp->getString(VideoCamera::PARAM_VELOCIDAD_VIDEO));
+        imageSource->lstParams.putString(VideoCamera::PARAM_CUADRO_INICIAL, proc.lstParamsApp->getString(VideoCamera::PARAM_CUADRO_INICIAL));
     }
     else
     {
@@ -125,8 +127,12 @@ int main( int argc, char *argv[])
       
     // configura la fuente de imagenes y carga las persona conocidas
     proc.setImageFactory(imageSource);    
-    // proc.universoPersonas.cargarpPerConocidas("./data/rostros_conocidos.txt");
-    proc.universoPersonas.cargarpPerConocidas(lstParams->getString("pathBDPersonas"));
+
+    string paramUnificarDescr = proc.lstParamsApp->getString("unificarDescriptores");
+    bool unifidarDescr = false;
+    if ( paramUnificarDescr.compare("S") == 0 ) unifidarDescr = true;
+
+    proc.universoPersonas.cargarpPerConocidas(lstParams->getString("pathBDPersonas"), unifidarDescr);
     proc.generadorEventos.urlServidor = proc.lstParamsApp->getString("urlBaseServidor");
 
     proc.iniciar();

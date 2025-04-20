@@ -49,6 +49,148 @@ DetectionTrackerHailo::~DetectionTrackerHailo()
     return trDet;
  }
 
+ /**
+ * Agrega una nueva deteccion temporal
+ */
+TrackedDetectionHailo DetectionTrackerHailo::agregaDeteccionTemporal ( DeteccionCaraHailo det )
+{
+    TrackedDetectionHailo trDet;
+  
+    trDet.id = 0;
+   
+    trDet.cara.deteccion = det;
+    trDet.ciclosNoDetectados = 0;
+        
+    lstUniversoTemp.add(trDet);
+
+    return trDet;
+}
+
+ /**
+ * Genera una lista de decciones a las que se les puede hacer tracking
+ * las detecciones actuales y le asigna un ID a cada deeccion.
+ */
+vector<TrackedDetectionHailo *> DetectionTrackerHailo::generaListaTrackTemporal( vector<DeteccionCaraHailo> *lstDetActuales )
+{
+    vector<TrackedDetectionHailo *> rpta;
+    TrackedDetectionHailo *rostroTrack;
+
+    lstUniversoTemp.reset();
+    for( DeteccionCaraHailo cara: *lstDetActuales )
+    {
+        agregaDeteccionTemporal(cara);
+        rostroTrack = lstUniversoTemp.getAddrUltimo();        
+        rpta.push_back(rostroTrack);
+    }
+
+    return rpta;
+}
+
+
+ /**
+ * Analiza las detecciones actualesy reconocidas, les asigna un ID unico
+ * para poder hacer un tracking, pero principalmente para poder llevar
+ * estadisticas del rostro y agrupar las detecciones 
+ */
+vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion( vector<TrackedDetectionHailo *> *lstDetActuales )
+{
+    int i,iu,n,nu;
+    vector<TrackedDetectionHailo *> rpta;
+    TrackedDetectionHailo *detActual;
+    DescPersonaExterno *descPerActual, *descPerUniv;
+    IdentificacionPersona idenPersona;
+
+    n = lstDetActuales->size();
+    nu = lstUniverso.size();
+
+    if ( nu == 0 )
+    {
+        // El universo esta vacio se agregan todas las detecciones y se les asigna un track unico
+        for(i=0; i<n; i++)
+        {
+            detActual = lstDetActuales->at(i);
+            detActual->id = sgteId;
+            sgteId++;            
+            lstUniverso.add(*detActual);
+            detActual = lstUniverso.getAddrUltimo();
+            rpta.push_back(detActual);
+        }
+
+        return rpta;
+    }
+
+    GLinkedList<TrackedDetectionHailo *> lstUnivPen;
+    TrackedDetectionHailo *detUniv, *detNueva;
+    bool encontro;
+
+    // creamos la lista temporal
+    for(i=0; i<nu; i++)
+    {
+        detUniv = lstUniverso.getAddr(i);        
+        lstUnivPen.add(lstUniverso.getAddr(i));
+    }
+
+    // Asociamos las detecciones actuales y las nuevas
+    for( i=0; i < n; i++)
+    {
+        detActual = lstDetActuales->at(i);
+        descPerActual = detActual->cara.identificador.getDatosPerIden();
+        
+        encontro = false;
+        nu = lstUnivPen.size()-1;
+        for(iu=nu; iu>=0; iu--)
+        {
+            detUniv = lstUnivPen.get(iu);
+            
+            descPerUniv = detUniv->cara.identificador.getDatosPerIden();
+            if (( descPerActual->anonimo== descPerUniv->anonimo ) &&  ( descPerActual->id.compare(descPerUniv->id) == 0 ))
+            {
+                // Encontramos que la persona actual o nueva coincide con una del universo
+                idenPersona = detActual->cara.identificador.getUltimaIdentificacion();
+                
+                detUniv->cara.fotoCara = detActual->cara.fotoCara;
+                detUniv->cara.deteccion = detActual->cara.deteccion;
+                detUniv->cara.descriptor = detActual->cara.descriptor;
+                detUniv->cara.identificador.agregaIdentif(descPerActual, idenPersona, idenPersona.fecDet);
+                lstUnivPen.remove(iu);
+                encontro = true;
+
+                rpta.push_back(detUniv);
+
+                break;
+            }
+        }
+
+        
+        if ( encontro == false )
+        {
+            // la deteccion es nueva
+            detActual->id = sgteId;
+            sgteId++;            
+            lstUniverso.add(*detActual);
+            detActual = lstUniverso.getAddrUltimo();
+            rpta.push_back(detActual);
+        }
+    }
+
+    // revisamos las detecciones anterioes que no coincidieron en las detecciones
+    // nu = lstUnivPen.size()-1;
+    // for(iu=nu; iu>=0; iu--)
+    // {
+    //     detUniv = lstUnivPen.get(iu);
+    //     detUniv->ciclosNoDetectados++;
+    //     if ( detUniv->ciclosNoDetectados < maxCiclosInactivo )
+    //     {
+    //         rpta.push_back(detUniv);
+    //     }
+    //     else
+    //     {
+    //         lstUnivPen.remove(iu);
+    //     }
+    // }
+
+    return rpta;
+}
 
 /**
  * Analiza las detecciones actuales y le asigna un ID a cada deeccion
@@ -100,7 +242,7 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaRapido( vector<Det
     {
         detUniv = lstUniverso.getAddr(i);
         // cout << "Agregando a pendientes " << detUniv->id << endl; 
-        lstUnivPen.add(lstUniverso.getAddr(i));
+        lstUnivPen.add(detUniv);
     }
 
     // Identificamos las detecciones actuales y las nuevas

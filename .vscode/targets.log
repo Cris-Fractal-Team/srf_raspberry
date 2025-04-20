@@ -1,0 +1,3968 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make -C ./src/lib/general
+ 
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 20)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 19)
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) 
+# makefile (from 'Makefile', line 12)
+EXT = .cpp
+# makefile (from 'Makefile', line 28)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 14)
+OBJDIR = ../../../obj/lib/general
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 24)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrRw
+# makefile (from 'Makefile', line 21)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros/src/lib/general
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrRw
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 11)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 16)
+INCLUDES = -I../../../include -I/usr/local/include/opencv4 -I/home/mchu/instladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 1
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 27)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 23)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 8)
+LDFLAGS = -L/usr/local/lib -lv4l2  -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_highgui -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hdf -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/rpi_armv7l/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 26)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 13)
+SRCDIR = ./
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 15)
+DEPDIR = ../../../dep/lib/general
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 7)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=109/1024=11%, Rehash=0, Collisions=11/165=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# ./ (device 45826, inode 1161892): 9 files, no impossibilities.
+# . (device 45826, inode 1161892): 9 files, no impossibilities.
+# ../../../dep/lib (device 0, inode 0): No files, 6 impossibilities.
+
+ 
+# 18 files, 6 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: %.cpp
+#  recipe to execute (from 'Makefile', line 41):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+../../../obj/lib/general/%.o: %.cpp
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 71):
+	$(DEL) $(DEP)
+
+# Not a target:
+../../../dep/lib/generalGVector.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/general/GVector.o: GVector.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GVector'
+#  Last modified 2025-02-11 17:39:26.090726586
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+GHashMap.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-14 18:41:58.950871099
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/generalGThread.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/general/GThread.o: GThread.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GThread'
+#  Last modified 2025-02-11 17:39:23.822683181
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	$(RM) $(DEP)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:30.869349606
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+GDate.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:30.777349355
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/generalGDate.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+GThreadPool.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-25 04:39:09.736449123
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/general:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 17:39:26.010725055
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 37):
+	mkdir $(OBJDIR)
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 55):
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+
+../../../obj/lib/general/GHashMap.o: GHashMap.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GHashMap'
+#  Last modified 2025-02-11 17:39:22.046649192
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+all: ../../../obj/lib/general ../../../obj/lib/general/GDate.o ../../../obj/lib/general/GHashMap.o ../../../obj/lib/general/GObject.o ../../../obj/lib/general/GThread.o ../../../obj/lib/general/GThreadPool.o ../../../obj/lib/general/GVector.o
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/general/GObject.o: GObject.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GObject'
+#  Last modified 2025-02-11 17:39:22.750662665
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+GObject.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-15 00:52:44.053280021
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/generalGThreadPool.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 66):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+../../../obj/lib/general/GThreadPool.o: GThreadPool.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GThreadPool'
+#  Last modified 2025-02-11 17:39:24.702700022
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+GVector.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:31.185350467
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/generalGObject.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+../../../dep/lib/generalGHashMap.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+.PHONY: clean cleandep cleanw cleandepw
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+GThread.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 12:35:56.613806541
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/general/GDate.o: GDate.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GDate'
+#  Last modified 2025-02-11 17:39:20.62262194
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# files hash-table stats:
+# Load=28/1024=3%, Rehash=0, Collisions=0/94=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 56 / storage = 1090 B / avg = 19 B
+# current buf: size = 8162 B / used = 1090 B / count = 56 / avg = 19 B
+
+# strcache performance: lookups = 102 / hit rate = 45%
+# hash-table stats:
+# Load=56/8192=1%, Rehash=0, Collisions=0/102=0%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+ 
+make -C ./src/lib/utils
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 20)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o) 
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 19)
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) 
+# makefile (from 'Makefile', line 12)
+EXT = .cpp
+# makefile (from 'Makefile', line 28)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 14)
+OBJDIR = ../../../obj/lib/utils
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 24)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrRw
+# makefile (from 'Makefile', line 21)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros/src/lib/utils
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrRw
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 11)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 16)
+INCLUDES = -I../../../include -I/usr/local/include/opencv4 -I/home/mchu/instladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 1
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 27)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 23)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 8)
+LDFLAGS = -L/usr/local/lib -lv4l2  -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_highgui -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hdf -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/rpi_armv7l/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 26)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 13)
+SRCDIR = ./
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 15)
+DEPDIR = ../../../dep/lib/utils
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 7)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=109/1024=11%, Rehash=0, Collisions=11/165=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# ./ (device 45826, inode 1161920): 8 files, no impossibilities.
+# . (device 45826, inode 1161920): 8 files, no impossibilities.
+# ../../../dep/lib (device 0, inode 0): No files, 5 impossibilities.
+
+# 16 files, 5 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: %.cpp
+#  recipe to execute (from 'Makefile', line 42):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+../../../obj/lib/utils/%.o: %.cpp
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+../../../obj/lib/utils/base64.o: base64.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'base64'
+#  Last modified 2025-02-11 17:39:26.28273026
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+ 
+#  recipe to execute (from 'Makefile', line 72):
+	$(DEL) $(DEP)
+
+../../../obj/lib/utils:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 17:39:29.21878645
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 37):
+	mkdir $(OBJDIR)
+
+../../../obj/lib/utils/GStringUtils.o: GStringUtils.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GStringUtils'
+#  Last modified 2025-02-11 17:39:28.706776651
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 61):
+	$(RM) $(DEP)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.845357675
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+GStringUtils.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-31 20:17:17.198014731
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+base64.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.849357686
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/utilsGStringUtils.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 56):
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+
+# Not a target:
+../../../dep/lib/utilsbase64.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+filesutils.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-07 12:51:22.077630859
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/utils/GLog.o: GLog.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GLog'
+#  Last modified 2025-02-11 17:39:27.882760881
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+../../../dep/lib/utilsGLog.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+all: ../../../obj/lib/utils ../../../obj/lib/utils/GLog.o ../../../obj/lib/utils/GStringUtils.o ../../../obj/lib/utils/base64.o ../../../obj/lib/utils/filesutils.o ../../../obj/lib/utils/timedate.o
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 67):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+# Not a target:
+GLog.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.857357708
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+timedate.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.853357697
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/utils/timedate.o: timedate.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'timedate'
+#  Last modified 2025-02-11 17:39:29.222786526
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+../../../obj/lib/utils/filesutils.o: filesutils.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'filesutils'
+#  Last modified 2025-02-11 17:39:27.218748174
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+../../../dep/lib/utilstimedate.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+../../../dep/lib/utilsfilesutils.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+.PHONY: clean cleandep cleanw cleandepw
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=25/1024=2%, Rehash=0, Collisions=0/84=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 50 / storage = 912 B / avg = 18 B
+# current buf: size = 8162 B / used = 912 B / count = 50 / avg = 18 B
+
+# strcache performance: lookups = 92 / hit rate = 45%
+# hash-table stats:
+# Load=50/8192=1%, Rehash=0, Collisions=0/92=0%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+make -C ./src/lib/graphics
+ 
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 20)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o) 
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 19)
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) 
+# makefile (from 'Makefile', line 12)
+EXT = .cpp
+# makefile (from 'Makefile', line 28)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 14)
+OBJDIR = ../../../obj/lib/graphics
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 24)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrRw
+# makefile (from 'Makefile', line 21)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros/src/lib/graphics
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrRw
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 11)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 16)
+INCLUDES = -I../../../include -I/usr/include/libcamera -I/usr/local/include/opencv4 -I/home/mchu/instladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 1
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 27)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 23)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 8)
+LDFLAGS = -L/usr/local/lib -lv4l2 -lcamera -lcamera-base -lpthread -lcamera_app -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_highgui -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hdf -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/rpi_armv7l/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 26)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 13)
+SRCDIR = ./
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 15)
+DEPDIR = ../../../dep/lib/graphics
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 7)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=109/1024=11%, Rehash=0, Collisions=11/165=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# ./ (device 45826, inode 1161881): 7 files, no impossibilities.
+# . (device 45826, inode 1161881): 7 files, no impossibilities.
+# ../../../dep/lib (device 0, inode 0): No files, 4 impossibilities.
+
+# 14 files, 4 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: %.cpp
+#  recipe to execute (from 'Makefile', line 42):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+../../../obj/lib/graphics/%.o: %.cpp
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+# Not a target:
+gcamara.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-14 18:38:28.290678114
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/graphics/gcamara.o: gcamara.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'gcamara'
+#  Last modified 2025-02-11 17:39:34.062879156
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+ 
+
+../../../obj/lib/graphics/imageutils.o: imageutils.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'imageutils'
+#  Last modified 2025-02-11 17:39:45.423096571
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 72):
+	$(DEL) $(DEP)
+
+# Not a target:
+GDibujo.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-16 02:28:30.293644616
+#  File has been updated.
+#  Successfully updated.
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+ 
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 61):
+	$(RM) $(DEP)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:28.233342391
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/graphicsimageutils.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 56):
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+
+# Not a target:
+../../../dep/lib/graphicsImageSource.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+ImageSource.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-14 19:27:08.156817329
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+ 
+all: ../../../obj/lib/graphics ../../../obj/lib/graphics/GDibujo.o ../../../obj/lib/graphics/ImageSource.o ../../../obj/lib/graphics/gcamara.o ../../../obj/lib/graphics/imageutils.o
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/graphics/ImageSource.o: ImageSource.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'ImageSource'
+#  Last modified 2025-02-11 17:39:41.98703081
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+imageutils.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-31 13:04:06.406727398
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/graphicsGDibujo.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 67):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+../../../obj/lib/graphics:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 17:39:45.395096035
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 37):
+	mkdir $(OBJDIR)
+
+../../../obj/lib/graphics/GDibujo.o: GDibujo.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GDibujo'
+#  Last modified 2025-02-11 17:39:37.786950428
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 50):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+.PHONY: clean cleandep cleanw cleandepw
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+../../../dep/lib/graphicsgcamara.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# files hash-table stats:
+# Load=22/1024=2%, Rehash=0, Collisions=0/74=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 44 / storage = 845 B / avg = 19 B
+# current buf: size = 8162 B / used = 845 B / count = 44 / avg = 19 B
+
+# strcache performance: lookups = 82 / hit rate = 46%
+# hash-table stats:
+# Load=44/8192=1%, Rehash=0, Collisions=0/82=0%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+make -C ./src/lib/deeplearning
+ 
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 20)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o) 
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 19)
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) 
+# makefile (from 'Makefile', line 12)
+EXT = .cpp
+# makefile (from 'Makefile', line 28)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 14)
+OBJDIR = ../../../obj/lib/deeplearning
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 24)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrRw
+# makefile (from 'Makefile', line 21)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros/src/lib/deeplearning
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrRw
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 11)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 16)
+INCLUDES = -I../../../include -I/usr/local/include/opencv4 -I/home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 1
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 27)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 23)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 8)
+LDFLAGS = -L/usr/local/lib -lv4l2  -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_highgui -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hdf -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/rpi_armv7l/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 26)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 13)
+SRCDIR = ./
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 15)
+DEPDIR = ../../../dep/lib/deeplearning
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 7)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=109/1024=11%, Rehash=0, Collisions=11/165=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# ./ (device 45826, inode 1161900): 8 files, no impossibilities.
+# . (device 45826, inode 1161900): 8 files, no impossibilities.
+# ../../../dep/lib (device 0, inode 0): No files, 5 impossibilities.
+
+# 16 files, 5 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: %.cpp
+#  recipe to execute (from 'Makefile', line 41):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+../../../obj/lib/deeplearning/%.o: %.cpp
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+../../../obj/lib/deeplearning:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 17:40:07.415517484
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 37):
+	mkdir $(OBJDIR)
+
+../../../obj/lib/deeplearning/DetectorBO.o: DetectorBO.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'DetectorBO'
+#  Last modified 2025-02-11 17:39:58.815352883
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+ 
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+../../../obj/lib/deeplearning/DetectionTracker.o: DetectionTracker.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'DetectionTracker'
+#  Last modified 2025-02-11 17:39:52.535232688
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 71):
+	$(DEL) $(DEP)
+
+# Not a target:
+../../../dep/lib/deeplearningDetectorBO.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/deeplearning/ThreadDetector.o: ThreadDetector.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'ThreadDetector'
+#  Last modified 2025-02-11 17:40:07.451518173
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	$(RM) $(DEP)
+
+../../../obj/lib/deeplearning/DetectorImageSource.o: DetectorImageSource.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'DetectorImageSource'
+#  Last modified 2025-02-11 17:40:02.331420178
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:32.157353108
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+DeteccionVO.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 16:52:52.639953154
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+DetectorBO.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-09 17:20:10.487919367
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/deeplearningDeteccionVO.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 55):
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+
+# Not a target:
+../../../dep/lib/deeplearningDetectorImageSource.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+ThreadDetector.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 14:00:16.916801633
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+../../../dep/lib/deeplearningThreadDetector.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+DetectionTracker.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 15:25:46.92110933
+#  File has been updated.
+#  Successfully updated.
+
+all: ../../../obj/lib/deeplearning ../../../obj/lib/deeplearning/DeteccionVO.o ../../../obj/lib/deeplearning/DetectionTracker.o ../../../obj/lib/deeplearning/DetectorBO.o ../../../obj/lib/deeplearning/DetectorImageSource.o ../../../obj/lib/deeplearning/ThreadDetector.o
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/deeplearningDetectionTracker.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 66):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+# Not a target:
+DetectorImageSource.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-16 01:46:59.902164049
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/deeplearning/DeteccionVO.o: DeteccionVO.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'DeteccionVO'
+#  Last modified 2025-02-11 17:39:48.9671644
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+.PHONY: clean cleandep cleanw cleandepw
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=25/1024=2%, Rehash=0, Collisions=0/84=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 50 / storage = 1253 B / avg = 25 B
+# current buf: size = 8162 B / used = 1253 B / count = 50 / avg = 25 B
+
+# strcache performance: lookups = 92 / hit rate = 45%
+# hash-table stats:
+# Load=50/8192=1%, Rehash=0, Collisions=0/92=0%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+make -C ./src/lib/facerecdlib
+ 
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 20)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o) 
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 19)
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) 
+# makefile (from 'Makefile', line 12)
+EXT = .cpp
+# makefile (from 'Makefile', line 28)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 14)
+OBJDIR = ../../../obj/lib/facerecdlib
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 24)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrRw
+# makefile (from 'Makefile', line 21)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros/src/lib/facerecdlib
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrRw
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 11)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 16)
+INCLUDES = -I../../../include -I/home/instaladores/dlib/dlib/all/source.cpp -I/usr/local/include/opencv4 -I/home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 1
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 27)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 23)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 8)
+LDFLAGS = -L/usr/local/lib -lv4l2 -L/home/mchu/instaladores/dlib/build/dlib/libdlib.a -ljpeg  -lpng -lwebp -ldlib -lblas -llapack  -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_highgui -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hdf -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/rpi_armv7l/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 26)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 13)
+SRCDIR = ./
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 15)
+DEPDIR = ../../../dep/lib/facerecdlib
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 7)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=109/1024=11%, Rehash=0, Collisions=11/165=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# ./ (device 45826, inode 1161877): 5 files, no impossibilities.
+# . (device 45826, inode 1161877): 5 files, no impossibilities.
+# ../../../dep/lib (device 0, inode 0): No files, 2 impossibilities.
+
+# 10 files, 2 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: %.cpp
+#  recipe to execute (from 'Makefile', line 41):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+../../../obj/lib/facerecdlib/%.o: %.cpp
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+# Not a target:
+facedemo.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-09 23:11:35.379487807
+#  File has been updated.
+#  Successfully updated.
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 71):
+	$(DEL) $(DEP)
+
+../../../obj/lib/facerecdlib:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 18:55:39.207007645
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 37):
+	mkdir $(OBJDIR)
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	$(RM) $(DEP)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:25.357334447
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+facerecdlib.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-09 23:01:30.59758218
+ 
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/facerecdlibfacerecdlib.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 55):
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+all: ../../../obj/lib/facerecdlib ../../../obj/lib/facerecdlib/facedemo.o ../../../obj/lib/facerecdlib/facerecdlib.o
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 66):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+../../../obj/lib/facerecdlib/facedemo.o: facedemo.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'facedemo'
+#  Last modified 2025-02-11 17:40:56.632459519
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+.PHONY: clean cleandep cleanw cleandepw
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+../../../obj/lib/facerecdlib/facerecdlib.o: facerecdlib.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'facerecdlib'
+#  Last modified 2025-02-11 17:41:45.021385795
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+../../../dep/lib/facerecdlibfacedemo.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# files hash-table stats:
+# Load=16/1024=2%, Rehash=0, Collisions=0/54=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 32 / storage = 570 B / avg = 17 B
+# current buf: size = 8162 B / used = 570 B / count = 32 / avg = 17 B
+
+# strcache performance: lookups = 62 / hit rate = 48%
+# hash-table stats:
+# Load=32/8192=0%, Rehash=0, Collisions=0/62=0%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+ 
+make -C ./src/lib/facerec
+ 
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 20)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o) 
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 19)
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) 
+# makefile (from 'Makefile', line 12)
+EXT = .cpp
+# makefile (from 'Makefile', line 28)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 14)
+OBJDIR = ../../../obj/lib/facerecdlib
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 24)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrRw
+# makefile (from 'Makefile', line 21)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros/src/lib/facerec
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrRw
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 11)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 16)
+INCLUDES = -I../../../include -I/usr/local/include/opencv4 -I/home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 1
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 27)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 23)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 8)
+LDFLAGS = -L/usr/local/lib -lv4l2 -L/home/mchu/instaladores/dlib/build/dlib/libdlib.a -ljpeg  -lpng -lwebp -ldlib -lblas -llapack  -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_highgui -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hdf -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/rpi_armv7l/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 26)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 13)
+SRCDIR = ./
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 15)
+DEPDIR = ../../../dep/lib/facerecdlib
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 7)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=109/1024=11%, Rehash=0, Collisions=11/165=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# ./ (device 45826, inode 1161887): 6 files, no impossibilities.
+# . (device 45826, inode 1161887): 6 files, no impossibilities.
+# ../../../dep/lib (device 0, inode 0): No files, 3 impossibilities.
+
+# 12 files, 3 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: %.cpp
+#  recipe to execute (from 'Makefile', line 41):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+../../../obj/lib/facerecdlib/%.o: %.cpp
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+# Not a target:
+../../../dep/lib/facerecdlibfacerecyn.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/facerecdlib/facerecyn.o: facerecyn.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'facerecyn'
+#  Last modified 2025-02-11 18:55:39.263007692
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 71):
+	$(DEL) $(DEP)
+
+../../../obj/lib/facerecdlib:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 18:55:39.207007645
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 37):
+	mkdir $(OBJDIR)
+
+# Not a target:
+facerec.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 18:02:54.831595783
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/facerecdlib/facedetection.o: facedetection.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'facedetection'
+#  Last modified 2025-02-11 17:41:49.869478603
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	$(RM) $(DEP)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:30.037347336
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+facerecyn.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 18:53:52.051064731
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/facerecdlibfacerec.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 55):
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+
+../../../obj/lib/facerecdlib/facerec.o: facerec.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'facerec'
+#  Last modified 2025-02-11 18:03:01.387461023
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+ 
+all: ../../../obj/lib/facerecdlib ../../../obj/lib/facerecdlib/facedetection.o ../../../obj/lib/facerecdlib/facerec.o ../../../obj/lib/facerecdlib/facerecyn.o
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 66):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+# Not a target:
+facedetection.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 16:02:01.797902615
+#  File has been updated.
+#  Successfully updated.
+
+.PHONY: clean cleandep cleanw cleandepw
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+../../../dep/lib/facerecdlibfacedetection.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# files hash-table stats:
+# Load=19/1024=2%, Rehash=0, Collisions=0/64=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 38 / storage = 744 B / avg = 19 B
+# current buf: size = 8162 B / used = 744 B / count = 38 / avg = 19 B
+
+# strcache performance: lookups = 72 / hit rate = 47%
+# hash-table stats:
+# Load=38/8192=0%, Rehash=0, Collisions=0/72=0%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+ 
+make -C ./src/lib/web
+ 
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 20)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o) 
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 19)
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) 
+# makefile (from 'Makefile', line 12)
+EXT = .cpp
+# makefile (from 'Makefile', line 28)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 14)
+OBJDIR = ../../../obj/lib/web
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 24)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrRw
+# makefile (from 'Makefile', line 21)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros/src/lib/web
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrRw
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 11)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 16)
+INCLUDES = -I../../../include -I/usr/local/include/opencv4 -I/home/mchu/instladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 1
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 27)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 23)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 8)
+LDFLAGS = -L/usr/local/lib -lv4l2  -lopencv_gapi -lopencv_stitching -lopencv_aruco -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dnn_objdetect -lopencv_dnn_superres -lopencv_dpm -lopencv_highgui -lopencv_face -lopencv_freetype -lopencv_fuzzy -lopencv_hdf -lopencv_hfs -lopencv_img_hash -lopencv_intensity_transform -lopencv_line_descriptor -lopencv_quality -lopencv_rapid -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_superres -lopencv_optflow -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_xfeatures2d -lopencv_shape -lopencv_ml -lopencv_ximgproc -lopencv_video -lopencv_xobjdetect -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_xphoto -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/rpi_armv7l/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 26)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 13)
+SRCDIR = ./
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 15)
+DEPDIR = ../../../dep/lib/web
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 7)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=109/1024=11%, Rehash=0, Collisions=11/165=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# ./ (device 45826, inode 1161907): 14 files, no impossibilities.
+# . (device 45826, inode 1161907): 14 files, no impossibilities.
+# ../../../dep/lib (device 0, inode 0): No files, 11 impossibilities.
+
+# 28 files, 11 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: %.cpp
+#  recipe to execute (from 'Makefile', line 41):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+../../../obj/lib/web/%.o: %.cpp
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+# Not a target:
+../../../dep/lib/webGHttpServerCommand.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+../../../dep/lib/webGHttpClient.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+ 
+GWebSocketThread.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.481356692
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+GHttpRequest.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-11-12 21:15:28.394744381
+#  File has been updated.
+#  Successfully updated.
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 71):
+	$(DEL) $(DEP)
+
+# Not a target:
+GHttpResponse.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-29 14:50:05.227994785
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+GHttpServerCommand.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-11-12 21:07:17.533660857
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/web/GWebSocketCommand.o: GWebSocketCommand.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GWebSocketCommand'
+#  Last modified 2025-02-11 17:42:08.485834987
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	$(RM) $(DEP)
+
+# Not a target:
+../../../dep/lib/webGHttpServerThread.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/web/GSocket.o: GSocket.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GSocket'
+#  Last modified 2025-02-11 17:42:07.269811708
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.281356152
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/web/GJson.o: GJson.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GJson'
+#  Last modified 2025-02-11 17:42:06.381794708
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+../../../dep/lib/webGSocket.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+../../../dep/lib/webGWebSocketCommand.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 55):
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+
+../../../obj/lib/web/GHttpResponse.o: GHttpResponse.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GHttpResponse'
+#  Last modified 2025-02-11 17:42:01.781706645
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+../../../obj/lib/web/HttpHeaderReader.o: HttpHeaderReader.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'HttpHeaderReader'
+#  Last modified 2025-02-11 17:42:10.149866844
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+../../../obj/lib/web/GHttpServerThread.o: GHttpServerThread.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GHttpServerThread'
+#  Last modified 2025-02-11 17:42:05.425776406
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+../../../obj/lib/web/GHttpServer.o: GHttpServer.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GHttpServer'
+#  Last modified 2025-02-11 17:42:04.529759253
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+../../../dep/lib/webGHttpRequest.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/web/GHttpRequest.o: GHttpRequest.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GHttpRequest'
+#  Last modified 2025-02-11 17:42:00.837688573
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+HttpHeaderReader.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-25 03:37:34.713318638
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/webGWebSocketThread.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/web/GWebSocketThread.o: GWebSocketThread.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GWebSocketThread'
+#  Last modified 2025-02-11 17:42:09.489854208
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+GWebSocketCommand.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.041355504
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/web/GHttpServerCommand.o: GHttpServerCommand.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GHttpServerCommand'
+#  Last modified 2025-02-11 17:42:02.949729005
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+GHttpClient.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-21 15:38:17.330068989
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+../../../dep/lib/webHttpHeaderReader.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+../../../dep/lib/webGHttpServer.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+all: ../../../obj/lib/web ../../../obj/lib/web/GHttpClient.o ../../../obj/lib/web/GHttpRequest.o ../../../obj/lib/web/GHttpResponse.o ../../../obj/lib/web/GHttpServer.o ../../../obj/lib/web/GHttpServerCommand.o ../../../obj/lib/web/GHttpServerThread.o ../../../obj/lib/web/GJson.o ../../../obj/lib/web/GSocket.o ../../../obj/lib/web/GWebSocketCommand.o ../../../obj/lib/web/GWebSocketThread.o ../../../obj/lib/web/HttpHeaderReader.o
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+GSocket.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-25 04:53:34.282113879
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+../../../dep/lib/webGHttpResponse.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+GJson.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-10-13 00:59:33.197355925
+#  File has been updated.
+#  Successfully updated.
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 66):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+# Not a target:
+../../../dep/lib/webGJson.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+../../../obj/lib/web:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 17:42:10.137866614
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 37):
+	mkdir $(OBJDIR)
+
+# Not a target:
+GHttpServer.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2024-11-12 21:11:45.888052055
+#  File has been updated.
+#  Successfully updated.
+
+.PHONY: clean cleandep cleanw cleandepw
+ 
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+GHttpServerThread.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-16 01:20:04.163504786
+#  File has been updated.
+#  Successfully updated.
+
+../../../obj/lib/web/GHttpClient.o: GHttpClient.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'GHttpClient'
+#  Last modified 2025-02-11 17:41:59.629665447
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 49):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# files hash-table stats:
+# Load=43/1024=4%, Rehash=0, Collisions=5/144=3%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 86 / storage = 2000 B / avg = 23 B
+# current buf: size = 8162 B / used = 2000 B / count = 86 / avg = 23 B
+
+# strcache performance: lookups = 152 / hit rate = 43%
+# hash-table stats:
+# Load=86/8192=1%, Rehash=0, Collisions=3/152=2%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+# GNU Make 4.3
+# Built for aarch64-unknown-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Feb 12 00:04:35 2025
+
+# Variables
+
+# makefile (from 'Makefile', line 35)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
+# environment
+GDK_BACKEND = x11
+# makefile (from 'Makefile', line 20)
+LIBDIR = obj/lib
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# makefile (from 'Makefile', line 34)
+SRC = $(wildcard $(SRCDIR)/*$(EXT))
+# makefile (from 'Makefile', line 16)
+EXT = .cpp
+# makefile (from 'Makefile', line 45)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# makefile (from 'Makefile', line 18)
+OBJDIR = obj/app
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCODE_CWD = /home/mchu/proyectos/sensor-facial-hailo
+# makefile (from 'Makefile', line 41)
+DELOBJ = $(OBJ)
+# environment
+TEXTDOMAIN = Linux-PAM
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/mchu/proyectos/sensor-facial-con-punteros
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share/raspi-ui-overrides:/usr/share:/usr/share/gdm:/var/lib/menu-xdg
+# environment
+OLDPWD = /home/mchu/proyectos
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/mchu/.config/Code/CachedData/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/mchu/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrR
+# makefile (from 'Makefile', line 37)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(DEPDIR)%.d)
+# makefile
+CURDIR := /home/mchu/proyectos/sensor-facial-con-punteros
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrR
+# environment
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrfDh14/agent.1034
+# default
+.SHELLFLAGS := -c
+# environment
+_LXSESSION_PID = 1034
+# environment
+XDG_CONFIG_DIRS = /etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# makefile (from 'Makefile', line 24)
+DIROBJAPP = ./obj/app
+# environment
+XDG_SESSION_DESKTOP = LXDE-pi-x
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 7429
+# environment
+XDG_SESSION_TYPE = x11
+# makefile (from 'Makefile', line 14)
+APPNAME = myapp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SAL_USE_VCLPLUGIN = gtk3
+# makefile (from 'Makefile', line 28)
+INCLUDES = -I./include -I/usr/include/libcamera -I/usr/include/mariadb -I/usr/local/include/opencv4 -I/home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/include -I/home/mchu/instaladores/tensorflow -I/home/mchu/tensorflow/tensorflow/lite/tools/make/downloads/absl 
+# automatic
+*F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# makefile (from 'Makefile', line 25)
+DIROBJTESTS = ./obj/test
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"en-us","osLocale":"en-us","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+# default
+MAKE_HOST := aarch64-unknown-linux-gnu
+# makefile
+SHELL = /bin/sh
+# default
+MAKECMDGOALS := all
+# environment
+SHLVL = 1
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = en_US.UTF-8
+# automatic
+^F = $(notdir $^)
+# makefile (from 'Makefile', line 23)
+DIROBJLIBS = ./obj/lib
+# environment
+XDG_CONFIG_HOME = /home/mchu/.config
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = LXDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.swp=00;90:*.tmp=00;90:*.dpkg-dist=00;90:*.dpkg-old=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = LXDE-pi
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = LXDE
+# makefile (from 'Makefile', line 31)
+LIBOBJ = $(wildcard $(LIBDIR)/*/*.o)
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = mchu
+# makefile (from 'Makefile', line 44)
+EXE = .exe
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from 'Makefile', line 40)
+RM = rm
+# environment
+DISPLAY = :0
+# environment
+USER = mchu
+# default
+MAKE_VERSION := 4.3
+# makefile (from 'Makefile', line 22)
+DIROBJBASE = ./obj
+# makefile (from 'Makefile', line 10)
+LDFLAGS = -L/usr/local/lib -L/home/mchu/instaladores/dlib/build/dlib/libdlib.a -ldlib -ljpeg -lwebp -lpng -lblas -llapack -lmariadb -lv4l2 -lcamera -lcamera-base -lpthread -lcamera_app -lopencv_highgui -lopencv_dnn -lopencv_videoio -lopencv_ml -lopencv_video -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_photo -lopencv_imgproc -lopencv_core -pthread -lcrypto -lssl /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/gen/linux_aarch64/lib/libtensorflow-lite.a /home/mchu/instaladores/tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/build/libflatbuffers.a /lib/aarch64-linux-gnu/libdl.so.2
+# makefile (from 'Makefile', line 43)
+DEL = del
+# environment
+SSH_AGENT_PID = 1096
+# environment
+_ = /usr/bin/code
+# makefile (from 'Makefile', line 36)
+OBJTEST = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/mchu
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-9620969c-1.93-main.sock
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 17)
+SRCDIR = src/app
+# environment
+XDG_SESSION_ID = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 19)
+DEPDIR = dep/app
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+VTE_VERSION = 7006
+# makefile (from 'Makefile', line 8)
+CXXFLAGS = -std=c++17 -Wall -g
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/mchu
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 6)
+CC = g++
+# environment
+XDG_MENU_PREFIX = lxde-pi-
+# environment
+GDMSESSION = LXDE-pi-x
+# variable set hash-table stats:
+# Load=117/1024=11%, Rehash=0, Collisions=11/221=5%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# src/app (device 45826, inode 1161857): 13 files, no impossibilities.
+# . (device 45826, inode 1161737): 18 files, no impossibilities.
+# dep/src/app (device 0, inode 0): No files, 7 impossibilities.
+
+# 31 files, 7 impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.d: src/app/%.cpp
+#  recipe to execute (from 'Makefile', line 59):
+	@$(CPP) $(CFLAGS) $< -MM -MT $($(DEPDIR)@:%.d=$(OBJDIR)/%.o) >$@
+
+obj/app/%.o: src/app/%.cpp libs
+#  recipe to execute (from 'Makefile', line 68):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# 2 implicit rules, 0 (0.0%) terminal.
+# Files
+
+# Not a target:
+obj/app/tempCodeRunnerFile.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+dep/appIdentificadorFacial.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+cleandepw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 114):
+	$(DEL) $(DEP)
+
+# Not a target:
+dep/appEmisorImagenesHTTP.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+obj/app/main.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+cleanTestDatabase:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 168):
+	rm -r ./obj/test/database
+
+obj/app:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 21:23:17.45326066
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 76):
+	mkdir $(DIROBJAPP)
+
+libfacerec:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# automatic
+# @ := libfacerec
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  recipe to execute (from 'Makefile', line 131):
+	$(MAKE) -C ./src/lib/facerec
+
+cleandep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 103):
+	$(RM) $(DEP)
+
+obj/app/EmisorImagenesHTTP.o: src/app/EmisorImagenesHTTP.cpp libs
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'EmisorImagenesHTTP'
+ 
+#  Last modified 2025-02-11 21:22:34.173201432
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := obj/app/EmisorImagenesHTTP.o
+# automatic
+# * := EmisorImagenesHTTP
+# automatic
+# < := src/app/EmisorImagenesHTTP.cpp
+# automatic
+# + := src/app/EmisorImagenesHTTP.cpp libs
+# automatic
+# % := 
+# automatic
+# ^ := src/app/EmisorImagenesHTTP.cpp libs
+# automatic
+# ? := libs
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/51=4%
+#  recipe to execute (from 'Makefile', line 68):
+	$(CC) $(CXXFLAGS) -o $@ -c $< $(INCLUDES)
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2025-02-11 13:40:47.60329556
+#  File has been updated.
+#  Successfully updated.
+
+libdatabase:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 151):
+	$(MAKE) -C ./src/lib/database
+
+# Not a target:
+obj/app/IdentificadorFacial.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+dep/appThreadGeneradorEventosDet.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 98):
+	rm -r $(DIROBJBASE)
+
+testDatabase: libs
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 164):
+	$(MAKE) -C ./src/test/database
+
+# Not a target:
+obj/app/MenuPrincipalCommand.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+obj:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 17:39:19.898608084
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 72):
+	mkdir $(DIROBJBASE)
+
+libutils:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# automatic
+# @ := libutils
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  recipe to execute (from 'Makefile', line 135):
+	$(MAKE) -C ./src/lib/utils
+
+libfaceredlib:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# automatic
+# @ := libfaceredlib
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  recipe to execute (from 'Makefile', line 155):
+	$(MAKE) -C ./src/lib/facerecdlib
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+dep/apptempCodeRunnerFile.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+all: obj obj/app obj/lib myapp
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/41=0%
+
+# Not a target:
+src/app/EmisorImagenesHTTP.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-01-07 13:00:54.036350524
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+dep/appMenuPrincipalCommand.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+obj/app/ThreadGeneradorEventosDet.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+obj/test:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 84):
+	mkdir $(DIROBJTESTS)
+
+libdeeplearning:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# automatic
+# @ := libdeeplearning
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  recipe to execute (from 'Makefile', line 147):
+	$(MAKE) -C ./src/lib/deeplearning
+
+libweb:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# automatic
+# @ := libweb
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  recipe to execute (from 'Makefile', line 143):
+	$(MAKE) -C ./src/lib/web
+
+libs: obj obj/lib libgeneral libutils libgraphics libdeeplearning libfaceredlib libfacerec libweb
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/35=0%
+
+obj/lib:
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 17:41:58.885651204
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 80):
+	mkdir $(DIROBJLIBS)
+
+cleanw:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 109):
+	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+
+# Not a target:
+obj/app/ThProcDescFaciales.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+cleanLibDatabase:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+ 
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 159):
+	rm -r ./obj/lib/database
+
+libgeneral:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# automatic
+# @ := libgeneral
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  recipe to execute (from 'Makefile', line 127):
+	$(MAKE) -C ./src/lib/general
+
+# Not a target:
+dep/appThProcDescFaciales.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+myapp: obj/app/EmisorImagenesHTTP.o obj/app/IdentificadorFacial.o obj/app/MenuPrincipalCommand.o obj/app/ThProcDescFaciales.o obj/app/ThreadGeneradorEventosDet.o obj/app/main.o obj/app/tempCodeRunnerFile.o
+#  Implicit rule search has not been done.
+#  Last modified 2025-02-11 21:23:19.573263311
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/41=0%
+#  recipe to execute (from 'Makefile', line 55):
+	$(CC) $(CXXFLAGS) -o $@ $(LIBOBJ) $^ $(LDFLAGS)
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+.PHONY: clean cleandep cleanw cleandepw libs libgeneral libfacerec libutils libgraphics libweb libdeeplearning libdatabase libfaceredlib cleanLibDatabase testDatabase cleanTestDatabase
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+dep/appmain.d:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+libgraphics:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# automatic
+# @ := libgraphics
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  recipe to execute (from 'Makefile', line 139):
+	$(MAKE) -C ./src/lib/graphics
+
+# files hash-table stats:
+# Load=41/1024=4%, Rehash=0, Collisions=2/157=1%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 89 / storage = 1576 B / avg = 17 B
+# current buf: size = 8162 B / used = 1576 B / count = 89 / avg = 17 B
+
+# strcache performance: lookups = 207 / hit rate = 57%
+# hash-table stats:
+# Load=89/8192=1%, Rehash=0, Collisions=0/207=0%
+# Finished Make data base on Wed Feb 12 00:04:35 2025
+
+ 

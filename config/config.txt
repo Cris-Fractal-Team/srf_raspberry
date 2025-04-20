@@ -4,7 +4,8 @@
 #   socket : se refiere a un dispositivo que via sockets envia JPEGs codificados
 #   onvif : se refiere a una camara IP con protocolo ONVIF
 #   webcam : se refiere a una camara web
-source=onvif
+#   video : se refiere a un video desde un archivo
+source=video
 
 # Configura la resolucion de las imagenes de la fuente de datos
 # Para algunas fuentes como la camara interna o la camara web
@@ -33,13 +34,24 @@ anchoCaraRec=112
 alturaCaraRec=112
 
 # Diferencia maxima entre dos rostro para considerar a la misma persona
-deltaRostroMax=0.52
+deltaRostroMax=0.80
 
 # Presicion o accuracy de la deteccion de rostros
 presicionDeteccion=0.5
 
 # Tiempo de revalidar rostros detectados en ms
 tiempoRevalidacion=1000
+
+# Indica si se usa distancia euclideana (S) o similaridad de coseno (N)
+usarDistEcuclideana=S
+
+# Establece cuantos threads se usan para hacer la identificacion de personas
+numThreadsIdentificacion=1
+
+# RUTA del archivo con la base de datos de personas
+# pathBDPersonas=./data/rostros_conocidos.txt
+# pathBDPersonas=./data/archivos1/rostros-conocidos.txt
+pathBDPersonas=./data/rostros-conocidos.txt
 
 # ****************** Configuracion para camaras onvif ****************** 
 
@@ -49,9 +61,6 @@ urlServidor=/cam/realmonitor?channel=1&subtype=0
 # Parte final o fuijo del URL para camaras TAPO TP-Link
 # urlServidor=/stream1
 
-# RUTA del archivo con la base de datos de personas
-# pathBDPersonas=./data/rostros_conocidos.txt
-# pathBDPersonas=./data/archivos1/rostros-conocidos.txt
-pathBDPersonas=./data/rostros-conocidos.txt
+
 
 

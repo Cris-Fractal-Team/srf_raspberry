@@ -498,4 +498,134 @@ class OnvifCameraFactory: public ImageSourceFactory
         
 };
 
+
+
+/**
+ * Image source que representa a un video al que se le dese hacer analitica
+ */
+class VideoCamera : public ImageSource , GThread
+{
+    public:
+
+        /**
+         * Parametro que contiene la ruta del video
+         */
+        static const string PARAM_PATH_VIDEO;
+
+        /**
+         * Parametro que contiene la velocidad en ms del video
+         */
+        static const string PARAM_VELOCIDAD_VIDEO;
+
+        /**
+         * Nombre del parametro que contiene el parametro a partir del que se procesa el video
+         */
+         static const string PARAM_CUADRO_INICIAL;
+        
+        /**
+         * Referencia a la camara
+         */
+        std::unique_ptr<cv::VideoCapture> cap;
+
+        /**
+         * Cada cuentos ms debe generarse un video
+         */
+        long periodoVideo;
+
+        /**
+         * Ultima vez que se genero una imagen de video
+         */
+        long long ultimaVezGenVideo;
+
+        /**
+         * Constructor
+         */
+        VideoCamera();
+
+        /**
+         * Destructor
+         */
+        ~VideoCamera();
+    
+        /**
+         * Inicializa el proveedor
+         */
+        int init() override ;
+
+        /**
+         * Detiene el proceso de captura de imagenes
+         */
+        void stop() override;
+
+        /**
+         * Libera el uso de recursos
+         */
+        void release() override;
+
+        /**
+         * Retonra la siguiente imagen desde el proveedor
+         */
+        GImage getImage() override;
+
+        /**
+         * Actualiza la configuracion del dispositivo fisico en base a una lista
+         * de parametros.
+         * 
+         * @param paramNames lista de los nombres de parametros que se desea se actualicen,
+         * estos nombres de parametros van separados por coma, no poner espacios entre ellos
+         */
+        void updateConfig( string paramNames ) override;
+
+        /**
+         * Establece el valor de un parametro del tipo string
+         */
+        void setStringParam( int param, string valor ) override;
+
+        /**
+         * Bucle del thread
+         */
+        void runThread() override;
+
+    private:
+
+        /**
+         * IP del servidor
+         */
+        string pathVideo;
+        
+        /**
+         * Ultima imagen detectada
+         */
+        GImage imagenDet;
+};
+
+
+
+/**
+ * Factory para image sources a partir de un video
+ */
+class VideoCameraFactory : public ImageSourceFactory
+{
+    public:
+
+        /**
+         * Destructor
+         */
+        ~VideoCameraFactory()
+        {
+
+        }
+
+        /**
+         * Se encarga de crear la fuente
+         */
+        shared_ptr<ImageSource> getInstance() override;
+
+        /**
+         * Metodo que retorna una instancia de ImageSource
+         * Recibe como parametro un archivo con la configuracion del image source
+         */
+        shared_ptr<ImageSource> getInstance( string configPath ) override;   
+};
+
 #endif

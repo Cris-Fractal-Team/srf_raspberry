@@ -205,6 +205,11 @@ class UnivIdenPersona
          * 
          */
         void agregaIdentif( DescPersonaExterno *descExterno, IdentificacionPersona iden, long long fecDet );
+
+        /**
+         * Retorna la ultima identificacion
+         */
+        IdentificacionPersona getUltimaIdentificacion();
 };
 
 

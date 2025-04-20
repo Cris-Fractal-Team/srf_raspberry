@@ -1,5 +1,7 @@
 
+#include "lib/utils/timedate.h"
 #include "lib/graphics/ImageSource.h"
+
 
 /**
  * Nombre del parametro en el que se define la resolucion horizontal
@@ -555,3 +557,191 @@ shared_ptr<ImageSource> OnvifCameraFactory::getInstance( string configPath )
     return dynamic_pointer_cast<ImageSource>(camera);
 }
 
+
+/**
+ * Nombre del parametro que contiene la RUTA del video
+ */
+string const VideoCamera::PARAM_PATH_VIDEO = "videoPath";
+
+/**
+ * Nombre del parametro que contiene la velocidad de reproduccion en imagenes
+ * por segundo del video
+ */
+string const VideoCamera::PARAM_VELOCIDAD_VIDEO = "videoVelocidadImgPorSegundo";
+
+/**
+ * Nombre del parametro que contiene el parametro a partir del que se procesa el video
+ */
+string const VideoCamera::PARAM_CUADRO_INICIAL = "videoCuadroInicial";
+
+
+
+/**
+ * Constructor
+ */
+VideoCamera::VideoCamera()
+{
+
+}
+
+/**
+ * Destructor
+ */
+VideoCamera::~VideoCamera()
+{
+
+}
+
+/**
+ * Inicializa el proveedor
+ */
+int VideoCamera::init()
+{
+    string ruta = lstParams.getString(PARAM_PATH_VIDEO);
+    cap = std::make_unique<cv::VideoCapture>(ruta);
+
+    if ( ruta.length() == 0 )
+    {
+        std::cerr << "No se ha especificado la ruta del video: " << ruta << std::endl;
+        return -1;
+    }
+    
+    if ( !cap->isOpened())    
+    {
+        std::cerr << "No se pudo abrir el video " << ruta << std::endl;
+        return -2;
+    }
+
+    long velocidad = lstParams.getStringLong(PARAM_VELOCIDAD_VIDEO, 30);
+
+    if (( velocidad <= 0 ) || ( velocidad > 1000 ))
+    {
+        velocidad = 30;
+    }
+
+    long pos = lstParams.getStringLong(VideoCamera::PARAM_CUADRO_INICIAL,0);
+    if ( pos < 0 ) pos = 0;
+    
+    cap->set(cv::CAP_PROP_POS_FRAMES, pos);
+    
+    periodoVideo = 1000 / velocidad;
+    ultimaVezGenVideo = -1;
+
+    cout << "Video cargado: " << ruta << endl;
+    
+    return 0;
+}
+
+/**
+ * Detiene el proceso de captura de imagenes
+ */
+void VideoCamera::stop()
+{
+    release();
+}
+
+/**
+ * Libera el uso de recursos
+ */
+void VideoCamera::release()
+{
+    if ( cap != nullptr )
+    {
+        cap->release();
+    }
+}
+
+/**
+ * Retonra la siguiente imagen desde el proveedor
+ */
+GImage VideoCamera::getImage()
+{
+    cv::Mat frame;
+
+    *cap >> frame;
+
+    if ( ultimaVezGenVideo == -1 )
+    {
+        ultimaVezGenVideo = TimeDateUtils::getDateTimeMs();
+    }
+    else
+    {
+        long long delta = periodoVideo - (TimeDateUtils::getDateTimeMs()-ultimaVezGenVideo);
+        if ( delta > 0 )
+        {
+            usleep(delta*1000);
+        }
+        ultimaVezGenVideo = TimeDateUtils::getDateTimeMs();
+    }
+
+    if ( frame.empty() )
+    {
+        return imagenDet;
+    }
+
+    GImage imagen = GImage();
+    imagen.imagenOpencv = frame;
+    imagen.ancho = frame.rows;
+    imagen.altura = frame.cols;
+
+    imagenDet = imagen;
+
+    return imagen;
+}
+
+/**
+ * Actualiza la configuracion del dispositivo fisico en base a una lista
+ * de parametros.
+ * 
+ * @param paramNames lista de los nombres de parametros que se desea se actualicen,
+ * estos nombres de parametros van separados por coma, no poner espacios entre ellos
+ */
+void VideoCamera::updateConfig( string paramNames )
+{
+
+}
+
+/**
+ * Establece el valor de un parametro del tipo string
+ */
+void VideoCamera::setStringParam( int param, string valor )
+{    
+}
+
+/**
+ * Bucle del thread
+ */
+void VideoCamera::runThread()
+{
+
+}
+
+
+
+
+/**
+ * Se encarga de crear la fuente
+ */
+shared_ptr<ImageSource> VideoCameraFactory::getInstance() 
+{
+    cout << "Creando camara Video" << endl;
+    shared_ptr<VideoCamera> camera = make_shared<VideoCamera>();
+    camera->lstParams = this->lstParams;
+    camera->init();
+
+    return dynamic_pointer_cast<ImageSource>(camera);
+}
+
+/**
+ * Metodo que retorna una instancia de ImageSource
+ * Recibe como parametro un archivo con la configuracion del image source
+ */
+shared_ptr<ImageSource> VideoCameraFactory::getInstance( string configPath )
+{
+    cout << "Creando camara Video" << endl;
+    shared_ptr<VideoCamera> camera = make_shared<VideoCamera>();
+    camera->lstParams = this->lstParams;
+    camera->init();
+
+    return dynamic_pointer_cast<ImageSource>(camera);
+}

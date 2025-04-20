@@ -68,6 +68,11 @@ class DetectionTrackerHailo
         GLinkedList<TrackedDetectionHailo> lstUniverso;
 
         /**
+         * Vector con una lista temporal de objetos antes de hacer el tracking
+         */
+        GLinkedList<TrackedDetectionHailo> lstUniversoTemp;
+
+        /**
          * Constructor
          */
         DetectionTrackerHailo();
@@ -77,17 +82,23 @@ class DetectionTrackerHailo
          */
         ~DetectionTrackerHailo();
 
-        
+        /**
+         * Analiza las detecciones actualesy reconocidas, les asigna un ID unico
+         * para poder hacer un tracking, pero principalmente para poder llevar
+         * estadisticas del rostro y agrupar las detecciones 
+         */
+        vector<TrackedDetectionHailo *> analizaPorIdentificacion( vector<TrackedDetectionHailo *> *lstDetActuales );
+
         /**
          * Analiza las detecciones actuales y le asigna un ID a cada deeccion
-         * 
-         *  lstDetecActuales : lista con punteros a instancias de DeteccionVO
-         * 
-         *  numDetAct : numero de detecciones de lstDetecActuales
-         * 
-         *  numDet : cantidad de detecciones reetornadas
          */
         vector<TrackedDetectionHailo *> analizaRapido( vector<DeteccionCaraHailo> *lstDetActuales );
+
+        /**
+         * Genera una lista de decciones a las que se les puede hacer tracking
+         * las detecciones actuales y le asigna un ID a cada deeccion.
+         */
+        vector<TrackedDetectionHailo *> generaListaTrackTemporal( vector<DeteccionCaraHailo> *lstDetActuales );
         
         /**
          * ID del siguiente elemento que se agregara
@@ -100,6 +111,11 @@ class DetectionTrackerHailo
          * Agrega una nueva deteccion al universo de detecciones
          */
         TrackedDetectionHailo agregaDeteccion ( DeteccionCaraHailo det );        
+
+        /**
+         * Agrega una nueva deteccion temporal
+         */
+        TrackedDetectionHailo agregaDeteccionTemporal ( DeteccionCaraHailo det );        
 };
 
 

@@ -115,6 +115,16 @@ class ProcesoRecFacial
         long long tiempoReEvento;
 
         /**
+         * Indica si se debe usar o no distancia euclideana para calcular similaridad
+         */
+        bool usarDistEuclideana;
+
+        /**
+         * ID del siguiente desconocido
+         */
+        long long idDesconocidoSgte;
+
+        /**
          * Ruta del archivo de parametros
          */
         string pathParametros;

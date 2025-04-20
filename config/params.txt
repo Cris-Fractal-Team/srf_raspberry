@@ -22,3 +22,7 @@ onvifPassword=12345678@
 onvifIP=192.168.1.103
 onvifPuerto=554
 tiempoReEvento=10
+videoPath=./videos/video_1_cam_dahua.mp4
+videoVelocidadImgPorSegundo=10
+videoCuadroInicial=1800
+unificarDescriptores=N

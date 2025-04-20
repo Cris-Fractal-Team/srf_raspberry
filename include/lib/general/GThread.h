@@ -21,6 +21,17 @@ class GThread : public GObject
     public:
 
         /**
+         * Numero de nucleo asociado al thread
+         * -1 indica no har preferencia
+         */
+        int nucleoAsociado;
+
+        /**
+         * Indica si el thread es un demonio
+         */
+        bool esDemonio;
+
+        /**
          * Puntero al threadPool al que pertenece
          */
         GThreadPool *threadPool;
@@ -29,6 +40,11 @@ class GThread : public GObject
          * Constructor
          */
         GThread(); 
+
+        /**
+         * Destructor
+         */
+        ~GThread(); 
 
          /**
          * Constructor
@@ -72,7 +88,7 @@ class GThread : public GObject
         /**
          * Se invoca para indicar que el Thread debe finalizar su bucle de ejecucion
          */
-        void finalizar();
+        virtual void finalizar();
 
         /**
          * Metodo que se debe invocar cuando se desea iniciar un codigo critico
@@ -105,6 +121,17 @@ class GThread : public GObject
          * Nombre del thread
          */
         string thName;
+
+        /**
+         * Retorna un lock sobre el mutex
+         */
+        std::unique_lock<std::mutex> getLock();
+            
+    
+        /**
+         * Retorna el mutex
+         */
+        std::mutex& getMutexRef();
 
     private:
 
@@ -139,7 +166,12 @@ class GThread : public GObject
          * Fecha de la ultima vez que se uso el thread
          */
         time_t fechaUltimoUso;
+                
 
+        /**
+         * Asocia el thread a que se ejecute en un nucleo en particular
+         */
+        void asociaThreadNucleo();
 };
 
 
