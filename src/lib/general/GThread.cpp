@@ -194,16 +194,18 @@ bool GThread::isOcupado()
 
 /**
  * Reporta si ha terminado su ejecucion o no
+ * 
+ *      bloquear:
+ *          Indica si se debe o no bloquear el mutex para leer el valor
  */
-bool GThread::isFinalizado()
+bool GThread::isFinalizado( bool bloquear )
 {
-    bool rpta;
-
-    mtxBloquea();
-    rpta = finalizado;
-    mtxLibera();
-
-    return rpta;
+    if ( bloquear == false ) return finalizado;
+    
+    {
+        auto lock = getLock();
+        return finalizado;
+    }
 }
 
 /**

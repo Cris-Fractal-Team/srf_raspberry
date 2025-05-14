@@ -76,6 +76,8 @@ void UnivIdenPersona::agregaIdentif( DescPersonaExterno *descExterno, Identifica
             numIden = 1;
             cambioIdentificacion = true;
         }        
+
+        grupoNuevo.lstIdentificaciones.reset();
     }
 }
 
@@ -235,7 +237,7 @@ cv::Mat FaceRecHailo::aliearRostro( cv::Mat fotoCara, DeteccionCaraHailo detecci
 /**
  * Extrae el descriptor facial de la ultima inferencia
  */
-std::vector<SIMD_TYPE> FaceRecHailo::extraeDescriptor()
+void FaceRecHailo::extraeDescriptor( SIMD_TYPE *descriptor )
 {
     hailo_vstream_info_t info;
     std::vector<SIMD_TYPE> rpta;
@@ -257,10 +259,8 @@ std::vector<SIMD_TYPE> FaceRecHailo::extraeDescriptor()
             valor = runner.dequantize(lstDescriptor[i], &info.quant_info);
         #endif
 
-        rpta.push_back(valor);
+        descriptor[i] = valor;
     }
-
-    return rpta;
 }
 
 /**
@@ -332,14 +332,15 @@ cv::Mat FaceRecHailo::extraeDescriptorMat()
 /**
  * Calcula el descriptor facial para una cara
  */
-std::vector<SIMD_TYPE> FaceRecHailo::calculaDescriptor( GImage imagen, DeteccionCaraHailo deteccion )
+bool FaceRecHailo::calculaDescriptor( GImage imagen, DeteccionCaraHailo deteccion, SIMD_TYPE *descriptor )
 {    
     if ( ejecutar(imagen.imagenOpencv, deteccion)  == false )
     {
-        std::vector<SIMD_TYPE> rpta;
         errorCalculo = true;
-        return rpta;
+        return false;
     }
     errorCalculo = false;
-    return extraeDescriptor();
+    extraeDescriptor(descriptor);
+
+    return true;
 }

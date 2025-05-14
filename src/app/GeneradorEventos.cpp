@@ -5,12 +5,22 @@
 #include "lib/web/GHttpClient.h"
 
 /**
- * Trama que se solicita enviar
+ * Trama que se solicita enviar perteneciente a una persona identificada
  */
-void GeneradorEventos::agregarTrama( string trama )
+void GeneradorEventos::agregarTramaIden( string trama )
 {
     mtxBloquea();
-    lstTramasPend.add(trama);
+    lstTramasPendIden.add(trama);
+    mtxLibera();
+}
+
+/**
+ * Trama que se solicita enviar perteneciente a una persona NO identificada
+ */
+void GeneradorEventos::agregarTramaNoIden( string trama )
+{
+    mtxBloquea();
+    lstTramasPendNoIden.add(trama);
     mtxLibera();
 }
 
@@ -22,7 +32,9 @@ bool GeneradorEventos::hayEventosPend()
     bool rpta;
 
     mtxBloquea();
-    if ( lstTramasPend.size() > 0 ) rpta=true;
+    if ( lstTramasPendIden.size() > 0 ) rpta=true;
+    else
+    if ( lstTramasPendNoIden.size() > 0 ) rpta=true;
     else rpta = false;
     mtxLibera();
 
@@ -36,6 +48,7 @@ bool GeneradorEventos::hayEventosPend()
 void GeneradorEventos::runThread()
 {
     string trama;    
+    string urlServidor;
     int i;
 
     cout << "Thread Generador Eventos iniciado" << endl;
@@ -47,7 +60,16 @@ void GeneradorEventos::runThread()
             continue;
         }
 
-        trama = lstTramasPend.get(0);
+        if ( lstTramasPendIden.size() > 0 ) 
+        {
+            trama = lstTramasPendIden.get(0);
+            urlServidor = urlServidorIden;
+        }            
+        else 
+        {
+            trama = lstTramasPendNoIden.get(0);
+            urlServidor = urlServidorNoIden;
+        }
 
         GHttpClient httpClient;
         httpClient.setHeader("Content-Type","application/json");
@@ -56,7 +78,8 @@ void GeneradorEventos::runThread()
         if ( i == 0 )
         {
             // exito en la transferencia se saca de la cola
-            lstTramasPend.remove(0);
+            if ( lstTramasPendIden.size() > 0 )  lstTramasPendIden.remove(0);
+            else lstTramasPendNoIden.remove(0);            
         }
     }
 

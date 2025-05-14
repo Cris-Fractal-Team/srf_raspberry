@@ -85,7 +85,7 @@ int main( int argc, char *argv[])
     proc.usarDistEuclideana = lstParams->getStringBool("usarDistEcuclideana", true);
     proc.universoPersonas.setNumThreadsIdentificacion(lstParams->getStringLong("numThreadsIdentificacion",1));
     proc.tiempoReEvento = proc.lstParamsApp->getStringLong("tiempoReEvento",30) * 1000;
-    
+    proc.tiempoMaxNoReconocido = proc.lstParamsApp->getStringLong("tiempoMaxNoReconocido",30);
         
     // COnfigura la fuente de imagenes del sensor
     shared_ptr<ImageSourceFactory> imageSource;    
@@ -113,6 +113,7 @@ int main( int argc, char *argv[])
         imageSource->lstParams.putString(VideoCamera::PARAM_PATH_VIDEO, proc.lstParamsApp->getString(VideoCamera::PARAM_PATH_VIDEO));
         imageSource->lstParams.putString(VideoCamera::PARAM_VELOCIDAD_VIDEO, proc.lstParamsApp->getString(VideoCamera::PARAM_VELOCIDAD_VIDEO));
         imageSource->lstParams.putString(VideoCamera::PARAM_CUADRO_INICIAL, proc.lstParamsApp->getString(VideoCamera::PARAM_CUADRO_INICIAL));
+        imageSource->lstParams.putString(VideoCamera::PARAM_INFINITO, proc.lstParamsApp->getString(VideoCamera::PARAM_INFINITO));
     }
     else
     {
@@ -133,7 +134,8 @@ int main( int argc, char *argv[])
     if ( paramUnificarDescr.compare("S") == 0 ) unifidarDescr = true;
 
     proc.universoPersonas.cargarpPerConocidas(lstParams->getString("pathBDPersonas"), unifidarDescr);
-    proc.generadorEventos.urlServidor = proc.lstParamsApp->getString("urlBaseServidor");
+    proc.generadorEventos.urlServidorIden = proc.lstParamsApp->getString("urlBaseServidorIden");
+    proc.generadorEventos.urlServidorNoIden = proc.lstParamsApp->getString("urlBaseServidorNoIden");
 
     proc.iniciar();
 

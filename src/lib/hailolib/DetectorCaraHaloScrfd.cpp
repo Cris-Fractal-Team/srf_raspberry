@@ -179,7 +179,7 @@ void DetectorCarasHailoSCRFD::extraeDetec( vector<DeteccionCaraHailo> *lstDet, s
     numAnclasCelda = 2;
     anchor_size = anchoImg / ((float)width);
 
-    int numTotalAnclas = width*height*numAnclasCelda;
+    // int numTotalAnclas = width*height*numAnclasCelda;
 
     int i=0;
     

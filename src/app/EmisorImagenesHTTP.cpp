@@ -269,8 +269,9 @@ void ServidorHttpImagenes::bucleEnvioImagenes()
     string finMsg = "\r\n";
     shared_ptr<GHttpResponse>response;
     std::chrono::milliseconds intervaloEspera(5);
+    std::chrono::milliseconds intervaloEsperaIni(5000);
 
-    sleep(5);
+    std::this_thread::sleep_for(intervaloEsperaIni);
 
     cout << "<<<< Iniciando Thread de previsualizacin" << endl;
     while( servidor.enEjecucion() )
@@ -281,7 +282,7 @@ void ServidorHttpImagenes::bucleEnvioImagenes()
 
         if ( hayImagenNueva == false )
         {
-            std:this_thread::sleep_for(intervaloEspera);
+            std::this_thread::sleep_for(intervaloEspera);
             continue;
         }
 

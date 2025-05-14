@@ -44,7 +44,6 @@ shared_ptr<GHashMap> leeArchivoConfig(  string path, bool convierteNombresLowerC
     }
 
     string line,nombre,valor;
-    float *datos;
     int pos;
 
     while( getline(file, line))

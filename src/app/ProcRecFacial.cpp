@@ -4,6 +4,7 @@
 #include "lib/graphics/ImageSource.h"
 #include "lib/utils/timedate.h"
 #include "lib/utils/fileutils.h"
+#include "lib/utils/systemUtils.h"
 #include "lib/utils/base64.h"
 #include "lib/utils/GStringUtils.h"
 #include "lib/web/GHttpClient.h"
@@ -13,6 +14,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <iostream>
+#include <cstring>
 
 /**
  * Lista con las ultimas caras detectadas
@@ -26,6 +28,7 @@ ProcesoRecFacial::ProcesoRecFacial()
 {
     invertirVertical = false;
     usarDistEuclideana = true;
+    tiempoMaxNoReconocido = 10;
 }
 
 /**
@@ -158,13 +161,13 @@ void ProcesoRecFacial::iniciar()
         lstCarasTrack = detTracker.analizaPorIdentificacion(&lstCaras);
 
         // Notifica al servidor web las incidencias o detecciones
-        // notificaDetecciones(imagenCapturada, &lstCaras);
         notificaDetecciones(imagenCapturada, &lstCarasTrack);
         auto finNotifica = std::chrono::high_resolution_clock::now();
-
-        // imagenVisor = dibujaCaras(imagenCapturada,&lstCaras);
+        
         imagenVisor = dibujaCaras(imagenCapturada,&lstCarasTrack);
         auto finDibuja = std::chrono::high_resolution_clock::now();
+
+        universoPersonas.eliminaDesAntiguos(tiempoMaxNoReconocido);
 
         // calcula los tiempos transcurridos
         auto durCaptura = std::chrono::duration_cast<std::chrono::microseconds>(finCaptura - inicio);
@@ -201,12 +204,18 @@ void ProcesoRecFacial::iniciar()
         {
             break;
         }
+
+        // SystemUtils::printRamUsage();
     }
     
     cout << "Finaliza Bucle reconocimiento" << endl;
     GDibujo::closeAllWindows();    
-    imageSource->stop();
+    imageSource->stop();    
     generadorEventos.finalizar();
+    
+    universoPersonas.lstPerIdentificadas.reset();
+    universoPersonas.lstPerNoIdent.reset();
+    detTracker.lstUniverso.reset();
 }
 
 
@@ -236,7 +245,7 @@ void ProcesoRecFacial::calculaDescriptores( FaceRecHailo *generador, GImage foto
         deteccion->cara.descCalculado = true;        
         deteccion->cara.calculaFotoCara(foto);
         
-        deteccion->cara.descriptor = generador->calculaDescriptor(deteccion->cara.fotoCara, deteccion->cara.detRelCara);
+        generador->calculaDescriptor(deteccion->cara.fotoCara, deteccion->cara.detRelCara, deteccion->cara.descriptor);
     }
 }
 
@@ -247,7 +256,7 @@ void ProcesoRecFacial::calculaDescriptores( FaceRecHailo *generador, GImage foto
 void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lstRostros )
 {
     TrackedDetectionHailo *deteccion;
-    DescPersonaExterno *personaConocida, *validaDetec;
+    DescPersonaExterno *personaConocida;
     IdentificacionPersona idenPersonaValidaDec;
     int i,n;
     long long fecDet;
@@ -264,13 +273,13 @@ void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lst
         }            
 
         // solo se identifica a la persona si es nueva        
-        personaConocida = universoPersonas.buscaPersonaCon(&deteccion->cara.descriptor, toleranciaIden, &distEucli, usarDistEuclideana);
+        personaConocida = universoPersonas.buscaPersonaCon(deteccion->cara.descriptor, toleranciaIden, &distEucli, usarDistEuclideana);
         if ( personaConocida != NULL )
         {
             IdentificacionPersona iden;
 
             iden.fecDet = fecDet;
-            iden.vecDescripcion = deteccion->cara.descriptor;
+            std::memcpy(iden.vecDescripcion,deteccion->cara.descriptor,512*sizeof(SIMD_TYPE));
             iden.comparacion = distEucli;
             deteccion->cara.personaIdent = true;                        
             deteccion->cara.identificador.agregaIdentif(personaConocida, iden , fecDet);
@@ -279,16 +288,17 @@ void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lst
         }
         else
         {
-            personaConocida = universoPersonas.buscaPersonaDesc(&deteccion->cara.descriptor, toleranciaIden, &distEucli);
+            personaConocida = universoPersonas.buscaPersonaDesc(deteccion->cara.descriptor, toleranciaIden, &distEucli, usarDistEuclideana);
             if ( personaConocida != NULL )
             {
                 IdentificacionPersona iden;
 
                 iden.fecDet = fecDet;
-                iden.vecDescripcion = deteccion->cara.descriptor;
+                std::memcpy(iden.vecDescripcion,deteccion->cara.descriptor,512*sizeof(SIMD_TYPE));
                 iden.comparacion = distEucli;
                 deteccion->cara.personaIdent = true;            
-                deteccion->cara.identificador.agregaIdentif(personaConocida, iden , fecDet);             
+                deteccion->cara.identificador.agregaIdentif(personaConocida, iden , fecDet);    
+                personaConocida->ultimaFechaDetectada = fecDet;         
                 
                 idenPersonaValidaDec = deteccion->cara.identificador.getUltimaIdentificacion();                
             }
@@ -297,16 +307,17 @@ void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lst
                 IdentificacionPersona iden;
 
                 iden.fecDet = fecDet;
-                iden.vecDescripcion = deteccion->cara.descriptor;
+                std::memcpy(iden.vecDescripcion,deteccion->cara.descriptor,512*sizeof(SIMD_TYPE));
                 iden.comparacion = 100;
                 deteccion->cara.personaIdent = true;            
                 
                 DescPersonaExterno personaExterna;
 
                 personaExterna.anonimo = true;
-                personaExterna.vecDescripcion = iden.vecDescripcion;
+                std::memcpy(personaExterna.vecDescripcion,iden.vecDescripcion,512*sizeof(SIMD_TYPE));
                 personaExterna.id = std::to_string(idDesconocidoSgte);
                 personaExterna.nombre = "Desc." + personaExterna.id;
+                personaExterna.ultimaFechaDetectada = fecDet;
                 idDesconocidoSgte++;
                 universoPersonas.lstPerNoIdent.add(personaExterna);
                 
@@ -324,7 +335,7 @@ void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lst
 GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras )
 {
     GImage imagenVisor;
-    CaraDescrita cara;
+    CaraDescrita *cara;
     TrackedDetectionHailo *det;
     GRect caja;
     GColor amarillo(0,255,255);
@@ -346,19 +357,19 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
     {
         det = lstCaras->at(i);
         id = to_string(det->id);
-        cara = det->cara;
+        cara = &det->cara;
 
-        caja.x1 = cara.deteccion.ptoSupIzq.x * escalaX;
-        caja.y1 = cara.deteccion.ptoSupIzq.y * escalaY;
-        caja.x2 = cara.deteccion.ptoInfDer.x * escalaX;
-        caja.y2 = cara.deteccion.ptoInfDer.y * escalaY;
+        caja.x1 = cara->deteccion.ptoSupIzq.x * escalaX;
+        caja.y1 = cara->deteccion.ptoSupIzq.y * escalaY;
+        caja.x2 = cara->deteccion.ptoInfDer.x * escalaX;
+        caja.y2 = cara->deteccion.ptoInfDer.y * escalaY;
 
-        if ( cara.descCalculado == false )
+        if ( cara->descCalculado == false )
         {
             GDibujo::drawRect(imagenVisor, caja, amarillo, 2);        
         }
         else
-        if ( cara.personaIdent == false )
+        if ( cara->personaIdent == false )
         {
             GDibujo::drawRect(imagenVisor, caja, rojo, 2);
         }
@@ -372,7 +383,8 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
                 id.append(" : ");
                 id.append(to_string(det->cara.identificador.getUltimaIdentificacion().comparacion));
             }                
-            GDibujo::drawRect(imagenVisor, caja, verde, 2);
+            if ( det->cara.identificador.getDatosPerIden()->anonimo == false ) GDibujo::drawRect(imagenVisor, caja, verde, 2);
+            else GDibujo::drawRect(imagenVisor, caja, rojo, 2);
         }        
         
         // dibuja la caja con el ID de seguimiento
@@ -424,7 +436,7 @@ void ProcesoRecFacial::onMouse( int event, int x, int y, int flags, void *userda
             cout << endl;
             for(int j=0;j<512; j++)
             {
-                cout << track->cara.descriptor.at(j) << ",";
+                cout << track->cara.descriptor[j] << ",";
             }
             cout << endl << endl;
             break;
@@ -465,96 +477,128 @@ void ProcesoRecFacial::notificaDetecciones( GImage imagen, vector<TrackedDetecti
     long long delta, fecEvento = TimeDateUtils::getDateTimeMs();
 
     n = lstCaras->size();
-    for(i=0; i<n; i++)
+    // bucle para generar datos de perasonas conocidas (bucleTipoPer=0) y para personas no idenentificadas (bucleTipoPer=1)
+    for(int bucleTipoPer=0; bucleTipoPer < 2; bucleTipoPer++)
     {
-        persona = lstCaras->at(i);
-        delta = fecEvento-persona->cara.identificador.fechaUltEvento;
-        if (( persona->cara.identificador.cambioIdentificacion == true ) || 
-            (( persona->cara.personaIdent == true ) && ( delta >= tiempoReEvento )))
+        jsonLstRostros = "";
+        for(i=0; i<n; i++)
         {
-            // persona->cara.identificador.cambioIdentificacion = false;
-            persona->cara.identificador.fechaUltEvento = fecEvento;
+            persona = lstCaras->at(i);
 
-            nombres.append(persona->cara.identificador.getDatosPerIden()->nombre);
-            nombres.append(",");
+            // se valida si el tipo de persona pertnece al bucle, si no se ignora
+            if (( bucleTipoPer == 0 ) && ( persona->cara.identificador.getDatosPerIden()->anonimo == true )) continue;
+            else
+            if (( bucleTipoPer == 1 ) && ( persona->cara.identificador.getDatosPerIden()->anonimo == false )) continue;
+            
+            delta = fecEvento-persona->cara.identificador.fechaUltEvento;
+            if (( persona->cara.identificador.cambioIdentificacion == true ) || 
+                (( persona->cara.personaIdent == true ) && ( delta >= tiempoReEvento )))
+            {
+                // persona->cara.identificador.cambioIdentificacion = false;
+                persona->cara.identificador.fechaUltEvento = fecEvento;
 
-            bufferImgVisor = GDibujo::encode(persona->cara.fotoCara, GDIBUJO_ENCODE_JPEG, 70, bufferLen);
-            bufferImgVisor64 = base64_encode((const unsigned char *)bufferImgVisor, bufferLen, &bufferLen64);
+                nombres.append(persona->cara.identificador.getDatosPerIden()->nombre);
+                nombres.append(",");
+
+                bufferImgVisor = GDibujo::encode(persona->cara.fotoCara, GDIBUJO_ENCODE_JPEG, 70, bufferLen);
+                bufferImgVisor64 = base64_encode((const unsigned char *)bufferImgVisor, bufferLen, &bufferLen64);
+                free(bufferImgVisor);
+
+                if ( jsonLstRostros.length() > 0 ) 
+                    jsonLstRostros.append(",");
+
+                jsonLstRostros.append("\n{");
+            
+                // jsonLstRostros.append("\"foto\":\"");
+                // jsonLstRostros.append(bufferImgVisor64);
+                // jsonLstRostros.append("\",\n");
+                GStringUtils::addJsonAtt(&jsonLstRostros,"foto", bufferImgVisor64,false);
+                // GStringUtils::addJsonAtt(&jsonLstRostros,"foto", "CARA",false);
+                free(bufferImgVisor64);
+
+                jsonLstRostros.append("\"coordenadas\":{");
+        
+                // jsonLstRostros.append("\"x1\":");
+                // jsonLstRostros.append(to_string(persona->cara.deteccion.ptoSupIzq.x));
+                // jsonLstRostros.append(",\n");
+                GStringUtils::addJsonAtt(&jsonLstRostros,"x1",to_string(persona->cara.deteccion.ptoSupIzq.x),true);
+        
+                // jsonLstRostros.append("\"y1\":");
+                // jsonLstRostros.append(to_string(persona->cara.deteccion.ptoSupIzq.y));
+                // jsonLstRostros.append(",\n");
+                GStringUtils::addJsonAtt(&jsonLstRostros,"y1",to_string(persona->cara.deteccion.ptoSupIzq.y),true);
+        
+                // jsonLstRostros.append("\"x2\":");
+                // jsonLstRostros.append(to_string(persona->cara.deteccion.ptoInfDer.x));
+                // jsonLstRostros.append(",\n");
+                GStringUtils::addJsonAtt(&jsonLstRostros,"x2",to_string(persona->cara.deteccion.ptoInfDer.x),true);
+        
+                // jsonLstRostros.append("\"y2\":");
+                // jsonLstRostros.append(to_string(persona->cara.deteccion.ptoInfDer.y));
+                GStringUtils::addJsonAtt(&jsonLstRostros,"y2",to_string(persona->cara.deteccion.ptoInfDer.y),true,false);
+                
+                jsonLstRostros.append("},\n");
+                jsonLstRostros.append("\"descripcionFacial\":[\n");
+        
+                for(j=0; j<512; j++)
+                {            
+                    jsonLstRostros.append(to_string(persona->cara.descriptor[j]));
+                    if ( j < 511 ) jsonLstRostros.append(",");
+                }
+        
+                jsonLstRostros.append("\n],\n");
+
+                if ( persona->cara.identificador.getDatosPerIden()->anonimo == false )
+                {
+                    // jsonLstRostros.append("\"idReconocido\":");
+                    // jsonLstRostros.append(persona->cara.identificador.getDatosPerIden()->id);            
+                    // jsonLstRostros.append(",\n");    
+                    GStringUtils::addJsonAtt(&jsonLstRostros,"idReconocido",persona->cara.identificador.getDatosPerIden()->id,true);
+                    jsonLstRostros.append("\"nuevo\":false");    
+                }
+                else
+                {
+                    jsonLstRostros.append("\"nuevo\":true");    
+                }                                
+                jsonLstRostros.append("}\n");
+            }
+        }   
+
+        if ( jsonLstRostros.size() > 0 )
+        {
+            // Si hay detecciones nuevas, se debe generar un evento
+            string trama;
+
+            bufferImgVisor = GDibujo::encode(imagen, GDIBUJO_ENCODE_JPEG, 80, bufferLen);
+            bufferImgVisor64 = base64_encode((const unsigned char *)bufferImgVisor, bufferLen, &bufferLen64);            
             free(bufferImgVisor);
 
-            if ( jsonLstRostros.length() > 0 ) 
-                jsonLstRostros.append(",");
+            trama.append("{\n");
 
-            jsonLstRostros.append("\n{");
-        
-            jsonLstRostros.append("\"foto\":\"");
-            jsonLstRostros.append(bufferImgVisor64);
-            jsonLstRostros.append("\",\n");
+            // trama.append("\"cuadro\":\"");
+            // trama.append(bufferImgVisor64);
+            // trama.append("\",\n");
+            GStringUtils::addJsonAtt(&trama, "cuadro", bufferImgVisor64, false);
+            // GStringUtils::addJsonAtt(&trama, "cuadro", "Foto Completa", false);
+
             free(bufferImgVisor64);
-    
-            jsonLstRostros.append("\"coordenadas\":{");
-    
-            jsonLstRostros.append("\"x1\":");
-            jsonLstRostros.append(to_string(persona->cara.deteccion.ptoSupIzq.x));
-            jsonLstRostros.append(",\n");
-    
-            jsonLstRostros.append("\"y1\":");
-            jsonLstRostros.append(to_string(persona->cara.deteccion.ptoSupIzq.y));
-            jsonLstRostros.append(",\n");
-    
-            jsonLstRostros.append("\"x2\":");
-            jsonLstRostros.append(to_string(persona->cara.deteccion.ptoInfDer.x));
-            jsonLstRostros.append(",\n");
-    
-            jsonLstRostros.append("\"y2\":");
-            jsonLstRostros.append(to_string(persona->cara.deteccion.ptoInfDer.y));
+
+            // trama.append("\"serieEquipo\":\"");
+            // trama.append(GStringUtils::trim(idEquipo));
+            // trama.append("\",\n");
+            GStringUtils::addJsonAtt(&trama, "serieEquipo", GStringUtils::trim(idEquipo), false);
+
+            trama.append("\"lstRostros\":[");    
+            trama.append(jsonLstRostros);
+            trama.append("]\n");
+            trama.append("}\n");
             
-            jsonLstRostros.append("},\n");
-    
-            jsonLstRostros.append("\"descripcionFacial\":[\n");
-    
-            for(j=0; j<512; j++)
-            {            
-                jsonLstRostros.append(to_string(persona->cara.descriptor[j]));
-                if ( j < 511 ) jsonLstRostros.append(",");
-            }
-    
-            jsonLstRostros.append("\n],\n");
-            jsonLstRostros.append("\"idReconocido\":");
-            jsonLstRostros.append(persona->cara.identificador.getDatosPerIden()->id);            
-            jsonLstRostros.append(",\n");
-    
-            jsonLstRostros.append("\"nuevo\":true");    
-            jsonLstRostros.append("}\n");
+            cout << "Reconocidos: " << nombres << endl;
+
+            // cout << "Trama:" <<  trama << endl;
+
+            if ( bucleTipoPer == 0 ) generadorEventos.agregarTramaIden(trama);
+            else generadorEventos.agregarTramaNoIden(trama);
         }
-    }   
-
-    if ( jsonLstRostros.size() > 0 )
-    {
-        // Si hay detecciones nuevas, se debe generar un evento
-        string trama;
-
-        bufferImgVisor = GDibujo::encode(imagen, GDIBUJO_ENCODE_JPEG, 80, bufferLen);
-        bufferImgVisor64 = base64_encode((const unsigned char *)bufferImgVisor, bufferLen, &bufferLen64);
-        free(bufferImgVisor);
-
-        trama.append("{\n");
-        trama.append("\"cuadro\":\"");
-        trama.append(bufferImgVisor64);
-        trama.append("\",\n");
-
-        free(bufferImgVisor64);
-
-        trama.append("\"serieEquipo\":\"");
-        trama.append(GStringUtils::trim(idEquipo));
-        trama.append("\",\n");
-
-        trama.append("\"lstRostros\":[");    
-        trama.append(jsonLstRostros);
-        trama.append("]\n");
-        trama.append("}\n");
-        
-        cout << "Reconocidos: " << nombres << endl;
-        generadorEventos.agregarTrama(trama);
     }
 }

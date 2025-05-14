@@ -829,7 +829,7 @@ void GSocket::readChar( char *buffer, int maxLen )
     len = readUint32();
     
     // calcula la cantidad de bytes que se deben leer sin rebalsar el buffer
-    if ( len >= maxLen )
+    if ( len >= (uint32_t)maxLen )
     {
         lenLee = maxLen-1;
     }

@@ -316,7 +316,6 @@ GImage GImage::clone()
 GImage GImage::getRect( int x1, int y1, int x2, int y2)
 {
     GImage rpta;
-    int delta;
 
     if ( x1 < 0 ) x1 = 0;
     if ( y1 < 0 ) y1 = 0;

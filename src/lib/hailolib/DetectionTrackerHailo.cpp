@@ -2,6 +2,8 @@
 #include "lib/hailolib/DetectionTrackerHailo.h"
 #include "lib/general/GLinkedList.h"
 #include <math.h>
+#include <cstring>
+
 
 /**
  * Constructor
@@ -18,7 +20,7 @@ DetectionTrackerHailo::DetectionTrackerHailo()
 {
     deltaMaxX = 0.8;
     deltaMaxY = 0.8;
-    maxCiclosInactivo = 2;
+    maxCiclosInactivo = 3;
     sgteId = 1;
 }
 
@@ -120,7 +122,8 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
     }
 
     GLinkedList<TrackedDetectionHailo *> lstUnivPen;
-    TrackedDetectionHailo *detUniv, *detNueva;
+    GLinkedList<int>lstUnivPenIndices;
+    TrackedDetectionHailo *detUniv;
     bool encontro;
 
     // creamos la lista temporal
@@ -128,6 +131,7 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
     {
         detUniv = lstUniverso.getAddr(i);        
         lstUnivPen.add(lstUniverso.getAddr(i));
+        lstUnivPenIndices.add(i);
     }
 
     // Asociamos las detecciones actuales y las nuevas
@@ -150,9 +154,10 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
                 
                 detUniv->cara.fotoCara = detActual->cara.fotoCara;
                 detUniv->cara.deteccion = detActual->cara.deteccion;
-                detUniv->cara.descriptor = detActual->cara.descriptor;
+                std::memcpy(detUniv->cara.descriptor, detActual->cara.descriptor, 512*sizeof(SIMD_TYPE));
                 detUniv->cara.identificador.agregaIdentif(descPerActual, idenPersona, idenPersona.fecDet);
                 lstUnivPen.remove(iu);
+                lstUnivPenIndices.remove(iu);
                 encontro = true;
 
                 rpta.push_back(detUniv);
@@ -174,20 +179,21 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
     }
 
     // revisamos las detecciones anterioes que no coincidieron en las detecciones
-    // nu = lstUnivPen.size()-1;
-    // for(iu=nu; iu>=0; iu--)
-    // {
-    //     detUniv = lstUnivPen.get(iu);
-    //     detUniv->ciclosNoDetectados++;
-    //     if ( detUniv->ciclosNoDetectados < maxCiclosInactivo )
-    //     {
-    //         rpta.push_back(detUniv);
-    //     }
-    //     else
-    //     {
-    //         lstUnivPen.remove(iu);
-    //     }
-    // }
+    nu = lstUnivPen.size()-1;
+    for(iu=nu; iu>=0; iu--)
+    {
+        detUniv = lstUnivPen.get(iu);
+        detUniv->ciclosNoDetectados++;
+        if ( detUniv->ciclosNoDetectados > maxCiclosInactivo )
+        {
+            i = lstUnivPenIndices.get(iu);
+            detUniv = lstUniverso.getAddr(i);
+            detUniv->cara.identificador.lstGrupoIden.reset();            
+            lstUniverso.remove(i);
+        }
+    }
+
+    lstUnivPen.reset();
 
     return rpta;
 }
