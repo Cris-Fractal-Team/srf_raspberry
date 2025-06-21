@@ -39,6 +39,11 @@ class IdentificadorPerHailo
         IdentificadorPerHailo();
 
         /**
+         * Destructor
+         */
+        ~IdentificadorPerHailo();
+
+        /**
          * Lista de personas 100% identificadas
          */
         GLinkedList<DescPersonaExterno> lstPerIdentificadas;
@@ -46,7 +51,7 @@ class IdentificadorPerHailo
         /**
          * Gestor de los threads que hacen la busqueda de personas
          */
-        GestorThIdentificacionPersonas gestorThreads;
+        GestorThIdentificacionPersonas *gestorThreads;
 
         /**
          * Lista de personas no identifiadas
@@ -91,7 +96,7 @@ class IdentificadorPerHailo
          *          Indica si se debe usar (true) o no distancia euclidieana como criterio de 
          *          equivalencia o similaridad entre dos personas.
          */
-        DescPersonaExterno *buscaPersonaCon(vector<SIMD_TYPE> *descriptor, float tolerancia, float *distEucli, bool usarDistEucli );
+        DescPersonaExterno *buscaPersonaCon(SIMD_TYPE *descriptor, float tolerancia, float *distEucli, bool usarDistEucli );
 
         /**
          * Dado un descriptor facial, se retorna una referencia en caso
@@ -109,15 +114,13 @@ class IdentificadorPerHailo
          *          Puntero en el que se guarda la distancia euclidiana entre el
          * descriptor y la persona detectada
          */
-        DescPersonaExterno *buscaPersonaDesc(vector<SIMD_TYPE> *descriptor,
-                                            float tolareancia, float *distEucli);
+        DescPersonaExterno *buscaPersonaDesc( SIMD_TYPE *descriptor, float tolareancia, float *distEucli, bool usarDistEuclideana);
 
         /**
          * Función para calcular la distancia euclidiana usando NEON SIMD
          * entre dos arreglos que contiene descripciones faciales
          */
-        float calculaDiferenciaSIMD(vector<SIMD_TYPE> *desc1,
-                                    vector<SIMD_TYPE> *desc2);
+        float calculaDiferenciaSIMD( SIMD_TYPE *desc1, SIMD_TYPE *desc2);
 
         /**
          * Calcula el descriptor facial mas cernado de una lista de personas
@@ -145,7 +148,7 @@ class IdentificadorPerHailo
          * lstUniv si no se encuentra se retorna NULL
          */
         DescPersonaExterno *encuentraPerCercana(
-            GLinkedList<DescPersonaExterno> *lstUniv, vector<SIMD_TYPE> *desc2,
+            GLinkedList<DescPersonaExterno> *lstUniv, SIMD_TYPE *desc2, 
             float tolerancia, int *indice, float *distEucli);
 
         /**
@@ -174,13 +177,19 @@ class IdentificadorPerHailo
          * lstUniv si no se encuentra se retorna NULL
          */
         DescPersonaExterno *encuentraPerCerCos(
-            GLinkedList<DescPersonaExterno> *lstUniv, vector<SIMD_TYPE> *desc,
+            GLinkedList<DescPersonaExterno> *lstUniv, SIMD_TYPE *desc,
             float tolerancia, int *indice, float *distEucli);
 
         /**
          * Retorna el promedio de los descriptores
          */
         DescPersonaExterno calculaPromedio(GLinkedList<DescPersonaExterno> *lst);
+
+        /**
+         * Elimina las personas no reconocidas que tengan mas de una cantidad
+         * de segundos que no son reconocidas
+         */
+        void eliminaDesAntiguos(long tiempoMaxNoReconocido);
 };
 
 
@@ -219,8 +228,7 @@ class ThIdentificadorPersonas : public GThread
          * 
          * 
          *      tolerancie :
-         *          Tolerancia en la busqueda.
-         * 
+         *          Tolerancia en la busqueda.         
          * 
          *      usarDistEuclidiana>
          *          Indica si se debe usar la distancia ecuclidiana (true) o la similaridad de coceno (false)
@@ -228,7 +236,7 @@ class ThIdentificadorPersonas : public GThread
          *      
          * 
          */
-        void buscarPersona(vector<SIMD_TYPE> *descriptor, float tolerancia, bool usarDistEuclidiana );
+        void buscarPersona(SIMD_TYPE *descriptor, float tolerancia, bool usarDistEuclidiana );
 
         /**
          * Agrega una persona externa al thread
@@ -265,7 +273,7 @@ class ThIdentificadorPersonas : public GThread
         /**
          * Descriptor buscado
          */
-        vector<SIMD_TYPE> *descBuscado;
+        SIMD_TYPE *descBuscado;
 
         /**
          * Distancia calculada por el thread al hacer la busqueda
@@ -367,7 +375,7 @@ class GestorThIdentificacionPersonas
          *   Retorna un puntero a la definicion de la persona externa dentro de
          *      lstUniv si no se encuentra se retorna NULL
          */
-        DescPersonaExterno *encuentraPerCercana(vector<SIMD_TYPE> *desc2, float tolerancia, float *distEucli, bool usarDistEuclidiana );
+        DescPersonaExterno *encuentraPerCercana(SIMD_TYPE *desc2, float tolerancia, float *distEucli, bool usarDistEuclidiana );
 
 
         /**
@@ -415,6 +423,11 @@ class GestorThIdentificacionPersonas
          * Variable de condicion para controlar la espera a los threads para que terminen de hacer su busqueda
          */
         std::condition_variable cv;        
+
+        /**
+         * Indica si los threads 
+         */
+        bool threadsIniciados;
 };
 
 #endif

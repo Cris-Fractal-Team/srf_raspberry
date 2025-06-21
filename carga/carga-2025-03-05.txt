@@ -1,3 +1,0 @@
-002,Carlos,persona_002.jpg
-005,Maria,persona_005.jpg
-006,Jose,persona_006.jpg

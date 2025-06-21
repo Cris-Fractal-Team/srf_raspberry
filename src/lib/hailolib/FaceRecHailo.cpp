@@ -226,12 +226,21 @@ cv::Mat FaceRecHailo::aliearRostro( cv::Mat fotoCara, DeteccionCaraHailo detecci
     lstPuntos.push_back(cv::Point2f(deteccion.bocaIzq.x, deteccion.bocaIzq.y));
     lstPuntos.push_back(cv::Point2f(deteccion.bocaDer.x, deteccion.bocaDer.y));
 
-    cv::Mat transformacion = cv::estimateAffine2D(lstPuntos, lstPuntosRef);
-
+    cv::Mat transformacion;
     cv::Mat imgAlineada;
-    cv::warpAffine(fotoCara, imgAlineada, transformacion, cv::Size(imgModeloAncho, imgModeloAltura));
+    try
+    {
+        transformacion = cv::estimateAffine2D(lstPuntos, lstPuntosRef);
+        cv::warpAffine(fotoCara, imgAlineada, transformacion, cv::Size(imgModeloAncho, imgModeloAltura));
 
-    return imgAlineada;
+        return imgAlineada;
+    }
+    catch (const std::exception& e) 
+    {
+        // Manejo de la excepción
+        std::cerr << "Excepción atrapada: " << e.what() << std::endl;
+        return fotoCara;
+    }    
 }
 
 /**

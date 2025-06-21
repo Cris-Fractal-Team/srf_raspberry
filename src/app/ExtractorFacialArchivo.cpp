@@ -74,6 +74,7 @@ void ExtractorFacialArchivo:: ejecutar()
         
         GImage rostro = GDibujo::read(pathFotos + pathFoto);        
         
+        cout << "Ancho del rostro " << rostro.ancho << " Altura " << rostro.altura << endl;
         lstDet = detector.detectar_2_5g(rostro, toleranciaDetec);        
         if ( detector.errorDeteccion == true )
         {
@@ -105,6 +106,12 @@ void ExtractorFacialArchivo:: ejecutar()
             }
             fila.append("\n");
             archivoBd << fila;
+
+            // cout << fila << endl;
+        }
+        else
+        {
+            cout << "!!! NO se detecto un rostro" << endl;
         }
     }
 

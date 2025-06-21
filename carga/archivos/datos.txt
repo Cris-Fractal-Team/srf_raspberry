@@ -1,6 +1,0 @@
-1,Hugo Rodríguez Castillo,rostro-1.jpg
-2,Camila Tam,rostro-2.jpg
-3,Josabet Bazán,rostro-3.jpg
-4,Dana Ortiz,rostro-4.jpg
-5,Yajaira Taboada,rostro-5.jpg
-6,Fiorella Pedraza,rostro-6.jpg

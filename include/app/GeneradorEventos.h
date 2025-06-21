@@ -3,7 +3,7 @@
 #define _GENREADOR_EVENTOS_
 
 #include "lib/general/GThread.h"
-#include "lib/general/GLinkedList.h""
+#include "lib/general/GLinkedList.h"
 
 
 /**
@@ -14,15 +14,46 @@ class GeneradorEventos : public GThread
 {
     public:
 
-        /** 
-         * URL al que se envian los datos
+         /**
+         * Path del log de eventos
          */
-        string urlServidor;
+        string pathLogEventos;
 
         /**
-         * Trama que se solicita enviar
+         * Indica si se debe o no generar el log de eventos
          */
-        void agregarTrama( string trama );
+        bool generarLogEventos;
+
+        /**
+         * Indica si se usa un endpoint unificado
+         */
+        bool usarEndpointUnificado;
+
+        /** 
+         * URL al que se envian los datos correspondientes a personas identificadas
+         */
+        string urlServidorIden;
+
+        /** 
+         * URL al que se envian los datos correspondientes a personas NOidentificadas
+         */
+        string urlServidorNoIden;
+
+        /**
+         * URL al que se envian los datos de las personas reconocidas o no identificadas 
+         * de forma unificada
+         */
+        string urlServidorUnificado;
+
+        /**
+         * Trama que se solicita enviar perteneciente a una persona identificada
+         */
+        void agregarTramaIden( string trama );
+
+        /**
+         * Trama que se solicita enviar perteneciente a una persona no identificada
+         */
+        void agregarTramaNoIden( string trama );
 
         /**
          * Bucle del thread
@@ -38,9 +69,14 @@ class GeneradorEventos : public GThread
     private:
 
         /**
-         * Lista de tramas pendientes de enviar
+         * Lista de tramas pendientes de enviar de personas identificadas
          */
-        GLinkedList<string> lstTramasPend;
+        GLinkedList<string> lstTramasPendIden;
+
+        /**
+         * Lista de tramas pendientes de enviar de personas no identificadas
+         */
+        GLinkedList<string> lstTramasPendNoIden;
 };
 
 #endif

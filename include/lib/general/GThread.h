@@ -80,10 +80,12 @@ class GThread : public GObject
         bool isOcupado();
 
         /**
-         * Reporta si ha terminado su ejecucion o no.
-         * Es decir que ya no se puede ejecutar la funcion en paralelo.
+         * Reporta si ha terminado su ejecucion o no
+         * 
+         *      bloquear:
+         *          Indica si se debe o no bloquear el mutex para leer el valor
          */
-        bool isFinalizado();
+        bool isFinalizado( bool bloquear = true );
 
         /**
          * Se invoca para indicar que el Thread debe finalizar su bucle de ejecucion

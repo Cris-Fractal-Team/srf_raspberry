@@ -91,6 +91,11 @@ class DeteccionCaraHailo
         int getAltura();
 
         /**
+         * Area del a deteccion
+         */
+        int getArea();
+
+        /**
          * Agrega un valor a las coordenadas x y otro a las coordenadas y
          * de todos los puntos de la cara
          */
@@ -105,6 +110,17 @@ class DeteccionCaraHailo
          * Valida si un punto (x,y) esta dentro de la deteccion
          */
         bool contienePunto( int x, int y );
+
+        /**
+         * Calcula la intereccion sobre la union de dos detecciones
+         */
+        float calcularIoU( DeteccionCaraHailo *det );
+
+        /**
+         * Retorna el bounding box o caja que redea a la deteccion
+         * con formato soportado por opencv
+         */
+        cv::Rect getOpenCV2DRectBoundingBox();
 };
 
 

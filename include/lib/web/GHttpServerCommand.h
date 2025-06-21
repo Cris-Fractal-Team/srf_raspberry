@@ -129,7 +129,7 @@ class GHttpServerCommand : public GObject
  * ser completado segun sea el caso.
  * 
  * Por ejemplo si se configuran:
- *  a) El URL:  /resources/* 
+ *  a) El URL:  /resources/ 
  *  b) El pathBaseArchivos : /home/usuario/www/resources/
  * 
  * Si se solicita la imagen con SCR = "/resources/images/fotos/logo.jpeg";

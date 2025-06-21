@@ -97,7 +97,7 @@ void ProcesoRecFacial::iniciar()
     servidorWeb->procRecFacial = this;
     servidorWeb->iniciar();
 
-    // ejecuta el procesador de eventos
+    // ejecuta el procesador de eventos    
     generadorEventos.start();
         
     // bucle principal
@@ -159,6 +159,7 @@ void ProcesoRecFacial::iniciar()
 
         // Hace el tracking de las caras procesadas
         lstCarasTrack = detTracker.analizaPorIdentificacion(&lstCaras);
+        // lstCarasTrack = detTracker.analizaPorIdentificacionYTracker(&lstCaras, &imagenCapturada);
 
         // Notifica al servidor web las incidencias o detecciones
         notificaDetecciones(imagenCapturada, &lstCarasTrack);
@@ -216,6 +217,8 @@ void ProcesoRecFacial::iniciar()
     universoPersonas.lstPerIdentificadas.reset();
     universoPersonas.lstPerNoIdent.reset();
     detTracker.lstUniverso.reset();
+
+    exit(0);
 }
 
 
@@ -281,7 +284,8 @@ void ProcesoRecFacial::identificarPersonas( vector<TrackedDetectionHailo *> *lst
             iden.fecDet = fecDet;
             std::memcpy(iden.vecDescripcion,deteccion->cara.descriptor,512*sizeof(SIMD_TYPE));
             iden.comparacion = distEucli;
-            deteccion->cara.personaIdent = true;                        
+            deteccion->cara.personaIdent = true;      
+            personaConocida->anonimo =  false;                  
             deteccion->cara.identificador.agregaIdentif(personaConocida, iden , fecDet);
 
             idenPersonaValidaDec = deteccion->cara.identificador.getUltimaIdentificacion();            
@@ -383,8 +387,8 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
                 id.append(" : ");
                 id.append(to_string(det->cara.identificador.getUltimaIdentificacion().comparacion));
             }                
-            if ( det->cara.identificador.getDatosPerIden()->anonimo == false ) GDibujo::drawRect(imagenVisor, caja, verde, 2);
-            else GDibujo::drawRect(imagenVisor, caja, rojo, 2);
+            if ( datosPersona->anonimo == true ) GDibujo::drawRect(imagenVisor, caja, rojo, 2);
+            else GDibujo::drawRect(imagenVisor, caja, verde, 2);
         }        
         
         // dibuja la caja con el ID de seguimiento
@@ -468,17 +472,21 @@ void ProcesoRecFacial::leeParametros(string path)
  */
 void ProcesoRecFacial::notificaDetecciones( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras )
 {
-    int i,n,j;
+    int i,n,j,numIteracionesUnif;
     int bufferLen;
     size_t bufferLen64;
     string jsonLstRostros,nombres;
     TrackedDetectionHailo *persona;
     char *bufferImgVisor, *bufferImgVisor64;    
     long long delta, fecEvento = TimeDateUtils::getDateTimeMs();
+    string ahora = TimeDateUtils::getFechaDesdeMs(fecEvento);
+
+    if ( generadorEventos.usarEndpointUnificado == true ) numIteracionesUnif = 1;
+    else numIteracionesUnif = 2;
 
     n = lstCaras->size();
     // bucle para generar datos de perasonas conocidas (bucleTipoPer=0) y para personas no idenentificadas (bucleTipoPer=1)
-    for(int bucleTipoPer=0; bucleTipoPer < 2; bucleTipoPer++)
+    for(int bucleTipoPer=0; bucleTipoPer < numIteracionesUnif; bucleTipoPer++)
     {
         jsonLstRostros = "";
         for(i=0; i<n; i++)
@@ -486,10 +494,13 @@ void ProcesoRecFacial::notificaDetecciones( GImage imagen, vector<TrackedDetecti
             persona = lstCaras->at(i);
 
             // se valida si el tipo de persona pertnece al bucle, si no se ignora
-            if (( bucleTipoPer == 0 ) && ( persona->cara.identificador.getDatosPerIden()->anonimo == true )) continue;
-            else
-            if (( bucleTipoPer == 1 ) && ( persona->cara.identificador.getDatosPerIden()->anonimo == false )) continue;
-            
+            if ( generadorEventos.usarEndpointUnificado == false )
+            {
+                if (( bucleTipoPer == 0 ) && ( persona->cara.identificador.getDatosPerIden()->anonimo == true )) continue;
+                else
+                if (( bucleTipoPer == 1 ) && ( persona->cara.identificador.getDatosPerIden()->anonimo == false )) continue;
+            }
+                
             delta = fecEvento-persona->cara.identificador.fechaUltEvento;
             if (( persona->cara.identificador.cambioIdentificacion == true ) || 
                 (( persona->cara.personaIdent == true ) && ( delta >= tiempoReEvento )))
@@ -546,19 +557,19 @@ void ProcesoRecFacial::notificaDetecciones( GImage imagen, vector<TrackedDetecti
                     if ( j < 511 ) jsonLstRostros.append(",");
                 }
         
-                jsonLstRostros.append("\n],\n");
-
+                jsonLstRostros.append("\n],\n");                
                 if ( persona->cara.identificador.getDatosPerIden()->anonimo == false )
                 {
                     // jsonLstRostros.append("\"idReconocido\":");
                     // jsonLstRostros.append(persona->cara.identificador.getDatosPerIden()->id);            
                     // jsonLstRostros.append(",\n");    
                     GStringUtils::addJsonAtt(&jsonLstRostros,"idReconocido",persona->cara.identificador.getDatosPerIden()->id,true);
-                    jsonLstRostros.append("\"nuevo\":false");    
+                    jsonLstRostros.append("\"idTipoRostro\":2");    
                 }
                 else
                 {
-                    jsonLstRostros.append("\"nuevo\":true");    
+                    GStringUtils::addJsonAtt(&jsonLstRostros,"idReconocido","0",true);
+                    jsonLstRostros.append("\"idTipoRostro\":1");    
                 }                                
                 jsonLstRostros.append("}\n");
             }
@@ -587,6 +598,7 @@ void ProcesoRecFacial::notificaDetecciones( GImage imagen, vector<TrackedDetecti
             // trama.append(GStringUtils::trim(idEquipo));
             // trama.append("\",\n");
             GStringUtils::addJsonAtt(&trama, "serieEquipo", GStringUtils::trim(idEquipo), false);
+            GStringUtils::addJsonAtt(&trama,"fecEvento",ahora,false);
 
             trama.append("\"lstRostros\":[");    
             trama.append(jsonLstRostros);

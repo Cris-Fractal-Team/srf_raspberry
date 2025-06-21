@@ -44,7 +44,7 @@ class ProcesoRecFacial
         /**
          * Indica si se debe o no invertira verticalmente las imagenes
          */
-        bool invertirVertical;
+        bool invertirVertical;       
         
         /**
          * Ancho minimo de un rostro para ser procesado
@@ -123,6 +123,12 @@ class ProcesoRecFacial
          * ID del siguiente desconocido
          */
         long long idDesconocidoSgte;
+
+        /**
+         * Cantidad de segundos maxima que puede estar una persona no
+         * reconocida sin que se le vuelva a hacer una deteccion
+         */
+        int tiempoMaxNoReconocido;
 
         /**
          * Ruta del archivo de parametros

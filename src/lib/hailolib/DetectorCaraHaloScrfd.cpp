@@ -21,6 +21,14 @@ int DeteccionCaraHailo::getAltura()
 }
 
 /**
+ * Area del a deteccion
+ */
+int DeteccionCaraHailo::getArea()
+{
+    return getAncho() * getAltura();
+}
+
+/**
  * Retorna el punto central del area detectada
  */
 PuntoHailo DeteccionCaraHailo::getCentro()
@@ -62,6 +70,40 @@ bool DeteccionCaraHailo::contienePunto( int x, int y )
         return true;
     }
     return false;
+}
+
+/**
+ * Calcula la intereccion sobre la union de dos detecciones
+ */
+float DeteccionCaraHailo::calcularIoU( DeteccionCaraHailo *det )
+{
+    // Coordenadas de la intersección
+    int xLeft   = std::max(ptoSupIzq.x, det->ptoSupIzq.x);
+    int yTop    = std::max(ptoSupIzq.y, det->ptoSupIzq.y);
+    int xRight  = std::min(ptoInfDer.x, det->ptoInfDer.x);
+    int yBottom = std::min(ptoInfDer.y, det->ptoInfDer.y);
+
+    // Si no hay intersección
+    if (xRight < xLeft || yBottom < yTop)
+        return 0.0f;
+
+    int interArea = (xRight - xLeft) * (yBottom - yTop);
+
+    int areaA = getAncho() * getAltura();
+    int areaB = getAncho() * getAltura();
+
+    float iou = static_cast<float>(interArea) / (areaA + areaB - interArea);
+    return iou;
+}
+
+/**
+ * Retorna el bounding box o caja que redea a la deteccion
+ * con formato soportado por opencv
+ */
+cv::Rect DeteccionCaraHailo::getOpenCV2DRectBoundingBox()
+{
+    Rect rpta = Rect(ptoSupIzq.x, ptoSupIzq.y, getAncho(), getAltura());
+    return rpta;
 }
 
 /**

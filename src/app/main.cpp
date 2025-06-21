@@ -86,7 +86,8 @@ int main( int argc, char *argv[])
     proc.universoPersonas.setNumThreadsIdentificacion(lstParams->getStringLong("numThreadsIdentificacion",1));
     proc.tiempoReEvento = proc.lstParamsApp->getStringLong("tiempoReEvento",30) * 1000;
     proc.tiempoMaxNoReconocido = proc.lstParamsApp->getStringLong("tiempoMaxNoReconocido",30);
-        
+    
+            
     // COnfigura la fuente de imagenes del sensor
     shared_ptr<ImageSourceFactory> imageSource;    
     string fuenteImages = lstParams->getString("source");
@@ -136,6 +137,10 @@ int main( int argc, char *argv[])
     proc.universoPersonas.cargarpPerConocidas(lstParams->getString("pathBDPersonas"), unifidarDescr);
     proc.generadorEventos.urlServidorIden = proc.lstParamsApp->getString("urlBaseServidorIden");
     proc.generadorEventos.urlServidorNoIden = proc.lstParamsApp->getString("urlBaseServidorNoIden");
+    proc.generadorEventos.urlServidorUnificado = proc.lstParamsApp->getString("urlServidorUnificado");
+    proc.generadorEventos.pathLogEventos = lstParams->getString("logEventos");
+    proc.generadorEventos.generarLogEventos = lstParams->getStringBool("generarLogEventos", false);
+    proc.generadorEventos.usarEndpointUnificado = lstParams->getStringBool("usarEndPointUnificado", false);
 
     proc.iniciar();
 
