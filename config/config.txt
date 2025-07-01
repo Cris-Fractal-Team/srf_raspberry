@@ -5,7 +5,7 @@
 #   onvif : se refiere a una camara IP con protocolo ONVIF
 #   webcam : se refiere a una camara web
 #   video : se refiere a un video desde un archivo
-source=video
+source=onvif
 
 # Configura la resolucion de las imagenes de la fuente de datos
 # Para algunas fuentes como la camara interna o la camara web
@@ -62,11 +62,12 @@ pathBDPersonas=./data/rostros-conocidos.txt
 # ****************** Configuracion para camaras onvif ****************** 
 
 # Parte final o sufijo del URL para camaras Dahua
-# urlServidor=/cam/realmonitor?channel=1&subtype=0
+#urlServidor=/cam/realmonitor?channel=1&subtype=0
 
 # Parte final o fuijo del URL para camaras TAPO TP-Link
-urlServidor=/stream1
+#urlServidor=/stream1
 
-
+# nivel de calidad JPEG
+compresionJpeg=80
 
 

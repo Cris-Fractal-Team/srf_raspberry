@@ -130,6 +130,11 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
     for(i=0; i<nu; i++)
     {
         detUniv = lstUniverso.getAddr(i);        
+
+        // descPerActual = detUniv->cara.identificador.getDatosPerIden();
+        // if ( descPerActual == NULL )
+        //     continue;
+
         lstUnivPen.add(lstUniverso.getAddr(i));
         lstUnivPenIndices.add(i);
     }
@@ -137,8 +142,10 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
     // Asociamos las detecciones actuales y las nuevas
     for( i=0; i < n; i++)
     {
-        detActual = lstDetActuales->at(i);
+        detActual = lstDetActuales->at(i);            
         descPerActual = detActual->cara.identificador.getDatosPerIden();
+        if ( descPerActual == NULL )
+            continue;
         
         encontro = false;
         nu = lstUnivPen.size()-1;
@@ -147,6 +154,9 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
             detUniv = lstUnivPen.get(iu);
             
             descPerUniv = detUniv->cara.identificador.getDatosPerIden();
+            if ( descPerUniv == NULL ) 
+                continue;
+                
             if (( descPerActual->anonimo== descPerUniv->anonimo ) &&  ( descPerActual->id.compare(descPerUniv->id) == 0 ))
             {
                 // Encontramos que la persona actual o nueva coincide con una del universo

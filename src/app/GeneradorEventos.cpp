@@ -120,7 +120,7 @@ void GeneradorEventos::runThread()
             cout << "Error al enviar deteccion" << endl;
         }
 
-        GLog::writeSimple(trama, false);
+         GLog::writeSimple(trama, false);
     }
 
     if ( generarLogEventos )

@@ -131,6 +131,16 @@ class ProcesoRecFacial
         int tiempoMaxNoReconocido;
 
         /**
+         * Factor de compresion de JPEG el valor va de 0 a 100 , 100 maxima calidad
+         */
+        int compresionJpeg;
+
+        /**
+         * Indica si se debe o no reportar personas desconocidas
+         */
+        bool reportarDesconocidos;
+
+        /**
          * Ruta del archivo de parametros
          */
         string pathParametros;
@@ -234,6 +244,16 @@ class ProcesoRecFacial
          * una o varias detecciones
          */
         void notificaDetecciones( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras );
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaX;
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaY;
 };
 
 
