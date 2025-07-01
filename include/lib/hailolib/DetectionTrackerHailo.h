@@ -4,6 +4,47 @@
 
 #include "lib/hailolib/FaceRecHailo.h"
 #include "lib/general/GLinkedList.h"
+#include <opencv2/tracking.hpp>
+
+/**
+ * Representa la distancia entre dos rostros
+ */
+class DistanciaRostros
+{
+    public:
+
+        /**
+         * Distancia en coordenada X con respecto al centroide
+         */
+        int deltaX;
+
+        /**
+         * Distancia en coordinada Y con respecto al centroida
+         */
+        int deltaY;
+
+        /**
+         * Distancia en coordenada X con respecto al centroide
+         */
+        int deltaAncho;
+
+        /**
+         * Distancia en coordinada Y con respecto al centroida
+         */
+        int deltaAltura;
+
+
+        /**
+         * Diferencia facial
+         */
+        float deltaFacial;
+
+        /**
+         * Indica lista pendientes
+         */
+        int indicePendiente;
+};
+
 
 /**
  * Representa el seguimiento que se hace a una deteccion
@@ -26,6 +67,16 @@ class TrackedDetectionHailo
          * ID unico del objeto detectado
          */
         long long id;
+
+        /**
+         * Puntero al objeto que se emplea para hacer tracking del objeto
+         */
+        cv::Ptr<cv::Tracker> tracker;
+
+        /**
+         * Recta en la que el tracker ha detectado al objeto
+         */
+        cv::Rect trackerBox;
 
         /**
          * Constructor
@@ -90,6 +141,15 @@ class DetectionTrackerHailo
         vector<TrackedDetectionHailo *> analizaPorIdentificacion( vector<TrackedDetectionHailo *> *lstDetActuales );
 
         /**
+         * Analiza las detecciones actualesy reconocidas, les asigna un ID unico
+         * para poder hacer un tracking, pero principalmente para poder llevar
+         * estadisticas del rostro y agrupar las detecciones adicionalmente aplica un algoritmo
+         * de tracking para poder identificar rostros que en la imagen anterior fueron identificados
+         * pero en la actual no, pero existen rostro sin identificacion o anonimos cercanos.
+         */
+        vector<TrackedDetectionHailo *> analizaPorIdentificacionYTracker( vector<TrackedDetectionHailo *> *lstDetActuales, GImage *imagen );        
+
+        /**
          * Analiza las detecciones actuales y le asigna un ID a cada deeccion
          */
         vector<TrackedDetectionHailo *> analizaRapido( vector<DeteccionCaraHailo> *lstDetActuales );
@@ -106,6 +166,14 @@ class DetectionTrackerHailo
         long long sgteId;
 
     private:
+
+        /**
+         * Analiza las detecciones nuevas anonimas, las compara con las detecciones universales que no tienen matching
+         * busca los mas cercanos en distancia y comparacion facial, para finalmente aplicar un tracking y
+         * decidir si hay o no una coincidencia
+         */
+        void analizaDetNuevasAnonimas( vector<TrackedDetectionHailo *> *lstTracActual, GLinkedList<TrackedDetectionHailo *> *lstUnivPen,
+            GLinkedList<TrackedDetectionHailo *> *lstNuevos, GLinkedList<int>*lstUnivPenIndices, GImage *imagen );
 
         /**
          * Agrega una nueva deteccion al universo de detecciones

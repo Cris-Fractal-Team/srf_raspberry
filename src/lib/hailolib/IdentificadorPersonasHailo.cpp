@@ -1,7 +1,7 @@
 
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
 #include "lib/general/GLinkedList.h"
-
+#include "lib/utils/timedate.h"
 
 /**
  * Constructor
@@ -9,28 +9,36 @@
 IdentificadorPerHailo::IdentificadorPerHailo()
 {
     idSgtePerDesc = 1;
-    gestorThreads.ptrIdentificadorPadre = this;
+    gestorThreads = new GestorThIdentificacionPersonas();
+    gestorThreads->ptrIdentificadorPadre = this;
 }
 
+/**
+ * Destructor
+ */
+IdentificadorPerHailo::~IdentificadorPerHailo()
+{
+    delete gestorThreads;
+}
 
 /**
  * Establece la cantidad de threads que se deben usar para identificar personas
  */
 void IdentificadorPerHailo::setNumThreadsIdentificacion( int numThreads )
 {
-    gestorThreads.setNumThreads(numThreads);
+    gestorThreads->setNumThreads(numThreads);
 }
 
 
 /**
  *  Función para calcular la distancia euclidiana usando NEON SIMD
  */ 
-float IdentificadorPerHailo::calculaDiferenciaSIMD( vector<SIMD_TYPE>*desc1, vector<SIMD_TYPE>*desc2 ) 
+float IdentificadorPerHailo::calculaDiferenciaSIMD( SIMD_TYPE *desc1, SIMD_TYPE *desc2 ) 
 {
-    size_t size = desc1->size();
+    size_t size = 512;
 
-    SIMD_TYPE *val1 = desc1->data();
-    SIMD_TYPE *val2 = desc2->data();
+    SIMD_TYPE *val1 = desc1;
+    SIMD_TYPE *val2 = desc2;
     
     size_t simd_size = size / NUMELEM_VECTOR_SIMD;  // Cada registro SIMD maneja 4 floats
     SIMD_VECTOR sum_vec = DUP_SIMD(0.0f);  // Inicializa a cero el acumulador SIMD
@@ -84,13 +92,12 @@ float IdentificadorPerHailo::calculaDiferenciaSIMD( vector<SIMD_TYPE>*desc1, vec
  *          Indica si se debe o no usar la distancia euclideana como criterio para buscar
  * 
  */
-DescPersonaExterno* IdentificadorPerHailo::buscaPersonaCon( vector<SIMD_TYPE> *descriptor, float tolerancia, float *distEucli, bool usarDistEucli )
+DescPersonaExterno* IdentificadorPerHailo::buscaPersonaCon( SIMD_TYPE *descriptor, float tolerancia, float *distEucli, bool usarDistEucli )
 {
-    int indice;
     DescPersonaExterno *ptr;
-
+    
     // ptr = encuentraPerCerCos(&lstPerIdentificadas, descriptor, tolerancia, &indice, distEucli);
-    ptr = gestorThreads.encuentraPerCercana(descriptor, tolerancia, distEucli, usarDistEucli);
+    ptr = gestorThreads->encuentraPerCercana(descriptor, tolerancia, distEucli, usarDistEucli);
         
     return ptr;
 }
@@ -109,17 +116,59 @@ DescPersonaExterno* IdentificadorPerHailo::buscaPersonaCon( vector<SIMD_TYPE> *d
  *      distEucli :
  *          Puntero en el que se guarda la distancia euclidiana entre el descriptor 
  *          y la persona detectada
+ * 
+ *      usarDistEuclideana:
+ *          Indica si se usa distancia euclideana o no
  */
-DescPersonaExterno* IdentificadorPerHailo::buscaPersonaDesc( vector<SIMD_TYPE> *descriptor, float tolerancia, float *distEucli )
+DescPersonaExterno* IdentificadorPerHailo::buscaPersonaDesc( SIMD_TYPE *descriptor, float tolerancia, float *distEucli, bool usarDistEuclideana )
 {
     int indice;
     DescPersonaExterno *ptr;
 
-    // ptr = encuentraPerCercana(&lstPerNoIdent, descriptor, tolerancia, &indice, distEucli);
-    ptr = encuentraPerCerCos(&lstPerNoIdent, descriptor, tolerancia, &indice, distEucli);
+    if ( usarDistEuclideana == true )
+    {
+        ptr = encuentraPerCercana(&lstPerNoIdent, descriptor, tolerancia, &indice, distEucli);
+    }
+    else 
+    {
+        ptr = encuentraPerCerCos(&lstPerNoIdent, descriptor, tolerancia, &indice, distEucli);
+    }
 
     return ptr;
 }
+
+
+/**
+ * Elimina las personas no reconocidas que tengan mas de una cantidad
+ * de segundos que no son reconocidas
+ */
+void IdentificadorPerHailo::eliminaDesAntiguos(long tiempoMaxNoReconocido)
+{
+    int i,n,numElem;
+    long long delta,ahora;
+    DescPersonaExterno *persona;
+    
+    numElem = 0;
+    ahora = TimeDateUtils::getDateTimeMs();
+    n= lstPerNoIdent.size();
+    i = 0;
+    while( i < n )
+    {
+        persona = lstPerNoIdent.getAddr(i);
+        delta = ahora - persona->ultimaFechaDetectada;
+        if ( (delta/1000) > tiempoMaxNoReconocido )
+        {
+            numElem++;
+            lstPerNoIdent.remove(i);
+            n--;
+        }
+        else
+        {
+            i++;
+        }
+    }
+}
+
 
 /**
 * Calcula el descriptor facial mas cernado de una lista de personas
@@ -146,7 +195,7 @@ DescPersonaExterno* IdentificadorPerHailo::buscaPersonaDesc( vector<SIMD_TYPE> *
 *   Retorna un puntero a la definicion de la persona externa dentro de lstUniv
 *   si no se encuentra se retorna NULL
 */ 
-DescPersonaExterno* IdentificadorPerHailo::encuentraPerCercana( GLinkedList<DescPersonaExterno> *lstUniv, vector<SIMD_TYPE> *desc, float tolerancia, int *indice, float *distEucli )
+DescPersonaExterno* IdentificadorPerHailo::encuentraPerCercana( GLinkedList<DescPersonaExterno> *lstUniv, SIMD_TYPE *desc, float tolerancia, int *indice, float *distEucli )
 {
     float distFinal, distMin = 10000;
     int indiceMin = -1;
@@ -160,12 +209,12 @@ DescPersonaExterno* IdentificadorPerHailo::encuentraPerCercana( GLinkedList<Desc
         return NULL;
     
     // referencia a los datos del descriptor
-    val2 = desc->data();
+    val2 = desc;
 
     // variables usadas para el bucle que calcula distancia euclideana
     
     // numero de elementos de los descriptores
-    size_t size = desc->size();
+    size_t size = 512;
 
     // numero de veces que se debe repetir el bucle en base a la 
     // cantidad de elementos que tiene cada vector SIMD
@@ -176,7 +225,7 @@ DescPersonaExterno* IdentificadorPerHailo::encuentraPerCercana( GLinkedList<Desc
     ptrNodo = lstUniv->getNode(0);
     for(int iUniv=0; iUniv<nUniv; iUniv++ )
     {
-        val1 = ptrNodo->data.vecDescripcion.data();    
+        val1 = ptrNodo->data.vecDescripcion;    
 
         // Inicio del codigo que calcula la diferencia entre el arreglo dataUniv y desc              
         
@@ -263,6 +312,8 @@ void IdentificadorPerHailo::cargarpPerConocidas( string path, bool unificarDesc 
     idExterno = "";
     while( getline(file, line))
     {       
+        if ( line.length() == 0 )
+            continue;
         if ( line.at(0) == '#' )
             continue;
         try
@@ -271,6 +322,7 @@ void IdentificadorPerHailo::cargarpPerConocidas( string path, bool unificarDesc 
 
             stringstream ss(line);
             pos = -2;
+            int indice=0;
             while( pos < 512 )
             {
                 getline(ss, dato, ',');
@@ -285,16 +337,16 @@ void IdentificadorPerHailo::cargarpPerConocidas( string path, bool unificarDesc 
                 }
                 else
                 {
-                    desc.vecDescripcion.push_back(stof(dato));
+                    desc.vecDescripcion[indice++]=stof(dato);
                 }
                 pos++;                
             }
-            if ( desc.vecDescripcion.size() != 512 )
+            if ( indice != 512 )
                     continue;
             if ( unificarDesc == false )
             {                
                 // lstPerIdentificadas.add(desc);                
-                gestorThreads.addPersona(desc);
+                gestorThreads->addPersona(desc);
             }
             else
             {               
@@ -319,12 +371,12 @@ void IdentificadorPerHailo::cargarpPerConocidas( string path, bool unificarDesc 
                     }
                     idExterno = desc.id;
                     // lstDescPersona.add(desc);
-                    gestorThreads.addPersona(desc);
+                    gestorThreads->addPersona(desc);
                 }
                 else
                 {
                     // lstDescPersona.add(desc);
-                    gestorThreads.addPersona(desc);
+                    gestorThreads->addPersona(desc);
                 }
             }                        
         }
@@ -393,7 +445,7 @@ DescPersonaExterno IdentificadorPerHailo::calculaPromedio( GLinkedList<DescPerso
 *   Retorna un puntero a la definicion de la persona externa dentro de lstUniv
 *   si no se encuentra se retorna NULL
 */ 
-DescPersonaExterno*  IdentificadorPerHailo::encuentraPerCerCos( GLinkedList<DescPersonaExterno> *lstUniv, vector<SIMD_TYPE> *desc, float tolerancia, int *indice, float *distEucli )
+DescPersonaExterno*  IdentificadorPerHailo::encuentraPerCerCos( GLinkedList<DescPersonaExterno> *lstUniv, SIMD_TYPE *desc, float tolerancia, int *indice, float *distEucli )
 {
     float distFinal, distMax = 0;
     int indiceMin = -1;
@@ -407,10 +459,10 @@ DescPersonaExterno*  IdentificadorPerHailo::encuentraPerCerCos( GLinkedList<Desc
         return NULL;
     
     // referencia a los datos del descriptor
-    val2 = desc->data();
+    val2 = desc;
     
     // numero de elementos de los descriptores
-    size_t size = desc->size();
+    size_t size = 512;
 
     float dot_product;
     float norm1;
@@ -420,7 +472,7 @@ DescPersonaExterno*  IdentificadorPerHailo::encuentraPerCerCos( GLinkedList<Desc
     ptrNodo = lstUniv->getNode(0);
     for(int iUniv=0; iUniv<nUniv; iUniv++ )
     {
-        val1 = ptrNodo->data.vecDescripcion.data();          
+        val1 = ptrNodo->data.vecDescripcion;          
         
         dot_product = 0.0;
         norm1 = 0.0;
@@ -466,6 +518,23 @@ DescPersonaExterno*  IdentificadorPerHailo::encuentraPerCerCos( GLinkedList<Desc
 GestorThIdentificacionPersonas::GestorThIdentificacionPersonas()
 {
     numPersonas = 0;
+    threadsIniciados = false;
+}
+
+/**
+ * Destructor
+ */
+GestorThIdentificacionPersonas::~GestorThIdentificacionPersonas()
+{
+    int i,n;
+    ThIdentificadorPersonas *ptrThread;
+
+    n = lstThreads.size();
+    for(i=0;i<n;i++)
+    {
+        ptrThread = lstThreads.get(i);
+        delete ptrThread;
+    }
 }
 
 /**
@@ -497,21 +566,6 @@ void GestorThIdentificacionPersonas::notificaFinCalculo()
     }
 }
 
-/**
- * Destructor
- */
-GestorThIdentificacionPersonas::~GestorThIdentificacionPersonas()
-{
-    int i,n;
-    ThIdentificadorPersonas *ptrThread;
-
-    n = lstThreads.size();
-    for(i=0;i<n;i++)
-    {
-        ptrThread = lstThreads.get(i);
-        delete ptrThread;
-    }
-}
 
 /**
  * Calcula el descriptor facial mas cernado de una lista de personas
@@ -537,10 +591,21 @@ GestorThIdentificacionPersonas::~GestorThIdentificacionPersonas()
  *   Retorna un puntero a la definicion de la persona externa dentro de
  * lstUniv si no se encuentra se retorna NULL
  */
-DescPersonaExterno *GestorThIdentificacionPersonas::encuentraPerCercana(vector<SIMD_TYPE> *desc2,float tolerancia, float *distEucli, bool usarDistEuclidiana )
+DescPersonaExterno *GestorThIdentificacionPersonas::encuentraPerCercana(SIMD_TYPE *desc2,float tolerancia, float *distEucli, bool usarDistEuclidiana )
 {
     int n = lstThreads.size();
     ThIdentificadorPersonas *ptrThread;
+
+    if ( threadsIniciados == false )
+    {
+        // inicia los threads para que esten a la espera de ordenes
+        for(int i=0;i<n; i++)
+        {
+            ptrThread = lstThreads.get(i);            
+            ptrThread->start();
+        }
+        threadsIniciados = true;
+    }
 
     // solisita a los threads hijos para que hagan la busqueda    
     numThFinalizado = 0;
@@ -557,9 +622,12 @@ DescPersonaExterno *GestorThIdentificacionPersonas::encuentraPerCercana(vector<S
     }
 
     // busca el thread con la mayor cercania
-    float distanciaMinima = 0;
+    float distanciaMinima;
     float distanciaThread;
     DescPersonaExterno *rpta = NULL;
+
+    if ( usarDistEuclidiana == true ) distanciaMinima = 1000;
+    else distanciaMinima = 0;
      
     for(int i=0;i<n; i++)
     {
@@ -567,11 +635,23 @@ DescPersonaExterno *GestorThIdentificacionPersonas::encuentraPerCercana(vector<S
         if ( ptrThread->getEncontro() )
         {
             distanciaThread = ptrThread->getDistanciaEncontrada();
-            if ( distanciaThread < distanciaMinima )
+            if ( usarDistEuclidiana == true )
             {
-                distanciaMinima = distanciaThread;
-                *distEucli = distanciaMinima;
-                rpta = ptrThread->getCoincidencia();
+                if ( distanciaThread < distanciaMinima )
+                {
+                    distanciaMinima = distanciaThread;
+                    *distEucli = distanciaMinima;
+                    rpta = ptrThread->getCoincidencia();
+                }
+            }
+            else
+            {
+                if ( distanciaThread > distanciaMinima )
+                {
+                    distanciaMinima = distanciaThread;
+                    *distEucli = distanciaMinima;
+                    rpta = ptrThread->getCoincidencia();
+                }
             }
         }
     }        
@@ -595,6 +675,14 @@ void GestorThIdentificacionPersonas::mtxBloquea()
 void GestorThIdentificacionPersonas::mtxLibera()
 {
     mtx.unlock();
+}
+
+/**
+ * Retorna un lock sobre el mutex
+ */
+std::unique_lock<std::mutex> GestorThIdentificacionPersonas::getLock()
+{
+    return std::unique_lock<std::mutex>(mtx);
 }
 
 
@@ -646,9 +734,9 @@ void ThIdentificadorPersonas::runThread()
     {
         auto lock = getLock();
 
-        cv.wait(lock, [this]() {  return hayDatos || isFinalizado();  }  );
-        
-        if ( isFinalizado() == true )
+        cv.wait(lock, [this]() {  return hayDatos || isFinalizado(false);  }  );
+               
+        if ( isFinalizado(false) == true )
             break;
         
         if ( usarDistanciaEuclidiana == true )
@@ -660,7 +748,8 @@ void ThIdentificadorPersonas::runThread()
             gestorPadre->ptrIdentificadorPadre->encuentraPerCerCos(&lstDatos, descBuscado, tolerancia, &indiceEncontrado, &distanciaCalculada);
         }
         
-        gestorPadre->notificaFinCalculo();        
+        gestorPadre->notificaFinCalculo();     
+        hayDatos = false;   
     }
     lstDatos.reset();
 }
@@ -682,7 +771,7 @@ void ThIdentificadorPersonas::runThread()
  *      
  * 
  */
-void ThIdentificadorPersonas::buscarPersona(vector<SIMD_TYPE> *descriptor, float toleranciaBus, bool usarDistEuclidiana )
+void ThIdentificadorPersonas::buscarPersona(SIMD_TYPE *descriptor, float toleranciaBus, bool usarDistEuclidiana )
 {
     {
         auto lock = getLock();
@@ -754,3 +843,5 @@ void ThIdentificadorPersonas::finalizar()
     GThread::finalizar();    
     cv.notify_one();
 }
+
+

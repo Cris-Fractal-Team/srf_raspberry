@@ -220,7 +220,7 @@ void GSocket::abrirConexion( string ip, int puerto, int usarSSL )
         // inicia conexion con encriptado
         ctx = SSL_CTX_new(SSLv23_client_method());
         
-        cout << "Configuracion de ubicacion de certificados" << endl;
+        // cout << "Configuracion de ubicacion de certificados" << endl;
         if(! SSL_CTX_load_verify_locations(ctx, NULL, "/usr/lib/ssl/certs"))
         {
             cout << "Error al verificar la ubicacion de los certificados" << endl;
@@ -229,7 +229,7 @@ void GSocket::abrirConexion( string ip, int puerto, int usarSSL )
             throw std::runtime_error("NO se pudo verificar los certificados SSL");
         }    
         
-        cout << "Creando objeto BIO SSL" << endl;
+        // cout << "Creando objeto BIO SSL" << endl;
 
         bio = BIO_new_ssl_connect(ctx);
         BIO_get_ssl(bio, & ssl);
@@ -252,6 +252,7 @@ void GSocket::abrirConexion( string ip, int puerto, int usarSSL )
         }
 
         // return 0;
+        conectado = 1;
     }    
 }
 
@@ -829,7 +830,7 @@ void GSocket::readChar( char *buffer, int maxLen )
     len = readUint32();
     
     // calcula la cantidad de bytes que se deben leer sin rebalsar el buffer
-    if ( len >= maxLen )
+    if ( len >= (uint32_t)maxLen )
     {
         lenLee = maxLen-1;
     }

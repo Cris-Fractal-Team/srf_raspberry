@@ -10,7 +10,6 @@
 #include "lib/web/GHttpRequest.h"
 #include "lib/web/GHttpResponse.h"
 #include "lib/graphics/GDibujo.h"
-#include "app/IdentificadorFacial.h"
 
 
 class IdentificadorFacial;

@@ -161,7 +161,7 @@ class GDate : public GObject
         /**
          * Estructura formateada de la fecha
          */
-        tm *valorInterno;
+        tm valorInterno;
 };
 
 #endif

@@ -78,6 +78,7 @@ int main( int argc, char *argv[])
     
     proc.anchoVisualiza = lstParams->getStringLong("anchoImgVisualizacion", 1280);
     proc.alturaVisualiza = lstParams->getStringLong("alturaImgVisualizacion", 720);
+    proc.compresionJpeg = lstParams->getStringLong("compresionJpeg", 70);
     
     proc.toleranciaDetec = lstParams->getStringDouble("presicionDeteccion",0.40);
     proc.toleranciaIden = lstParams->getStringDouble("deltaRostroMax",0.60);
@@ -85,8 +86,10 @@ int main( int argc, char *argv[])
     proc.usarDistEuclideana = lstParams->getStringBool("usarDistEcuclideana", true);
     proc.universoPersonas.setNumThreadsIdentificacion(lstParams->getStringLong("numThreadsIdentificacion",1));
     proc.tiempoReEvento = proc.lstParamsApp->getStringLong("tiempoReEvento",30) * 1000;
+    proc.tiempoMaxNoReconocido = proc.lstParamsApp->getStringLong("tiempoMaxNoReconocido",30);
+    proc.reportarDesconocidos = lstParams->getStringBool("reportarDesconocidos", false);
     
-        
+            
     // COnfigura la fuente de imagenes del sensor
     shared_ptr<ImageSourceFactory> imageSource;    
     string fuenteImages = lstParams->getString("source");
@@ -113,6 +116,7 @@ int main( int argc, char *argv[])
         imageSource->lstParams.putString(VideoCamera::PARAM_PATH_VIDEO, proc.lstParamsApp->getString(VideoCamera::PARAM_PATH_VIDEO));
         imageSource->lstParams.putString(VideoCamera::PARAM_VELOCIDAD_VIDEO, proc.lstParamsApp->getString(VideoCamera::PARAM_VELOCIDAD_VIDEO));
         imageSource->lstParams.putString(VideoCamera::PARAM_CUADRO_INICIAL, proc.lstParamsApp->getString(VideoCamera::PARAM_CUADRO_INICIAL));
+        imageSource->lstParams.putString(VideoCamera::PARAM_INFINITO, proc.lstParamsApp->getString(VideoCamera::PARAM_INFINITO));
     }
     else
     {
@@ -133,7 +137,12 @@ int main( int argc, char *argv[])
     if ( paramUnificarDescr.compare("S") == 0 ) unifidarDescr = true;
 
     proc.universoPersonas.cargarpPerConocidas(lstParams->getString("pathBDPersonas"), unifidarDescr);
-    proc.generadorEventos.urlServidor = proc.lstParamsApp->getString("urlBaseServidor");
+    proc.generadorEventos.urlServidorIden = proc.lstParamsApp->getString("urlBaseServidorIden");
+    proc.generadorEventos.urlServidorNoIden = proc.lstParamsApp->getString("urlBaseServidorNoIden");
+    proc.generadorEventos.urlServidorUnificado = proc.lstParamsApp->getString("urlServidorUnificado");
+    proc.generadorEventos.pathLogEventos = lstParams->getString("logEventos");
+    proc.generadorEventos.generarLogEventos = lstParams->getStringBool("generarLogEventos", false);
+    proc.generadorEventos.usarEndpointUnificado = lstParams->getStringBool("usarEndPointUnificado", false);
 
     proc.iniciar();
 

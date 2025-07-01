@@ -232,7 +232,6 @@ void MenuPrincipalCommand::btnSalir_onClick( shared_ptr<GHttpRequest> request,  
 void MenuPrincipalCommand::procesaActualizaParams( shared_ptr<GHttpRequest> request,  shared_ptr<GHashMap> lstValoresTag )
 {
     string txt,txtError;
-    double valorDouble;
 
     txtError = "";
 
@@ -299,7 +298,6 @@ void MenuPrincipalCommand::calculaValoresMenuPrincipal( shared_ptr<GHashMap> lst
 {
     int giro;
     bool valorLogico;
-    double valorDouble;
     string idControl;
     
     lstValores->putString("versionSensor","N");

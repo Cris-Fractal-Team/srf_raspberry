@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 
+
 std::string SystemUtils::getRaspberryPiSerial() 
 {
     std::ifstream cpuinfo("/proc/cpuinfo");
@@ -24,4 +25,15 @@ std::string SystemUtils::getRaspberryPiSerial()
     }
 
     return serial;
+}
+
+void SystemUtils::printRamUsage()
+{
+    std::ifstream status_file("/proc/self/status");
+    std::string line;
+    while (std::getline(status_file, line)) {
+        if (line.find("VmRSS:") == 0 || line.find("VmSize:") == 0) {
+            std::cout << line << std::endl;
+        }
+    }
 }

@@ -74,6 +74,7 @@ void ExtractorFacialArchivo:: ejecutar()
         
         GImage rostro = GDibujo::read(pathFotos + pathFoto);        
         
+        cout << "Ancho del rostro " << rostro.ancho << " Altura " << rostro.altura << endl;
         lstDet = detector.detectar_2_5g(rostro, toleranciaDetec);        
         if ( detector.errorDeteccion == true )
         {
@@ -89,20 +90,28 @@ void ExtractorFacialArchivo:: ejecutar()
             // GDibujo::show(fotoCara, "Visor");
             // GDibujo::waitForKey(0);
             
-            std::vector<SIMD_TYPE> descriptor = generadorDesc.calculaDescriptor(rostro, det);        
+            SIMD_TYPE descriptor[512];
+            
+            generadorDesc.calculaDescriptor(rostro, det, descriptor);        
             
             string fila = nombre;
             fila.append(",");
             fila.append(idPersona);
             fila.append(",");
 
-            for(int j=0; j<descriptor.size(); j++)
+            for(int j=0; j<512; j++)
             {
-                fila.append(to_string(descriptor.at(j)));
+                fila.append(to_string(descriptor[j]));
                 fila.append(",");
             }
             fila.append("\n");
             archivoBd << fila;
+
+            // cout << fila << endl;
+        }
+        else
+        {
+            cout << "!!! NO se detecto un rostro" << endl;
         }
     }
 

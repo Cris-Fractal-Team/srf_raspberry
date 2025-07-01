@@ -521,6 +521,12 @@ class VideoCamera : public ImageSource , GThread
          * Nombre del parametro que contiene el parametro a partir del que se procesa el video
          */
          static const string PARAM_CUADRO_INICIAL;
+
+         /**
+         * Nombre del parametro que contiene el parametro que indica si se debe reproducir 
+         * el video de forma infinita
+         */
+        static const string PARAM_INFINITO;
         
         /**
          * Referencia a la camara
@@ -536,6 +542,11 @@ class VideoCamera : public ImageSource , GThread
          * Ultima vez que se genero una imagen de video
          */
         long long ultimaVezGenVideo;
+
+        /**
+         * Reproduccion infinita
+         */
+        bool reproduccionInfinita;
 
         /**
          * Constructor

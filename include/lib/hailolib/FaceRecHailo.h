@@ -78,7 +78,14 @@ class IdentificacionPersona
         /**
          * Vector de la descripcion facial
          */
-        vector<SIMD_TYPE> vecDescripcion;
+        SIMD_TYPE vecDescripcion[512];
+
+        /**
+         * Destructor
+         */
+        ~IdentificacionPersona()
+        {            
+        }
 };
 
 /**
@@ -107,9 +114,14 @@ class DescPersonaExterno
         bool anonimo;
 
         /**
+         * Ultima fecha en la que se detecto a la persona en ms
+         */
+        long long ultimaFechaDetectada;
+
+        /**
          * Vector de la descripcion facial
          */
-        vector<SIMD_TYPE> vecDescripcion;        
+        SIMD_TYPE vecDescripcion[512];        
 };
 
 
@@ -250,7 +262,7 @@ class CaraDescrita
         /**
          * descriptor facial
          */
-        vector<SIMD_TYPE> descriptor;
+        SIMD_TYPE descriptor[512];
 
         /**
          * Indica si se calculo o no el descriptor facial
@@ -316,12 +328,13 @@ class FaceRecHailo
         /**
          * Extrae el descriptor facial de la ultima inferencia
          */
-        std::vector<SIMD_TYPE>extraeDescriptor();
+        void extraeDescriptor( SIMD_TYPE *descriptor );
 
         /**
          * Calcula el descriptor facial para una cara
+         * Retorna true en caso de exito, false en caso de error
          */
-        std::vector<SIMD_TYPE>calculaDescriptor( GImage imagen, DeteccionCaraHailo deteccion );
+        bool calculaDescriptor( GImage imagen, DeteccionCaraHailo deteccion, SIMD_TYPE *descriptor );
 
         /**
          * Extrae el descriptor facial de la ultima inferencia en formato de OpenCV

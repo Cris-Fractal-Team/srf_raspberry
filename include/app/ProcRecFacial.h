@@ -44,7 +44,7 @@ class ProcesoRecFacial
         /**
          * Indica si se debe o no invertira verticalmente las imagenes
          */
-        bool invertirVertical;
+        bool invertirVertical;       
         
         /**
          * Ancho minimo de un rostro para ser procesado
@@ -123,6 +123,22 @@ class ProcesoRecFacial
          * ID del siguiente desconocido
          */
         long long idDesconocidoSgte;
+
+        /**
+         * Cantidad de segundos maxima que puede estar una persona no
+         * reconocida sin que se le vuelva a hacer una deteccion
+         */
+        int tiempoMaxNoReconocido;
+
+        /**
+         * Factor de compresion de JPEG el valor va de 0 a 100 , 100 maxima calidad
+         */
+        int compresionJpeg;
+
+        /**
+         * Indica si se debe o no reportar personas desconocidas
+         */
+        bool reportarDesconocidos;
 
         /**
          * Ruta del archivo de parametros
@@ -228,6 +244,16 @@ class ProcesoRecFacial
          * una o varias detecciones
          */
         void notificaDetecciones( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras );
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaX;
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaY;
 };
 
 

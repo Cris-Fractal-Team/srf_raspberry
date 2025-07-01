@@ -249,8 +249,9 @@ GImage Esp32SocketCamera::getImage()
     GImage rpta;
     char buffer[8];
     uint8_t *dataJpeg;
-    uint32_t i,lenImagen,len2,posMascara = 0;
+    uint32_t lenImagen,len2;
     uint32_t *ptr32;
+    // uint32_t i,posMascara = 0;
     
     dataJpeg = NULL;
     lenImagen = 0;
@@ -374,27 +375,27 @@ shared_ptr<ImageSource> Esp32SocketCamFactory::getInstance( string configPath )
 /**
  * Parametro que contiene la IP del servidor
  */
-const string OnvifCamera::PARAM_IP_SERVIDOR = "IP";
+const string OnvifCamera::PARAM_IP_SERVIDOR = "onvifIP";
 
 /**
  * Parametro que contiene el puerto del servidor
  */
-const string OnvifCamera::PARAM_PUERTO_SERVIDOR = "PUERTO";
+const string OnvifCamera::PARAM_PUERTO_SERVIDOR = "onvifPuerto";
 
 /**
  * Parametro que contiene el usuario del servidor
  */
-const string OnvifCamera::PARAM_USUARIO_SERVIDOR = "USUARIO";
+const string OnvifCamera::PARAM_USUARIO_SERVIDOR = "onvifLogin";
 
 /**
  * Parametro que contiene la password del usuario del servidor
  */
-const string OnvifCamera::PARAM_PASSWORD_SERVIDOR = "PASSWORD";
+const string OnvifCamera::PARAM_PASSWORD_SERVIDOR = "onvifPassword";
 
 /**
  * Parametro que contiene el sufijo o parte final del URL para obtener
  */
-const string OnvifCamera::PARAM_URL_SERVIDOR = "URL";
+const string OnvifCamera::PARAM_URL_SERVIDOR = "urlServidor";
 
 /**
  * Constructor
@@ -574,6 +575,11 @@ string const VideoCamera::PARAM_VELOCIDAD_VIDEO = "videoVelocidadImgPorSegundo";
  */
 string const VideoCamera::PARAM_CUADRO_INICIAL = "videoCuadroInicial";
 
+/**
+ * Nombre del parametro que contiene el parametro que indica si se debe reproducir 
+ * el video de forma infinita
+ */
+string const VideoCamera::PARAM_INFINITO = "videoInfinito";
 
 
 /**
@@ -581,7 +587,7 @@ string const VideoCamera::PARAM_CUADRO_INICIAL = "videoCuadroInicial";
  */
 VideoCamera::VideoCamera()
 {
-
+    reproduccionInfinita = false;
 }
 
 /**
@@ -598,6 +604,10 @@ VideoCamera::~VideoCamera()
 int VideoCamera::init()
 {
     string ruta = lstParams.getString(PARAM_PATH_VIDEO);
+    string infinito = lstParams.getString(PARAM_INFINITO);
+
+    if ( infinito.compare("S") == 0 ) reproduccionInfinita = true;
+
     cap = std::make_unique<cv::VideoCapture>(ruta);
 
     if ( ruta.length() == 0 )
@@ -657,8 +667,8 @@ void VideoCamera::release()
 GImage VideoCamera::getImage()
 {
     cv::Mat frame;
-
-    *cap >> frame;
+    bool exito = cap->read(frame);
+    // *cap >> frame;
 
     if ( ultimaVezGenVideo == -1 )
     {
@@ -672,6 +682,18 @@ GImage VideoCamera::getImage()
             usleep(delta*1000);
         }
         ultimaVezGenVideo = TimeDateUtils::getDateTimeMs();
+    }
+
+    if ( exito == false )
+    {
+        if ( reproduccionInfinita == true )
+        {
+            cap->set(cv::CAP_PROP_POS_FRAMES, 0);
+        }
+        else
+        {
+            return imagenDet;    
+        }
     }
 
     if ( frame.empty() )
