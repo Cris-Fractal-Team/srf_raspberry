@@ -4,7 +4,8 @@
 #   socket : se refiere a un dispositivo que via sockets envia JPEGs codificados
 #   onvif : se refiere a una camara IP con protocolo ONVIF
 #   webcam : se refiere a una camara web
-source=onvif
+#   video : se refiere a un video desde un archivo
+source=video
 
 # Configura la resolucion de las imagenes de la fuente de datos
 # Para algunas fuentes como la camara interna o la camara web
@@ -14,34 +15,141 @@ source=onvif
 anchoImgFuente=1920
 alturaImgFuente=1080
 
+#anchoImgFuente=3840
+#alturaImgFuente=2160
+
 # Configura la resolucion con la que se visualizaa los datos
 # y con la que se envian en caso se solicite ver las imagenes
 anchoImgVisualizacion=1280
 alturaImgVisualizacion=720
 
 # Configura la resolucion minima de una cara para visualizar el recuadro al rededor de ella
+#anchoMinCaraVis=70
+#alturaMinCaraVis=70
 anchoMinCaraVis=70
 alturaMinCaraVis=70
 
 # Configura la resolucion minima de una cara procesar un cara y hacerle reconocimiento facial
-anchoMinCaraRec=90
-alturaMinCaraRec=90
+#anchoMinCaraRec=90
+#alturaMinCaraRec=90
+anchoMinCaraRec=70
+alturaMinCaraRec=70
+
+# Indica la posicion X inicial a partir de la cual el sistema detectara rostros
+regionInteresInicioX=0
+
+# Indica la posicion X Final a partir de la cual el sistema detectara rostros
+regionInteresFinX=1920
 
 # Configura la resolucion de las caras a las que se hace el reconocimiento facial
 # todas las caras no importa su resolucion se escalan a esta resolucion
 anchoCaraRec=112
 alturaCaraRec=112
 
-# Diferencia maxima entre dos rostro para considerar a la misma persona
-deltaRostroMax=0.52
+# Indica que tanta es la similaridad entre puntos de un rostro y los frontales
+# Un valor de 5 es un contraste
+similaridadFrontal=10
+
+# Numero de identificaciones exitosas requeridas para generar un evento
+# y llamar al webservice 
+numIndentificacionesMin=3
+
+
+# *************************************************************************************
+#  Parametros que controlan la deteccion de rostros e identificacion
+# *************************************************************************************
+
+# Diferencia maxima entre un rostro desconocido frontal y un rostro conocido 
+deltaRostroMax=0.65
+
+# Diferencia maxima entre un rostro desconocido no frontal y un rostro conocido
+# Debido a que hay un giro en el rostro se requiere ser menos tolerante
+deltaRostroMovidoMax=0.80
+
+# Angulo de desviacion horizontal o vertical minimo para considerar un rostro no frontal
+# Un rostro con desviacion mayor o igual a este angulo, es evaluado con el deltaRostroMovidoMax
+anguloRostroMovido=35
 
 # Presicion o accuracy de la deteccion de rostros
-presicionDeteccion=0.5
+presicionDeteccion=0.50
 
 # Tiempo de revalidar rostros detectados en ms
 tiempoRevalidacion=1000
 
-# ****************** Configuracion para camaras onvif ****************** 
+# Indica si se usa distancia euclideana (S) o similaridad de coseno (N)
+usarDistEcuclideana=N
+
+# Establece cuantos threads se usan para hacer la identificacion de personas
+numThreadsIdentificacion=4
+
+# Indica si se deben reportar personas desconocidas
+reportarDesconocidos=N
+
+# Ruta del modelo que genera los descriptores faciales
+_pathModeloDescFacial=./models/arcface_mobilefacenet_h8l.hef
+_pathModeloDescFacial=./models/arcface_r50.hef
+_pathModeloDescFacial=./models/r50_fractal_v3.hef
+_pathModeloDescFacial=./models/mbf_finetuned-20250902-1101.hef
+_pathModeloDescFacial=./models/fractal_20250916_1253.hef
+
+# Este funciona bien
+_pathModeloDescFacial=./models/mbf_fractal_v2.hef
+_pathModeloDescFacial=./models/mbf_finetuned.hef
+pathModeloDescFacial=./models/mbf_finetuned_20250917.hef
+
+
+# Nombre de la capa final del modelo que genera descriptor facial
+_nombreUltimaCapaRedNeuronal=arcface_mobilefacenet/fc1
+_nombreUltimaCapaRedNeuronal=arcface_r50/fc1
+_nombreUltimaCapaRedNeuronal=r50/fc1
+_nombreUltimaCapaRedNeuronal=mbf/fc1
+nombreUltimaCapaRedNeuronal=mbf_finetuned/fc1
+
+# *************************************************************************************
+#  Configuracion de LOGS 
+# *************************************************************************************
+
+# Ruta del archivo de logs de invocaciones de eventos
+logEventos=./data/log_eventos.txt
+
+# Indica si se debe o no generar log de eventos : S=Si, N=No
+generarLogEventos=N
+
+# RUTA del archivo con la base de datos de personas
+# pathBDPersonas=./data/per-con-colegio_resnet50_A800_S3_R0.85_J80_C0.txt
+# 1 pathBDPersonas=./data/per-con-colegio_mobilnet_A800_S3_R0.85_J70_C0.txt
+# 2 pathBDPersonas=./data/per-con-colegio_mobilnet_A800_S3_R0.85_J80_C0.txt
+# 3 pathBDPersonas=./data/per-con-colegio_mobilnet_A800_S3_R0.75_J60_C0.txt
+# 4 pathBDPersonas=./data/per-con-colegio_mobilnet_A800_S3_R0.75_J50_C0.txt
+# 5 pathBDPersonas=./data/per_con_colegio_resnet50_A800_S5_R0.60_J60_C0.txt
+# pathBDPersonas=./data/per_colegio_resnet50_A800_S5_R0.60_J60_C1_plomo.txt
+# pathBDPersonas=./data/per_colegio_resnet50_A800_S5_R0.60_J50_C0_plomo.txt
+# pathBDPersonas=./data/per_colegio_resnet50_A800_S7_R0.60_J60_C0_plomo.txt
+# pathBDPersonas=./data/per_colegio_resnet50_A800_S7_R0.70_J70_C0_minicuad.txt
+
+_pathBDPersonas=./data/per_colegio_resnet50_A800_S5_R0.70_J70_C0_cuad_fractal.txt
+_pathBDPersonas=./data/per_colegio_resnet50_A800_S3_R0.80_J80_C0_cuad_fractal.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R0.90_J20_C0_cuad_fractal.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R0.70_J20_C0_cuad_fractal.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R0.70_J15_C0_cuad_fractal.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_J15_C0_cuad_fractal_v2.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R80_J80_C0_cuad_fractal.txt
+
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R80_J80_C0_cuad_fractal_v3.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R90_J70_C0_cuad_fractal_v3.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R100_j80_C0_cuad_fractal_v3.txt
+
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j80_C0_fractal_20250902-1102.txt
+_pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j100_C0_fractal_20250902-1102.txt
+_pathBDPersonas=./data/colegio-20250916.txt
+pathBDPersonas=./data/colegio-20250918-g0-r0-j100-h1080.txt
+
+
+# pathBDPersonas=./data/personas-fractal.txt
+
+# *************************************************************************************
+#  Configuracion para camaras onvif 
+# *************************************************************************************
 
 # Parte final o sufijo del URL para camaras Dahua
 urlServidor=/cam/realmonitor?channel=1&subtype=0
@@ -49,9 +157,177 @@ urlServidor=/cam/realmonitor?channel=1&subtype=0
 # Parte final o fuijo del URL para camaras TAPO TP-Link
 # urlServidor=/stream1
 
-# RUTA del archivo con la base de datos de personas
-# pathBDPersonas=./data/rostros_conocidos.txt
-# pathBDPersonas=./data/archivos1/rostros-conocidos.txt
-pathBDPersonas=./data/rostros-conocidos.txt
+onvifLogin=admin
+onvifPassword=12345678@
+onvifIP=192.168.3.201
+onvifPuerto=554
 
+# *************************************************************************************
+#  Coniguracion para poder previsualizar imagenes 
+# *************************************************************************************
+
+# Indica se se desea previsualizar la imagen que
+# se envia al detector de rostros
+previsualizaImgParaDeteccion=N
+
+# Indica se se desea esperar la presion de una tecla 
+# luego previsualizar la imagen que se envia al detector de rostros
+esperarPrevImgParaDeteccion=N
+
+# Indica se se desea previsualizar las cara original
+# y la centrada antes de generar una descripcion facial
+previsualizaImgReconocimiento=S
+
+# Indica se se desea esperar la presidon de una tecla 
+# luego previsualizar las imagenes para reconocimiento facial
+esperarPrevImgReconocimiento=S
+
+# Indica se se desea procesar la tecla presionada luego de
+# visualizar las caras para reconocimiento
+# si se presiona la tecla "g" o "G" mayuscula se guarda
+# un PNG del rostro alineado
+guardarPrevImgReconocimiento=S
+
+# Prefijo que se le pone a las imagenes de reconocimiento que se guardan
+prefijoImgReconocimiento=oficial_
+
+# Indica si se debe guardar las fotos frontales alineadas
+guardarCarasFrontalesAlineadas=N
+
+# *************************************************************************************
+# Configuracion de modificacion de las imagenes 
+# *************************************************************************************
+
+# Indica si se debe girar horizontalmente la imagen
+girar=N
+
+# Indica si se debe reflejar verticalmente la imagen, esto es util para casos
+# donde la camara esta de cabeza, generalmente porque se ancla desde el techo
+reflejarVerticalmente=S
+
+
+# ***************************************************************************************
+# Configuracionde los WEB Services a los que se emiten los eventos 
+# ***************************************************************************************
+
+urlBaseServidorIden_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canadacentral-01.azurewebsites.net/srf/sensor/eventoSensor
+urlBaseServidorNoIden_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canadacentral-01.azurewebsites.net/srf/sensor/eventoDesconocidoSensor
+urlBaseServidorUnificado_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canadacentral-01.azurewebsites.net/srf/sensor/eventoDesconocidoSensor
+_urlBaseServidorIden=http://iawks02.local/clientes/fractal/registra_data.php
+_urlBaseServidorNoIden=http://iawks02.local/clientes/fractal/registra_data.php
+_urlBaseServidorUnificado=http://iawks02.local/clientes/fractal/registra_data.php
+urlBaseServidorIden=http://lap01.local/clientes/fractal/registra_data.php
+urlBaseServidorNoIden=http://lap01.local/clientes/fractal/registra_data.php
+urlBaseServidorUnificado=http://lap01.local/clientes/fractal/registra_data.php
+
+
+# nivel de calidad JPEG
+compresionJpeg=80
+
+# Tiempo que debe pasar para generar de nuevo un evento de deteccion
+tiempoReEvento=1
+
+# Tiempo maximo en segundos que una persona desconocida que no tiene eventos debe permanecer en RAM
+tiempoMaxNoReconocido=20
+
+
+# *************************************************************************************
+#  Configuracion de la camara interna del Raspberry PI
+# *************************************************************************************
+
+horaInicio1=0
+horaFin1=5
+brillo1=0
+contraste1=1
+exposicion1=30000
+
+horaInicio2=6
+horaFin2=18
+brillo2=0.15
+contraste2=1.15
+exposicion2=7000
+
+horaInicio3=19
+horaFin3=23
+brillo3=0.45
+contraste3=1.45
+exposicion3=25000
+
+
+# *************************************************************************************
+#  Configuracion de camara cuyas imagenes se cargan desde un video
+# *************************************************************************************
+
+# Ruta del video
+videoPath_1=./videos/video_calle_v3.mp4
+videoPath_3=./videos/video_2_cam_dahua.mp4
+videoPath_2=./videos/pasillo.mp4
+videoPath_=./videos/colegio_1.mp4
+videoPath_c1=./videos/colegio_2.mp4
+videoPath_c2=./videos/colegio_3.mp4
+videoPath_=./videos/colegio_con_erick.mp4
+videoPath_=./videos/entrada-2025-08-11-06.45.00-07.00.00.mp4
+videoPath_=./videos/entrada-2025-08-12-06.45.00.mp4
+videoPath_=./videos/entrada-2025-08-12-06.30.00.mp4
+videoPath_=./videos/entrada-2025-08-13-08.15.00.mp4
+videoPath_=./videos/entrada-2025-08-13-08.30.00.mp4
+videoPath_=./videos/entrada_0821_07.00.mp4
+videoPath_=./videos/entrada_0821_07.15.mp4
+videoPath_=./videos/entrada_0820_12.30.mp4
+videoPath_=./videos/entrada_0820_12.45.mp4
+videoPath_=./videos/entrada-0812_14.45.mp4
+videoPath=./videos/20250915-no-detecta-cris.mp4
+
+
+# Cantidad de imagenes por segundo del video
+videoVelocidadImgPorSegundo=2
+
+# Indica si se debe reiniciar automaticamente el video
+videoInfinito=N
+
+# Cuadro o imagen inicial de la primera vez que se muestra el video
+videoCuadroInicial_v1_1=950
+videoCuadroInicial_v1_2=7140
+videoCuadroInicial_v1_3=7720
+videoCuadroInicial_v2_1=7610
+videoCuadroInicial_v_erick_1=3420
+videoCuadroInicial_v_erick_2=2220
+videoCuadroInicial_v_erick_3=2250
+videoCuadroInicial_erick=1000,2220
+videoCuadroInicial_erick_lunes=3530
+videoCUadroInicial_jueves_14_08.15=4300
+videoCUadroInicial_jueves_14_08.30=7500,8100
+videoCuadroInicial_0821_07.00=5230
+videoCuadroInicial_20250915=6200
+videoCuadroInicial=6200
+
+# *************************************************************************************
+# Configuracion para la creacion de la BD de personas conocidas
+# *************************************************************************************
+
+# Indica si se deben unificar los descriptores cuando se detecte el mismo ID externo
+unificarDescriptores=N
+
+# Pixeles de Gausian blure aplicado a las imagenes
+pixelSuavizado=0
+
+# Porcentaje entre 0 y 1 que se debe reducir y luego restaurar a 100% la imagen
+# para al propocito eliminar detalles
+resizeSuavizado=0
+
+# Suavizado del JPEG que genera artefactos de compresion
+jpegSuavizado=100
+
+# Paramtro del nivel de contraste que se genera
+paramContraste=0
+
+# Indica si se debe extraer una zona cuadrada, dentro de la cual este centrado el rostro detectados
+# Valores validos son : 
+#   S : crea un cuadrado con la dimension maxima
+#   M : crea cuadrado con dimension minima
+#   N : no encuadra el rostro
+encuadrarRostros=S
+
+# Altura a la que se escalan las imagenes antes de detectar rostros, esto tambien elimina detalles
+alturaImagenBase=1080
 
