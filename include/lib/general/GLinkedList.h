@@ -5,7 +5,9 @@
 
 #include <memory.h>
 #include <stdexcept>
+#include <iostream>
 
+using namespace std;
 
 /**
  * Nodo de la lista doblemente enlazada
@@ -46,6 +48,11 @@ class GLinkedList
         GLinkedList();
 
         /**
+         * Constructor copia
+         */
+        GLinkedList( GLinkedList<T> &base );
+
+        /**
          * Destructor
          */
         ~GLinkedList();
@@ -58,7 +65,7 @@ class GLinkedList
         /**
          * Agrega todos los elementos de una lista a la lista actual
          */
-        void addAll( GLinkedList<T> list );
+        void addAll( GLinkedList<T> &list );
 
         /**
          * borra todos los elementos de la lista
@@ -76,6 +83,11 @@ class GLinkedList
         T get( int index );
 
         /**
+         * Retorna un valor de la lista
+         */
+        T getLast();
+
+        /**
          * Retorna la direccion de memoria de un elemento de la lista
          */
         T *getAddr( int index );
@@ -89,6 +101,13 @@ class GLinkedList
          * Establece el valor de un elemento de la lista
          */
         void set( int index, T value );
+
+        /**
+         * Retorna el indice de un elemento.
+         * Busca el elemento y retorna la primera coincidencia.
+         * En caso de no existir retorna -1
+         */
+        int indexOf( T value );
 
         /**
          * Retorna un nodo de la lista dado su indice o ubicacion
@@ -108,7 +127,12 @@ class GLinkedList
         /**
          * Retorna la cantidad de elementos de la lista
          */
-        int size();
+        int size() const;
+
+        /**
+         * Copia los valores de una lista a otra
+         */
+        GLinkedList<T>& operator=(const GLinkedList<T>& other);
 
     private:
 
@@ -127,6 +151,16 @@ class GLinkedList
          */
         int numElem;
 
+        /**
+         * Ultima posicion accedida
+         */
+        int ultimaPosLeida;
+
+        /**
+         * Puntero a la ultima posicion leida
+         */
+        GLinkedListNode<T> *ptrUltimaPosLeida;        
+
 };
 
 
@@ -140,6 +174,23 @@ GLinkedList<T>::GLinkedList()
     numElem = 0;
     head = NULL;
     tail = NULL;
+    ultimaPosLeida = -1;
+    ptrUltimaPosLeida = NULL;
+}
+
+/**
+ * Constructor copia
+ */
+template<typename T>
+GLinkedList<T>::GLinkedList( GLinkedList<T> &base )
+{
+    numElem = 0;
+    head = NULL;
+    tail = NULL;
+    ultimaPosLeida = -1;
+    ptrUltimaPosLeida = NULL;
+
+    addAll(base);
 }
 
 /**
@@ -148,6 +199,7 @@ GLinkedList<T>::GLinkedList()
 template<typename T>
 GLinkedList<T>::~GLinkedList()
 {
+    reset();
 }
 
 /**
@@ -158,6 +210,12 @@ void GLinkedList<T>::reset()
 {
     while( numElem > 0 )
         removeLast();
+
+    ptrUltimaPosLeida = NULL;
+    ultimaPosLeida = -1;
+    head = NULL;
+    tail = NULL;
+    numElem = 0;
 }
 
 /**
@@ -172,7 +230,7 @@ void GLinkedList<T>::add( T value )
         head->data = value;
         head->prev = NULL;
         head->next = NULL;
-
+        
         tail = head;        
     }
     else
@@ -185,6 +243,7 @@ void GLinkedList<T>::add( T value )
 
         tail = newNode;
     }
+
     numElem++;
 }
 
@@ -194,10 +253,28 @@ void GLinkedList<T>::add( T value )
 template<typename T>
 T GLinkedList<T>::get( int index )
 {
+    if ( index == ultimaPosLeida )
+        return ptrUltimaPosLeida->data;
+
     GLinkedListNode<T> *nodo = getNode(index);
     
     return nodo->data;
 }
+
+/**
+ * Retorna un valor de la lista
+ */
+template<typename T>
+T GLinkedList<T>::getLast()
+{
+    if ( tail != NULL )
+        return tail->data;
+
+    GLinkedListNode<T> *nodo = getNode(numElem-1);
+    
+    return nodo->data;
+}
+
 
 /**
  * Establece el valor de un elemento de la lista
@@ -209,21 +286,55 @@ void GLinkedList<T>::set( int index, T value )
     nodo->data = value;
 }
 
+
+/**
+ * Retorna la posicion de un elemento en la lista
+ */
+template<typename T>
+int GLinkedList<T>::indexOf( T value )
+{
+    int n = size();
+    T valor;
+    for(int i=0; i < n; i++ )
+    {
+        valor = get(i);
+        if ( valor == value )
+            return i;
+    }
+
+    return -1;
+}
+
 /**
  * Retorna el puntero a un nodo
  */
 template<typename T>
-GLinkedListNode<T> *GLinkedList<T>::getNode( int index )
+GLinkedListNode<T> *GLinkedList<T>::getNode( int index ) 
 {
     if (( index < 0 ) || ( index >= numElem ))
         throw std::out_of_range("Inidex out of range");
 
-    GLinkedListNode<T> *nodo = head;
-    while( index > 0 )
+    GLinkedListNode<T> *nodo;
+    int pos;
+        
+    if (( ultimaPosLeida >= 0 ) &&( index > ultimaPosLeida ))
+    {
+        pos = index - ultimaPosLeida;
+        nodo = ptrUltimaPosLeida;
+    }
+    else
+    {
+        pos = index;
+        nodo = head;
+    }
+
+    while( pos > 0 )
     {
         nodo = nodo->next;
-        index--;
+        pos--;
     }
+    ultimaPosLeida = index;
+    ptrUltimaPosLeida = nodo;
 
     return nodo;
 }
@@ -235,6 +346,13 @@ template<typename T>
 void GLinkedList<T>::remove( int index )
 {
     GLinkedListNode<T> *nodo = getNode(index);
+
+    if ( nodo == NULL )
+    {
+        cout << "Error nodo NULL" << endl;
+        nodo = getNode(index);
+    }
+
 
     if ( nodo == head )
     {
@@ -261,10 +379,18 @@ void GLinkedList<T>::remove( int index )
         nodo->next->prev = nodo->prev; 
     }
 
+    // cout << "Borrando " << nodo << endl;
     delete nodo;
+
+    if ( index <= ultimaPosLeida )
+    {
+        ultimaPosLeida = -1;
+        ptrUltimaPosLeida = NULL;
+    }
     
     numElem--;
 }
+
 
 /**
  * Remueve el ultimo elemento
@@ -272,31 +398,43 @@ void GLinkedList<T>::remove( int index )
 template<typename T>
 void GLinkedList<T>::removeLast()
 {
-    if ( numElem == 0 )
+    if ( numElem == 0 ) 
         return;
 
-    GLinkedListNode<T> *nodo = tail;
+    remove(numElem-1);
+
+    // if ( numElem == 0 )
+    //     return;
+
+    // GLinkedListNode<T> *nodo = tail;
    
-    if ( tail == head )
-    {
-        head = NULL;
-        tail = NULL;
-    }
-    else
-    {
-        tail = tail->prev;
-    }
+    // if ( tail == head )
+    // {
+    //     head = NULL;
+    //     tail = NULL;
+    // }
+    // else
+    // {
+    //     tail = tail->prev;
+    //     if ( tail->prev != NULL )
+    //     {
+    //         tail->prev->next = NULL;
+    //     }
+    // }
 
-    numElem--;
+    // ultimaPosLeida = -1;
+    // ptrUltimaPosLeida = NULL;
 
-    delete nodo;
+    // numElem--;
+
+    // delete nodo;
 }
 
 /**
  * Retorna la cantidad de elementos de la lista
  */
 template<typename T>
-int GLinkedList<T>::size()
+int GLinkedList<T>::size() const
 {
     return numElem;
 }   
@@ -309,7 +447,7 @@ GLinkedList<T> GLinkedList<T>::getClone()
 {
     GLinkedList<T> rpta;
 
-    rpta.addAll(*this);
+    rpta.addAll(this);
 
     return rpta;
 }
@@ -318,7 +456,7 @@ GLinkedList<T> GLinkedList<T>::getClone()
  * Agrega todos los elementos de una lista a la lista actual
  */
 template<typename T>
-void GLinkedList<T>::addAll( GLinkedList<T> list )
+void GLinkedList<T>::addAll( GLinkedList<T> &list )
 {
     int n = list.size();
     for(int i=0;i<n;i++)
@@ -342,11 +480,33 @@ T *GLinkedList<T>::getAddr( int index )
  * Retorna la direccion de memoria del ultimo elemento de la lista
  */
 template<typename T>
-T *GLinkedList<T>::getAddrUltimo()
+T *GLinkedList<T>::getAddrUltimo() 
 {
     if ( tail == NULL ) return NULL;
 
     return &tail->data;
+}
+
+
+/**
+ * Copia los valores de una lista a otra
+ */
+template<typename T>
+GLinkedList<T>& GLinkedList<T>::operator=(const GLinkedList<T>& other)
+{
+    int i,n;
+    GLinkedListNode<T> *nodoBase;
+    reset();
+    
+    n = other.size();
+    nodoBase = other.head;
+    for(i=0;i<n;i++)
+    {
+        add(nodoBase->data);
+        nodoBase = nodoBase->next;
+    }
+
+    return *this;
 }
 
 

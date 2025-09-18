@@ -66,6 +66,62 @@ class GStringUtils
          * Retorna la conversion de una cadena de texto a pura letra mayuscula
          */
         static string toUpperCase( string cadena );
+
+        /**
+         * Agrega un atributo JSON a una cadena que almacena un JSON
+         *      cadena:
+         *          Cadena que tiene el JSON a la que se le agrega el atributo
+         * 
+         *      atributo:
+         *          Nombre del atributo JSON
+         * 
+         *      valor:
+         *          Valor del atributo
+         * 
+         *      esNumerico:
+         *          Indica si el valor es numerico (true) y no se deben agregar comillas al rededor
+         *          del valor, o es string (false) para el que se debe agregar comillas al rededor
+         *          del valor
+         * 
+         *      agregaFinLinea:
+         *          Indica si se debe o no agregar un fin de linea o caracter \n
+         *      
+         */
+        static void addJsonAtt( string *cadena, string atributo, string valor, bool esNumerico, bool agregaFinLinea = true );
+
+        /**
+         * Agrega un atributo JSON a una cadena que almacena un JSON
+         *      cadena:
+         *          Cadena que tiene el JSON a la que se le agrega el atributo
+         * 
+         *      atributo:
+         *          Nombre del atributo JSON
+         * 
+         *      valor:
+         *          Valor del atributo
+         * 
+         *      esNumerico:
+         *          Indica si el valor es numerico (true) y no se deben agregar comillas al rededor
+         *          del valor, o es string (false) para el que se debe agregar comillas al rededor
+         *          del valor
+         * 
+         *      agregaFinLinea:
+         *          Indica si se debe o no agregar un fin de linea o caracter \n
+         *      
+         */
+        static void addJsonAtt( string *cadena, string atributo, string *valor, bool esNumerico,bool agregaFinLinea = true );
+
+
+        /**
+         * Convierte un valor decimal a un string con una cantidad de decimales de presicion
+         */
+        static string to_string_fixed( float valor, int decimales );
+
+         /**
+         * Convierte un valor decimal a un string con una cantidad de decimales de presicion
+         */
+        static string to_string_fixed( double valor, int decimales );
+    
 };
 
 #endif

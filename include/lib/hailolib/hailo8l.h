@@ -152,10 +152,16 @@ class Hailo8LRunner : public GThread
          * Ejecuta la inferencia sobre los datos que se pasan
          * 
          *      data : puntero con los datos
+         *          En caso se dese hacer la inferencia de dos imagenes, este buffer debera
+         *          tener los datos continuos uno detras del otro.
          * 
          *      dataSize : cantidad de datos que tiene el puntero
+         * 
+         *      num_infeencias : numero de inferencias o datos contenidos en el puntero de data
+         *          Si por ejemplo se dese ejecutar la inferencia para 2 imagenes, este parametro
+         *          debe tener el valor 2.
          */
-        bool ejecutarInferencia( uint8_t *data, uint32_t dataSize );
+        bool ejecutarInferencia( uint8_t *data, uint32_t dataSize, uint32_t num_inferencias = 1 );
 
         /**
          * Imprime la informacion sobre el stream de salida
@@ -163,7 +169,7 @@ class Hailo8LRunner : public GThread
         void printInfoStreamSalida();
 
         /**
-         * Convierte un valor quantizado a float
+         * Convierte un valor quantizado a float donde el valor origina es entero 8 bits sin signo
          */
         float dequantize(uint8_t value, hailo_quant_info_t *quant_info );
 
@@ -249,6 +255,13 @@ class Hailo8LRunner : public GThread
          * Cantidad de datos de la data para hacer inferencia
          */
         uint32_t inferDataSize;
+
+        /**
+         * Cantidad de datos que se pasan.
+         * EN caso se hayan mandado dos imagenes para ejecutar inferencia sobre ellas
+         * de manera secuencial, este valor debe ser 2
+         */
+        uint32_t inferNumber;
 };
 
 

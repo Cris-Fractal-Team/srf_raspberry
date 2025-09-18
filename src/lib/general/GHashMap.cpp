@@ -279,7 +279,7 @@ int GHashMap::getIndiceParam( string varName )
     num = lstClaves.size();
     for(int i = 0 ; i < num; i++ )
     {
-        nombre = lstClaves[i];
+        nombre = lstClaves[i];        
         if ( nombre.compare(varName) == 0 )
         {
             return i;

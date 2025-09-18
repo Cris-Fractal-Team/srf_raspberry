@@ -42,9 +42,31 @@ class ProcesoRecFacial
         IdentificadorPerHailo universoPersonas;
 
         /**
+         * Numero total de eventos 
+         */
+        int numIndentificacionesMin;
+
+        /**
+         * Indica si se debe o no extraer una zona cuadrada en la que este
+         * centrado el rostro detectado
+         */
+        string encuadrarRostros;
+
+        /**
+         * Ruta del modelo de red neuronal a usar para generar la descripcion facial
+         */
+        string pathModeloDescFacial;
+
+        /**
+         * Nombre de la ultima capa o capa de salida del modelo 
+         * para calcular el descriptor facial
+         */
+        string nombreCapaSalidaRedFacial;
+
+        /**
          * Indica si se debe o no invertira verticalmente las imagenes
          */
-        bool invertirVertical;
+        bool invertirVertical;       
         
         /**
          * Ancho minimo de un rostro para ser procesado
@@ -106,6 +128,11 @@ class ProcesoRecFacial
          * Tolerancia o acuracy para las detecciones
          */
         float toleranciaDetec;   
+
+        /**
+         * Factor para calcular contraste 
+         */
+        float paramContraste;
         
         /**
          * Tiempo en el que se debe reportar a una persona si es que ella esta mucho
@@ -115,9 +142,45 @@ class ProcesoRecFacial
         long long tiempoReEvento;
 
         /**
+         * Indica si se debe usar o no distancia euclideana para calcular similaridad
+         */
+        bool usarDistEuclideana;
+
+        /**
+         * ID del siguiente desconocido
+         */
+        long long idDesconocidoSgte;
+
+        /**
+         * Cantidad de segundos maxima que puede estar una persona no
+         * reconocida sin que se le vuelva a hacer una deteccion
+         */
+        int tiempoMaxNoReconocido;
+
+        /**
+         * Factor de compresion de JPEG el valor va de 0 a 100 , 100 maxima calidad
+         */
+        int compresionJpeg;
+
+        /**
+         * Indica si se debe o no reportar personas desconocidas
+         */
+        bool reportarDesconocidos;
+
+        /**
          * Ruta del archivo de parametros
          */
         string pathParametros;
+
+        /**
+         * Posicion Inicial X de la region de interes
+         */
+        int regionInteresInicioX;
+
+        /**
+         * Posicion Final X de la region de interes
+         */
+        int regionInteresFinX;
         
         /**
          * Servidor web que permite configurar el dispositivo
@@ -211,13 +274,23 @@ class ProcesoRecFacial
          * Dibuja las caras encontradas
          * Retorna la imagen que se debe enviar al visor
          */
-        GImage dibujaCaras( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras );
+        GImage dibujaCaras( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras  );
 
         /**
          * Notifica en caso se necesarios a un servidor de la ocurrencia de
          * una o varias detecciones
          */
         void notificaDetecciones( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras );
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaX;
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaY;
 };
 
 

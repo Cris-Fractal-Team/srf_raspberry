@@ -21,6 +21,14 @@ int DeteccionCaraHailo::getAltura()
 }
 
 /**
+ * Area del a deteccion
+ */
+int DeteccionCaraHailo::getArea()
+{
+    return getAncho() * getAltura();
+}
+
+/**
  * Retorna el punto central del area detectada
  */
 PuntoHailo DeteccionCaraHailo::getCentro()
@@ -37,7 +45,7 @@ PuntoHailo DeteccionCaraHailo::getCentro()
  * Agrega un valor a las coordenadas x y otro a las coordenadas y
  * de todos los puntos de la cara
  */
-void DeteccionCaraHailo::desplazaPtosCara( int deltaX, int deltaY )
+void DeteccionCaraHailo::desplazaPtosCara( float deltaX, float deltaY )
 {
     ojoIzq.x+= deltaX;
     ojoDer.x+= deltaX;
@@ -52,6 +60,20 @@ void DeteccionCaraHailo::desplazaPtosCara( int deltaX, int deltaY )
     bocaDer.y+= deltaY;
 }
 
+
+/**
+ * Agrega un valor a las coordenadas x y otro a las coordenadas y
+ * de los puntos de la region de detecion
+ */
+void DeteccionCaraHailo::desplazaRegion( float deltaX, float deltaY )
+{
+    ptoSupIzq.x+= deltaX;
+    ptoSupIzq.y+= deltaY;
+    ptoInfDer.x+= deltaX;
+    ptoInfDer.y+= deltaY;
+}
+
+
 /**
  * Valida si un punto (x,y) esta dentro de la deteccion
  */
@@ -65,11 +87,241 @@ bool DeteccionCaraHailo::contienePunto( int x, int y )
 }
 
 /**
+ * Calcula la intereccion sobre la union de dos detecciones
+ */
+float DeteccionCaraHailo::calcularIoU( DeteccionCaraHailo *det )
+{
+    // Coordenadas de la intersección
+    float xLeft   = std::max(ptoSupIzq.x, det->ptoSupIzq.x);
+    float yTop    = std::max(ptoSupIzq.y, det->ptoSupIzq.y);
+    float xRight  = std::min(ptoInfDer.x, det->ptoInfDer.x);
+    float yBottom = std::min(ptoInfDer.y, det->ptoInfDer.y);
+
+    // Si no hay intersección
+    if (xRight < xLeft || yBottom < yTop)
+        return 0.0f;
+
+    int interArea = (xRight - xLeft) * (yBottom - yTop);
+
+    int areaA = getAncho() * getAltura();
+    int areaB = getAncho() * getAltura();
+
+    float iou = static_cast<float>(interArea) / (areaA + areaB - interArea);
+    return iou;
+}
+
+/**
+ * Valida si al cara esta de perfil
+ */
+bool DeteccionCaraHailo::caraDePerfil()
+{
+    float minX,maxX;
+    float puntoMedioOjos = (ojoIzq.x + ojoDer.x )/2;
+    float deltaOjos = abs(ojoIzq.x - ojoDer.x)/4;
+    
+    minX = ojoIzq.x - deltaOjos;
+    maxX = ojoDer.x + deltaOjos;
+
+    if ( ( nariz.x >= minX ) && ( nariz.x <= maxX ))
+        return false;
+
+    return true;
+}
+
+/**
+ * Valida si al cara esta de perfil.
+ * No se analiza si la cara esta mirando hacia arriba o hacia abajo
+ */
+bool DeteccionCaraHailo::caraFrontal( std::vector<cv::Point2f> *lstPuntosReferencia, cv::Mat transAlineacion, float afinidadMaxima )
+{
+    // float minX,maxX;
+    // float puntoMedioOjos = (ojoIzq.x + ojoDer.x )/2;
+    // float puntoMedioBoca = (bocaIzq.x + bocaDer.x )/2;    
+    
+    // float deltaOjos = abs(ojoIzq.x - ojoDer.x)/4;
+    // float deltaBoca = abs(bocaIzq.x - bocaDer.x)/4;
+        
+    // float puntoMedio = getAncho()/2;
+    // float deltaCentroOjos = puntoMedio-puntoMedioOjos;
+    // float deltaCentroBoca = puntoMedio-puntoMedioBoca;
+    // float deltaCentro = puntoMedio / 4;
+    // float deltaCentroNariz = nariz.x - puntoMedio;
+
+    // // valida si el centro de los ojos no esta muy desviado del centro de la cara
+    // if ( abs(deltaCentroOjos) > deltaCentro )
+    //     return false;
+
+    // // valida si el centro de la boca no esta muy desviado del centro de la cara
+    // if ( abs(deltaCentroOjos) > deltaCentro )
+    //     return false;
+    
+    // // valida si la nariz no esta muy desviada del centro de la cara
+    // // if ( abs(deltaCentroNariz) > (puntoMedio/3) )
+    // //     return false;
+
+    // // valida que la nariz no este muy desviada del centro de los ojos
+    // minX = ojoIzq.x - deltaOjos;
+    // maxX = ojoDer.x + deltaOjos;
+
+    // if ( ( nariz.x < minX ) || ( nariz.x > maxX ))
+    //     return false;
+
+    // // valida que la nariz no este muy desviada del centro de la boca
+    // minX = bocaIzq.x - deltaOjos;
+    // maxX = bocaDer.x + deltaOjos;
+    
+    // if ( ( nariz.x < minX ) || ( nariz.x > maxX ))    
+    //     return false;
+    
+    // return true;
+
+    std::vector<cv::Point2f> lstPuntos;
+    cv::Point2f p, pRef;
+
+    lstPuntos.push_back(cv::Point2f(ojoIzq.x, ojoIzq.y));
+    lstPuntos.push_back(cv::Point2f(ojoDer.x, ojoDer.y));
+    lstPuntos.push_back(cv::Point2f(nariz.x, nariz.y));
+    lstPuntos.push_back(cv::Point2f(bocaIzq.x, bocaIzq.y));
+    lstPuntos.push_back(cv::Point2f(bocaDer.x, bocaDer.y));
+
+    double se = 0.0;
+
+    for ( int i=0; i<5; i++)
+    {
+        p = lstPuntos[i];
+        pRef = lstPuntosReferencia->at(i);
+
+        double x = transAlineacion.at<double>(0,0)*p.x + transAlineacion.at<double>(0,1)*p.y + transAlineacion.at<double>(0,2);
+        double y = transAlineacion.at<double>(1,0)*p.x + transAlineacion.at<double>(1,1)*p.y + transAlineacion.at<double>(1,2);
+        double dx = x - pRef.x;
+        double dy = y - pRef.y;
+        se += dx*dx + dy*dy;
+    }
+
+    double afinidad = std::sqrt(se/5.0);
+
+    // cout << "Afinidad Frontal: " << afinidad << " VS " << afinidadMaxima <<  endl;
+
+    if ( afinidad > afinidadMaxima )
+        return false;
+
+    return true;
+}
+
+
+/**
+ * Retorna el bounding box o caja que redea a la deteccion
+ * con formato soportado por opencv
+ */
+cv::Rect DeteccionCaraHailo::getOpenCV2DRectBoundingBox()
+{
+    Rect rpta = Rect(ptoSupIzq.x, ptoSupIzq.y, getAncho(), getAltura());
+    return rpta;
+}
+
+
+/**
+ * Ajusta las cooredanas de la deteccion para que sea un cuadrado
+ * tomando como base la dimension mayor del rostro
+ * 
+ *  param anchoMax : ancho de la imagen en la que se hizo la deteccion
+ * 
+ *  param alturaMax : altura de la imagen en la que se hizo la deteccion
+ */
+void DeteccionCaraHailo::ajustarCuadrado( int anchoMax, int alturaMax )
+{
+    int ancho = getAncho();
+    int altura = getAltura();
+    int delta,deltaMed;
+    
+    if ( ancho > altura )
+    {
+        delta = ancho-altura;
+        deltaMed = delta / 2;
+
+        ptoSupIzq.y -= deltaMed;
+        ptoInfDer.y += deltaMed;
+
+        if ( ptoSupIzq.y < 0 ) 
+        {
+            ptoInfDer.y+= -ptoSupIzq.y;
+            ptoSupIzq.y = 0;
+        }
+        else
+        if ( ptoInfDer.y >= alturaMax )
+        {
+            delta = ptoInfDer.y - alturaMax + 1;
+            ptoSupIzq.y -= delta;
+            ptoInfDer.y -= delta;
+        }
+    }
+    else
+    if ( altura > ancho )
+    {
+        delta = altura-ancho;
+        deltaMed = delta / 2;
+
+        ptoSupIzq.x -= deltaMed;
+        ptoInfDer.x += deltaMed;
+
+        if ( ptoSupIzq.x < 0 ) 
+        {
+            ptoInfDer.x+= -ptoSupIzq.x;
+            ptoSupIzq.x = 0;
+        }
+        else
+        if ( ptoInfDer.x >= anchoMax )
+        {
+            delta = ptoInfDer.x - anchoMax + 1;
+            ptoSupIzq.x -= delta;
+            ptoInfDer.x -= delta;
+        }
+    }
+}
+
+/**
+ * Ajusta las cooredanas de la deteccion para que sea un cuadrado
+ * tomando como base la dimension minima
+ * 
+ *  param anchoMax : ancho de la imagen en la que se hizo la deteccion
+ * 
+ *  param alturaMax : altura de la imagen en la que se hizo la deteccion
+ */
+void DeteccionCaraHailo::ajustarMiniCuadrado( int anchoMax, int alturaMax )
+{
+    int ancho = getAncho();
+    int altura = getAltura();
+    int delta,deltaMed;
+    
+    if ( ancho > altura )
+    {
+        delta = ancho-altura;
+        deltaMed = delta / 2;
+
+        ptoSupIzq.x += deltaMed;
+        ptoInfDer.x -= deltaMed;        
+    }
+    else
+    if ( altura > ancho )
+    {
+        delta = altura-ancho;
+        deltaMed = delta / 2;
+
+        ptoSupIzq.y += deltaMed;
+        ptoInfDer.y -= deltaMed;
+    }
+}
+
+
+/**
  * Constructor
  */
 DetectorCarasHailoSCRFD::DetectorCarasHailoSCRFD()
 {
     nms_iou_thresh = 0.7;
+
+    previsualizaImgParaDeteccion = false;
+    esperarPrevImgParaDeteccion = false;
 }
 
 
@@ -95,17 +347,48 @@ int DetectorCarasHailoSCRFD::cargarModelo( string path )
  */
 bool DetectorCarasHailoSCRFD::ejecutar( cv::Mat imagen )
 {
+    int deltaBorde;
+
     // auto inicio = std::chrono::high_resolution_clock::now();
     anchoImgOrig = imagen.cols;
     alturaImgOrig = imagen.rows;
 
+    // hacemos que la imagen sea cuadrada
+    if ( anchoImgOrig > alturaImgOrig )
+    {        
+        deltaBorde = (anchoImgOrig - alturaImgOrig) / 2;
+        cv::Mat cuadrada(anchoImgOrig, anchoImgOrig, CV_8UC3, cv::Scalar(127, 127, 127));
+        cv::Mat roi = cuadrada(cv::Rect(0, deltaBorde, anchoImgOrig, alturaImgOrig));
+        imagen.copyTo(roi);
+        imagen = cuadrada;
+    }
+    else
+    if ( alturaImgOrig > anchoImgOrig )
+    {
+        deltaBorde = (alturaImgOrig - anchoImgOrig ) / 2;
+        cv::Mat cuadrada(alturaImgOrig, alturaImgOrig, CV_8UC3, cv::Scalar(0, 0, 0));
+        cv::Mat roi = cuadrada(cv::Rect(deltaBorde, 0, anchoImgOrig, alturaImgOrig));
+        imagen.copyTo(roi);
+        imagen = cuadrada;
+    }
+    
     // redimensiona la imagen a la resolucion de entrada
-    cv::Mat imagenRedim;
     cv::resize(imagen, imagenRedim, cv::Size(imgModeloAncho,imgModeloAltura));   
+
+    // muestra la imagen que se envia al detector de rostros
+    if ( previsualizaImgParaDeteccion == true )
+    {
+        cv::imshow("Cuadro Deteccion", imagenRedim);
+        if ( esperarPrevImgParaDeteccion == true )
+        {
+            cv::waitKey(0);
+        }
+    }
 
     // convierte la imagen a RGB
     cv::Mat imagenRgb;
     cv::cvtColor(imagenRedim, imagenRgb, cv::COLOR_BGR2RGB);
+
     
     // crea el buffer para ingresar la imagen
     std::vector<uint8_t> input_buffer(imagenRgb.total() * imagenRgb.elemSize());
@@ -179,7 +462,7 @@ void DetectorCarasHailoSCRFD::extraeDetec( vector<DeteccionCaraHailo> *lstDet, s
     numAnclasCelda = 2;
     anchor_size = anchoImg / ((float)width);
 
-    int numTotalAnclas = width*height*numAnclasCelda;
+    // int numTotalAnclas = width*height*numAnclasCelda;
 
     int i=0;
     
@@ -302,12 +585,48 @@ std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::getDetecciones_2_5g( fl
     float escala2[2] = {16,16};
     float escala3[2] = {32,32};
 
-    float factorEscalaX = anchoImgOrig / 640.0;
-    float factorEscalaY = alturaImgOrig / 640.0;            
+    float factorEscalaX;
+    float factorEscalaY;   
+    int deltaBorde;         
 
+    if ( anchoImgOrig >= alturaImgOrig )
+    {
+        deltaBorde = (anchoImgOrig - alturaImgOrig)/2;
+        factorEscalaX = anchoImgOrig / 640.0;
+        factorEscalaY = factorEscalaX;
+    }
+    else
+    {
+        deltaBorde = (alturaImgOrig-anchoImgOrig)/2;
+        factorEscalaY = alturaImgOrig / 640.0;            
+        factorEscalaX = factorEscalaY;
+    }
+    
     extraeDetec(&lstDet,"scrfd_2_5g/conv43","scrfd_2_5g/conv42","scrfd_2_5g/conv44",640,640,prec, escala1, factorEscalaX, factorEscalaY);
     extraeDetec(&lstDet,"scrfd_2_5g/conv50","scrfd_2_5g/conv49","scrfd_2_5g/conv51",640,640,prec, escala2, factorEscalaX, factorEscalaY );
     extraeDetec(&lstDet,"scrfd_2_5g/conv56","scrfd_2_5g/conv55","scrfd_2_5g/conv57",640,640,prec, escala3, factorEscalaX, factorEscalaY );
+
+    int n = lstDet.size();
+    DeteccionCaraHailo det;
+
+    for(int i=0; i<n; i++)
+    {
+        det = lstDet[i];        
+        if ( anchoImgOrig >= alturaImgOrig )
+        {   
+            det.desplazaPtosCara(0,-deltaBorde);
+            det.ptoSupIzq.y-= deltaBorde;
+            det.ptoInfDer.y-= deltaBorde;
+        }
+        else
+        {
+            det.desplazaPtosCara(-deltaBorde,0);
+            det.ptoSupIzq.x-= deltaBorde;
+            det.ptoInfDer.x-= deltaBorde;
+
+        }    
+        lstDet[i] = det;
+    }    
 
     lstDetFinal = apply_nms(lstDet, nms_iou_thresh);
 
@@ -329,15 +648,99 @@ std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::getDetecciones_500m( fl
     float escala2[2] = {16,16};
     float escala3[2] = {32,32};
 
-    float factorEscalaX = anchoImgOrig / 640.0;
-    float factorEscalaY = alturaImgOrig / 640.0;  
+    float factorEscalaX;
+    float factorEscalaY;
+    int deltaBorde;            
 
-    extraeDetec(&lstDet,"scrfd_500m/conv27","scrfd_500m/conv26", "scrfd_2_5g/conv25", 640,640,prec, escala1, factorEscalaX, factorEscalaY );
-    extraeDetec(&lstDet,"scrfd_500m/conv33","scrfd_500m/conv32", "scrfd_2_5g/conv34", 640,640,prec, escala2, factorEscalaX, factorEscalaY );
-    extraeDetec(&lstDet,"scrfd_500m/conv39","scrfd_500m/conv38","scrfd_2_5g/conv40", 640,640,prec, escala3, factorEscalaX, factorEscalaY );
+    if ( anchoImgOrig >= alturaImgOrig )
+    {
+        deltaBorde = (anchoImgOrig - alturaImgOrig)/2;
+        factorEscalaX = anchoImgOrig / 640.0;
+        factorEscalaY = factorEscalaX;
+    }
+    else
+    {
+        deltaBorde = (alturaImgOrig-anchoImgOrig)/2;
+        factorEscalaY = alturaImgOrig / 640.0;            
+        factorEscalaX = factorEscalaY;
+    }
+
+    extraeDetec(&lstDet,"scrfd_500m/conv27","scrfd_500m/conv26", "scrfd_500m/conv25", 640,640,prec, escala1, factorEscalaX, factorEscalaY );
+    extraeDetec(&lstDet,"scrfd_500m/conv33","scrfd_500m/conv32", "scrfd_500m/conv34", 640,640,prec, escala2, factorEscalaX, factorEscalaY );
+    extraeDetec(&lstDet,"scrfd_500m/conv39","scrfd_500m/conv38","scrfd_500m/conv40", 640,640,prec, escala3, factorEscalaX, factorEscalaY );
+
+    int n = lstDet.size();
+    DeteccionCaraHailo det;
+
+    for(int i=0; i<n; i++)
+    {
+        det = lstDet[i];        
+        if ( anchoImgOrig >= alturaImgOrig )
+        {   
+            det.desplazaPtosCara(0,-deltaBorde);
+            det.ptoSupIzq.y-= deltaBorde;
+            det.ptoInfDer.y-= deltaBorde;
+        }
+        lstDet[i] = det;
+    }   
 
     return apply_nms(lstDet, nms_iou_thresh);
 }
+
+
+/**
+ * Retorna las detecciones para el modelo 500m
+ * 
+ *      prec : 
+ *          Porcentaje de precicion o accurary esperada
+ */
+std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::getDetecciones_10g( float prec )
+{
+    std::vector<DeteccionCaraHailo> lstDet;
+
+    float escala1[2] = {8,8};
+    float escala2[2] = {16,16};
+    float escala3[2] = {32,32};
+
+    float factorEscalaX;
+    float factorEscalaY;    
+    int deltaBorde;        
+
+    if ( anchoImgOrig >= alturaImgOrig )
+    {
+        deltaBorde = (anchoImgOrig - alturaImgOrig)/2;
+        factorEscalaX = anchoImgOrig / 640.0;
+        factorEscalaY = factorEscalaX;
+    }
+    else
+    {
+        deltaBorde = (alturaImgOrig-anchoImgOrig)/2;
+        factorEscalaY = alturaImgOrig / 640.0;            
+        factorEscalaX = factorEscalaY;
+    }
+
+    extraeDetec(&lstDet,"scrfd_10g/conv42","scrfd_10g/conv41", "scrfd_10g/conv43", 640,640,prec, escala1, factorEscalaX, factorEscalaY );
+    extraeDetec(&lstDet,"scrfd_10g/conv50","scrfd_10g/conv49", "scrfd_10g/conv51", 640,640,prec, escala2, factorEscalaX, factorEscalaY );
+    extraeDetec(&lstDet,"scrfd_10g/conv57","scrfd_10g/conv56","scrfd_10g/conv58", 640,640,prec, escala3, factorEscalaX, factorEscalaY );
+
+    int n = lstDet.size();
+    DeteccionCaraHailo det;
+
+    for(int i=0; i<n; i++)
+    {
+        det = lstDet[i];        
+        if ( anchoImgOrig >= alturaImgOrig )
+        {   
+            det.desplazaPtosCara(0,-deltaBorde);
+            det.ptoSupIzq.y-= deltaBorde;
+            det.ptoInfDer.y-= deltaBorde;
+        }
+        lstDet[i] = det;
+    }   
+
+    return apply_nms(lstDet, nms_iou_thresh);
+}
+
 
 /**
  * Ejecuta non max supression
@@ -402,6 +805,30 @@ std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::detectar_2_5g( GImage i
     return getDetecciones_2_5g(prec);
 }
 
+
+/**
+ * Retorna las detecciones
+ * 
+ *      image:
+ *          Imagen desde la que se hacen las detecciones
+ * 
+ *      prec : 
+ *          Porcentaje de precicion o accurary esperada
+ */
+std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::detectar_10g( GImage image, float prec )
+{
+    errorDeteccion = false;
+    if ( ejecutar(image.imagenOpencv) == false )
+    {
+        vector<DeteccionCaraHailo> rpta;
+        errorDeteccion = true;
+        return rpta;
+    }
+
+    return getDetecciones_10g(prec);
+}
+
+
 /**
  * Retorna las detecciones
  * 
@@ -423,3 +850,5 @@ std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::detectar_500m( GImage i
 
     return getDetecciones_500m(prec);
 }
+
+

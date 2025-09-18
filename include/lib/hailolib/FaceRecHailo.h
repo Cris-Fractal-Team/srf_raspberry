@@ -12,6 +12,8 @@
 #include "lib/hailolib/DetectorCaraHaloScrfd.h"
 #include "lib/graphics/GDibujo.h"
 
+// Referencia simple para evitar referencias circulares
+class TrackedDetectionHailo;
 
 /**
  * Seleccionar el tipo de dato con el que se desea trabajar
@@ -31,7 +33,6 @@
     #define SUM_SIMD vaddvq_f16
     #define DUP_SIMD vdupq_n_f16
     #define STORE_SIMD vst1q_f16
-    #define NUMELEM_VECTOR_SIMD 8
 
 #elif defined USE_INT16
     typedef int16_t SIMD_TYPE;
@@ -57,6 +58,10 @@
     #define NUMELEM_VECTOR_SIMD 4
 #endif
 
+#define NUM_ELEMS_DESC_FACIAL 512
+
+class UnivIdenPersona;
+
 /**
  * Representa la deteccion de una persona
  */
@@ -78,7 +83,14 @@ class IdentificacionPersona
         /**
          * Vector de la descripcion facial
          */
-        vector<SIMD_TYPE> vecDescripcion;
+        SIMD_TYPE vecDescripcion[NUM_ELEMS_DESC_FACIAL];
+
+        /**
+         * Destructor
+         */
+        ~IdentificacionPersona()
+        {            
+        }
 };
 
 /**
@@ -87,6 +99,16 @@ class IdentificacionPersona
 class DescPersonaExterno
 {
     public:
+
+        /**
+         * Constructor
+         */
+        DescPersonaExterno()
+        {
+            norm_coseno = 0.0;
+            norm_coceno_calculado = false;
+        }
+
 
         /**
          * Codigo con el que se identifica a la persona
@@ -107,9 +129,41 @@ class DescPersonaExterno
         bool anonimo;
 
         /**
+         * Indica si el valor de norm_coceno se inicializo
+         */
+        bool norm_coceno_calculado;
+
+        /**
+         * Ultima fecha en la que se detecto a la persona en ms
+         */
+        long long ultimaFechaDetectada;
+
+        /**
          * Vector de la descripcion facial
          */
-        vector<SIMD_TYPE> vecDescripcion;        
+        SIMD_TYPE vecDescripcion[NUM_ELEMS_DESC_FACIAL];        
+
+        /**
+         * Factor empleado para calcular la similaridad de coceno
+         */
+        float norm_coseno;
+
+        /**
+         * Lista de referencia a personas que tuvieron coincidencia
+         * con esta descripcion externa
+         */
+        GLinkedList<UnivIdenPersona *> lstPersonas ;
+
+        /**
+         * Elimina las referencias que los universos de persona
+         * tienen de este descriptor externo
+         */
+        void reset();
+
+        /**
+         * Normaliza el descriptor
+         */
+        void normaliza();
 };
 
 
@@ -154,6 +208,11 @@ class UnivIdenPersona
         GLinkedList<GrupoIdenPersona>lstGrupoIden;
 
         /**
+         * ID unico del objeto, usado para el operador de igualdad
+         */
+        long long id;
+
+        /**
          * Indice del grupo que tiene la mayor cantidad
          * de identificaciones, motivo por el cual se considera
          * que una cara corresponde a esa peronsa
@@ -185,6 +244,18 @@ class UnivIdenPersona
          */
         DescPersonaExterno* getDatosPerIden();
 
+
+        /**
+         * Retorna el promedio de las similaridades o distancias de comparacion
+         * del grupo actual
+         */
+        float getPromedioComparacion();
+
+        /**
+         * Retorna la cantidad de identificaciones que tiene el grupo actual
+         */
+        int getNumIdentificaciones();
+
         /**
          * Constructor
          */
@@ -205,6 +276,21 @@ class UnivIdenPersona
          * 
          */
         void agregaIdentif( DescPersonaExterno *descExterno, IdentificacionPersona iden, long long fecDet );
+
+        /**
+         * Borra las referencias a descriptor externo
+         */
+        void borrarDescPersonaExterno( DescPersonaExterno *descExterno );
+
+        /**
+         * Retorna la ultima identificacion
+         */
+        IdentificacionPersona getUltimaIdentificacion();
+
+        /**
+         * Libera RAM del objeto
+         */
+        void reset();
 };
 
 
@@ -245,7 +331,7 @@ class CaraDescrita
         /**
          * descriptor facial
          */
-        vector<SIMD_TYPE> descriptor;
+        SIMD_TYPE descriptor[NUM_ELEMS_DESC_FACIAL];
 
         /**
          * Indica si se calculo o no el descriptor facial
@@ -284,9 +370,65 @@ class FaceRecHailo
         bool errorCalculo;
 
         /**
+         * Similaridad frontal maxima
+         */
+        float similaridadFrontal;
+
+        /**
          * Runner empleado por la clase
          */
         Hailo8LRunner runner;
+
+        /**
+         * Tamaño maximo del batch para procesar inferencias en bloque
+         */
+        size_t maxBatchSize;
+
+        /**
+         * Nombre de la ultima capa del modelo de red neuronal
+         */
+        string nombreUltimaCapaModelo;
+
+        /**
+         * Factor para calcular el contraste
+         */
+        float paramContraste;
+
+        /**
+         * Indica si se debe visualizar el rostro original
+         * y su version transformada en posicion frontal
+         */
+        bool previsualizaImgReconocimiento;
+
+        /**
+         * Indica si se debe guardar las caras frontales
+         * alineadas, ellas se pueden usar para entrenamiento
+         * o mejora en modelos de reconocimiento
+         */
+        bool guardarCarasFrontalesAlineadas;
+
+
+        /**
+         * Indica si se debe esperar la presion de una tecla
+         * luego que se muestran las imagenes que
+         * se envian para reconocimiento
+         */
+        bool esperarPrevImgReconocimiento;
+
+        /**
+         * Indica si se debe guardar 
+         */
+        bool guardarPrevImgReconocimiento;
+
+        /**
+         * Codigo de seguimiento
+         */
+        int secuencialImgReconocimiento;
+
+        /**
+         * Prefijo de las imagenes que se guardan en disco
+         */
+        string prefijoImgReconocimiento;
 
         /**
          * Constructor
@@ -309,14 +451,29 @@ class FaceRecHailo
         bool ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet );
 
         /**
+         * Ejecuta la deteccion
+         */
+        bool ejecutar( GLinkedList<cv::Mat> *lstImagenes, GLinkedList<DeteccionCaraHailo> *lstDetecciones );
+
+
+        /**
          * Extrae el descriptor facial de la ultima inferencia
          */
-        std::vector<SIMD_TYPE>extraeDescriptor();
+        void extraeDescriptor( SIMD_TYPE *descriptor, int offset = 0 );
 
         /**
          * Calcula el descriptor facial para una cara
+         * Retorna true en caso de exito, false en caso de error
          */
-        std::vector<SIMD_TYPE>calculaDescriptor( GImage imagen, DeteccionCaraHailo deteccion );
+        bool calculaDescriptor( GImage imagen, DeteccionCaraHailo deteccion, SIMD_TYPE *descriptor );
+
+        /**
+         * Calcula el descriptor facial para una cara
+         * Retorna true en caso de exito, false en caso de error
+         */
+        // bool calculaDescriptor( GLinkedList<GImage> *lstImagenes, GLinkedList<DeteccionCaraHailo> *lstDetecciones, GLinkedList<SIMD_TYPE *> *lstDescriptores );
+        bool calculaDescriptor( GLinkedList<TrackedDetectionHailo *> *lstDeteccionesTrack );
+
 
         /**
          * Extrae el descriptor facial de la ultima inferencia en formato de OpenCV
@@ -329,6 +486,18 @@ class FaceRecHailo
          * Lista de puntos de referencia
          */
         std::vector<cv::Point2f> lstPuntosReferencia;
+
+        /**
+         * Calcula la matriz de alineacion para un rostro detectado
+         */
+        cv::Mat calculaMatrizAlineacion( DeteccionCaraHailo deteccion );
+
+        /**
+         * Lista de indices de rostros que se han enviado a procesar
+         * no todos los rostros se procesan porque algunos no estan cercanos
+         * a ser frontales
+         */
+        GLinkedList<int>lstIndicesRostrosProc;
 
         /**
          * Ancho de las imagens aceptadas por el modelo
@@ -344,7 +513,7 @@ class FaceRecHailo
          * Dada una cara detectada , la alinea para ejecutar el reconocimiento
          * facial, usando como dato los puntos de una deteccion previa
          */
-        cv::Mat aliearRostro( cv::Mat fotoCara, DeteccionCaraHailo deteccion );
+        cv::Mat aliearRostro( cv::Mat fotoCara, DeteccionCaraHailo deteccion, cv::Mat transformacion );
 
         /**
          * Vector en el que se almacenan los datos de las fotos de caras

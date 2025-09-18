@@ -19,9 +19,9 @@ class PuntoHailo
 {
     public:
         
-        int x;
+        float x;
 
-        int y;
+        float y;
 
 };
 
@@ -91,10 +91,21 @@ class DeteccionCaraHailo
         int getAltura();
 
         /**
+         * Area del a deteccion
+         */
+        int getArea();
+
+        /**
          * Agrega un valor a las coordenadas x y otro a las coordenadas y
          * de todos los puntos de la cara
          */
-        void desplazaPtosCara( int deltaX, int deltaY );
+        void desplazaPtosCara( float deltaX, float deltaY );
+
+        /**
+         * Agrega un valor a las coordenadas x y otro a las coordenadas y
+         * de los puntos de la region de detecion
+         */
+        void desplazaRegion( float deltaX, float deltaY );
 
         /**
          * Retorna el punto central del area detectada
@@ -105,6 +116,47 @@ class DeteccionCaraHailo
          * Valida si un punto (x,y) esta dentro de la deteccion
          */
         bool contienePunto( int x, int y );
+
+        /**
+         * Calcula la intereccion sobre la union de dos detecciones
+         */
+        float calcularIoU( DeteccionCaraHailo *det );
+
+        /**
+         * Ajusta las cooredanas de la deteccion para que sea un cuadrado
+         * tomando como base la dimension mayor del rostro
+         * 
+         *  param anchoMax : ancho de la imagen en la que se hizo la deteccion
+         * 
+         *  param alturaMax : altura de la imagen en la que se hizo la deteccion
+         */
+        void ajustarCuadrado( int anchoMax, int alturaMax );
+
+        /**
+         * Ajusta las cooredanas de la deteccion para que sea un cuadrado
+         * tomando como base la dimension minima del rostro
+         * 
+         *  param anchoMax : ancho de la imagen en la que se hizo la deteccion
+         * 
+         *  param alturaMax : altura de la imagen en la que se hizo la deteccion
+         */
+        void ajustarMiniCuadrado( int anchoMax, int alturaMax );
+
+        /**
+         * Retorna el bounding box o caja que redea a la deteccion
+         * con formato soportado por opencv
+         */
+        cv::Rect getOpenCV2DRectBoundingBox();
+
+        /**
+         * Valida si al cara esta de perfil
+         */
+        bool caraDePerfil();
+
+        /**
+         * Valida si la cara es muy frontal
+         */
+        bool caraFrontal( std::vector<cv::Point2f> *lstPuntosReferencia, cv::Mat transAlineacion, float afinidadMaxima = 4.0 );
 };
 
 
@@ -116,6 +168,29 @@ class DetectorCarasHailoSCRFD
 {
     public:
 
+        /**
+         * Ancho de las imagens aceptadas por el modelo
+         */
+        int imgModeloAncho;
+
+        /**
+         * Altura de las imagens aceptadas por el modelo
+         */
+        int imgModeloAltura;
+
+        /**
+         * Indica si se debe previsualizar la imagen
+         * que se envia al detector de rostros
+         */
+        bool previsualizaImgParaDeteccion;
+
+        /**
+         * Indica si se debe esperar la presion de una tecla
+         * una vez que se ha previsualizado la imagen
+         * que se envia al detector de rostros
+         */
+        bool esperarPrevImgParaDeteccion;
+
         /*
         * Indica si se presento un error en la deteccion
         */
@@ -125,6 +200,11 @@ class DetectorCarasHailoSCRFD
          * Runner empleado por la clase
          */
         Hailo8LRunner runner;
+
+        /**
+         * Ultima imagen redimensionada a la dimension esperada por la red neuronal
+         */
+        cv::Mat imagenRedim;
 
         /**
          * Rango de evluacion del proceso de eliminar
@@ -168,6 +248,18 @@ class DetectorCarasHailoSCRFD
          */
         std::vector<DeteccionCaraHailo> detectar_500m( GImage image, float prec );
 
+        
+        /**
+         * Retorna las detecciones
+         * 
+         *      image:
+         *          Imagen desde la que se hacen las detecciones
+         * 
+         *      prec : 
+         *          Porcentaje de precicion o accurary esperada
+         */
+        std::vector<DeteccionCaraHailo> detectar_10g( GImage image, float prec );
+
 
         /**
          * Retorna las detecciones
@@ -184,6 +276,15 @@ class DetectorCarasHailoSCRFD
          *          Porcentaje de precicion o accurary esperada
          */
         std::vector<DeteccionCaraHailo> getDetecciones_500m( float prec );
+
+
+        /**
+         * Retorna las detecciones
+         * 
+         *      prec : 
+         *          Porcentaje de precicion o accurary esperada
+         */
+        std::vector<DeteccionCaraHailo> getDetecciones_10g( float prec );
 
     private:
         
@@ -229,15 +330,7 @@ class DetectorCarasHailoSCRFD
          */
         float compute_iou(const DeteccionCaraHailo& a, const DeteccionCaraHailo& b);
 
-        /**
-         * Ancho de las imagens aceptadas por el modelo
-         */
-        int imgModeloAncho;
-
-        /**
-         * Altura de las imagens aceptadas por el modelo
-         */
-        int imgModeloAltura;
+        
 
         /**
          * Ancho de la imagen original

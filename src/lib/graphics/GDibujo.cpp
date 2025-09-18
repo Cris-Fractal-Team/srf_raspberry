@@ -226,6 +226,18 @@ GImage::GImage()
     altura = 0;
 }
 
+#ifdef GDIBUJO_USAR_OPENCV
+/**
+ * Constructor
+ */
+GImage::GImage( Mat imgOpenCV )
+{
+    imagenOpencv = imgOpenCV;
+    ancho = imagenOpencv.cols;
+    altura = imagenOpencv.rows;
+}
+#endif
+
 /**
  * Destructor
  */
@@ -249,6 +261,17 @@ GImage::GImage( int ancho, int altura, int formato )
     this->ancho = ancho;
     this->altura = altura;
     this->formato = formato;
+
+    #ifdef GDIBUJO_USAR_OPENCV
+    if ( formato == GDIBUJO_IMAGEN_MODO_RGB )
+    {
+        imagenOpencv = Mat::zeros(altura, ancho, CV_8UC3);
+    }
+    else
+    {
+        imagenOpencv = Mat::zeros(altura, ancho, CV_8UC1);
+    }                  
+    #endif
 }
 
 /**
@@ -288,6 +311,35 @@ bool GImage::isEmpty()
     return false;
 }
 
+/**
+ * Aplica una mejora de contraste a la imagen
+ *
+ *  param clipLimit: Ajustar con valores entre 2 y 4 
+ * 
+ */
+void GImage::aplicarCLAHE( float clipLimit)
+{
+    // Convertir a espacio de color LAB (mejor que YUV o HSV para mejorar contraste)
+    cv::Mat lab;
+    cv::cvtColor(imagenOpencv, lab, cv::COLOR_BGR2Lab);
+
+    // Dividir en canales L, A y B
+    std::vector<cv::Mat> labChannels(3);
+    cv::split(lab, labChannels);
+
+    // Aplicar CLAHE solo al canal L (luminosidad)
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+    clahe->setClipLimit(clipLimit); 
+    clahe->setTilesGridSize(cv::Size(8, 8)); // Tamaño del grid (8x8 es estándar)
+    clahe->apply(labChannels[0], labChannels[0]);
+
+    // Unir los canales y volver a BGR
+    cv::merge(labChannels, lab);
+    cv::Mat outputBGR;
+    cv::cvtColor(lab, outputBGR, cv::COLOR_Lab2BGR);
+
+    imagenOpencv = outputBGR;
+}
 
 /**
  * Genera una copia de la imagen
@@ -316,7 +368,6 @@ GImage GImage::clone()
 GImage GImage::getRect( int x1, int y1, int x2, int y2)
 {
     GImage rpta;
-    int delta;
 
     if ( x1 < 0 ) x1 = 0;
     if ( y1 < 0 ) y1 = 0;
@@ -475,6 +526,245 @@ void GImage::setCharData( char *buffer, int ancho, int altura )
     imagenOpencv = cv::Mat(altura,ancho,CV_8UC3, (unsigned*)buffer);
 
     #endif
+}
+
+ /**
+ * Desplazamiento circular 2D (tipo "roll") para centrar el PSF en (0,0) antes de la DFT
+ */
+void GImage::circShift(const Mat& src, Mat& dst, int shiftY, int shiftX)
+{
+    dst.create(src.size(), src.type());
+    int rows = src.rows, cols = src.cols;
+
+    shiftY = ((shiftY % rows) + rows) % rows; // normaliza
+    shiftX = ((shiftX % cols) + cols) % cols;
+
+    Mat q0(src, Rect(0,          0,           cols-shiftX, rows-shiftY));
+    Mat q1(src, Rect(cols-shiftX,0,           shiftX,      rows-shiftY));
+    Mat q2(src, Rect(0,          rows-shiftY, cols-shiftX, shiftY     ));
+    Mat q3(src, Rect(cols-shiftX,rows-shiftY, shiftX,      shiftY     ));
+
+    Mat d0(dst, Rect(shiftX,     shiftY,      cols-shiftX, rows-shiftY));
+    Mat d1(dst, Rect(0,          shiftY,      shiftX,      rows-shiftY));
+    Mat d2(dst, Rect(shiftX,     0,           cols-shiftX, shiftY     ));
+    Mat d3(dst, Rect(0,          0,           shiftX,      shiftY     ));
+
+    q0.copyTo(d0); q1.copyTo(d1); q2.copyTo(d2); q3.copyTo(d3);
+}
+
+/**
+ * Genera un PSF de "motion blur" (línea anti-aliased) de longitud 'len' y ángulo 'theta' (grados)
+ */
+Mat GImage::makeMotionPSF(int len, double thetaDeg)
+{
+    int k = std::max(3, (len | 1));             // tamaño de kernel (impar)
+    Mat psf = Mat::zeros(k, k, CV_32F);
+
+    // Línea horizontal centrada de longitud 'len'
+    int y = k/2;
+    int x0 = (k - len)/2;
+    int x1 = x0 + len - 1;
+    line(psf, Point(x0, y), Point(x1, y), Scalar::all(1.f), 1, LINE_AA);
+
+    // Rotar a 'thetaDeg'
+    Point2f c(k/2.f, k/2.f);
+    Mat R = getRotationMatrix2D(c, thetaDeg, 1.0);
+    Mat rot;
+    warpAffine(psf, rot, R, psf.size(), INTER_AREA, BORDER_CONSTANT, Scalar::all(0));
+
+    // Normalizar (suma = 1)
+    rot /= sum(rot)[0] + 1e-12f;
+    return rot;
+}
+
+/** 
+ * Convierte PSF (espacio) a OTF (frecuencia) del tamaño de salida 'outSz'
+ */
+void GImage::psf2otf(const Mat& psf, Mat& otf, Size outSz)
+{
+    Mat psfPadded = Mat::zeros(outSz, CV_32F);
+    psf.copyTo(psfPadded(Rect(0,0, psf.cols, psf.rows)));
+    // Mover el centro del PSF al (0,0) antes de la DFT (shifteo circular)
+    Mat psfShifted; circShift(psfPadded, psfShifted, -psf.rows/2, -psf.cols/2);
+
+    Mat planes[] = {psfShifted, Mat::zeros(outSz, CV_32F)};
+    merge(planes, 2, otf);
+    dft(otf, otf, DFT_COMPLEX_OUTPUT);
+}
+    
+/**
+ * Deconvolución de Wiener (1 canal float [0..1])
+ */
+void GImage::wienerDeconvSingle(const Mat& srcGray32, Mat& dstGray32, const Mat& psf, double K)
+{
+    // Tamaño óptimo para DFT (pad con reflejo para reducir "ringing" en bordes)
+    int R = getOptimalDFTSize(srcGray32.rows);
+    int C = getOptimalDFTSize(srcGray32.cols);
+
+    Mat srcPad; copyMakeBorder(srcGray32, srcPad, 0, R - srcGray32.rows,
+                               0, C - srcGray32.cols, BORDER_REFLECT);
+
+    // OTF del PSF
+    Mat H; psf2otf(psf, H, srcPad.size());
+
+    // DFT de la imagen
+    Mat G; {
+        Mat planes[] = {srcPad.clone(), Mat::zeros(srcPad.size(), CV_32F)};
+        merge(planes, 2, G);
+        dft(G, G, DFT_COMPLEX_OUTPUT);
+    }
+
+    // |H|^2 + K
+    Mat planesH[2]; split(H, planesH);
+    Mat mag2; magnitude(planesH[0], planesH[1], mag2); mag2 = mag2.mul(mag2) + (float)K;
+
+    // conj(H)
+    Mat Hconj; {
+        Mat planesC[] = {planesH[0], -planesH[1]};
+        merge(planesC, 2, Hconj);
+    }
+
+    // Numerador = G .* conj(H)
+    Mat numer; mulSpectrums(G, Hconj, numer, 0); // 0: sin conj extra
+
+    // Resultado en frecuencia = numer / (|H|^2 + K)
+    Mat nPlanes[2]; split(numer, nPlanes);
+    nPlanes[0] /= mag2; nPlanes[1] /= mag2;
+    Mat Fhat; merge(nPlanes, 2, Fhat);
+
+    // IDFT
+    Mat rec; dft(Fhat, rec, DFT_INVERSE | DFT_REAL_OUTPUT | DFT_SCALE);
+
+    // Recortar
+    dstGray32 = rec(Rect(0,0, srcGray32.cols, srcGray32.rows)).clone();
+}
+
+/**
+ * Elimina el motion blur
+ */
+void GImage::deblurMotionWiener( int len, double angle, double K )
+{
+    Mat psf = makeMotionPSF(len, angle);
+
+    Mat out;
+    if (imagenOpencv.channels() == 1) {
+        Mat f; imagenOpencv.convertTo(f, CV_32F, 1.0/255.0);
+        Mat r; wienerDeconvSingle(f, r, psf, K);
+        r = min(max(r, 0.0f), 1.0f);
+        r.convertTo(out, CV_8U, 255.0);
+    } else {
+        // Procesar cada canal
+        std::vector<Mat> ch; split(imagenOpencv, ch);
+        std::vector<Mat> chOut(3);
+        for (int i=0;i<3;++i) {
+            Mat f; ch[i].convertTo(f, CV_32F, 1.0/255.0);
+            Mat r; wienerDeconvSingle(f, r, psf, K);
+            r = min(max(r, 0.0f), 1.0f);
+            r.convertTo(chOut[i], CV_8U, 255.0);
+        }
+        merge(chOut, out);
+    }
+
+    imagenOpencv = out;
+}
+
+/**
+ * Aclara un poco la imagen
+ */
+void GImage::sharpenUnsharp( float amount, float radius, float thr)
+{
+    cv::Mat src32, blur32, high, dst32, out;
+    imagenOpencv.convertTo(src32, CV_32F);                          // [0..255] en float
+    cv::GaussianBlur(src32, blur32, cv::Size(0,0), std::max(0.01f, radius));
+
+    high = src32 - blur32;                                 // detalle (alta frecuencia)
+
+    if (thr > 0.0f) 
+    {
+        // Calcula magnitud de detalle y crea máscara 8-bit donde el detalle es BAJO
+        cv::Mat absHigh, gray, mask8u;
+        cv::absdiff(src32, blur32, absHigh);               // CV_32F
+        if (imagenOpencv.channels() == 3) cv::cvtColor(absHigh, gray, cv::COLOR_BGR2GRAY);
+        else gray = absHigh;
+        cv::compare(gray, cv::Scalar(thr), mask8u, cv::CMP_LT); // 255 donde |detalle| < thr
+        high.setTo(0, mask8u);                             // no afilar zonas planas
+    }
+
+    dst32 = src32 + amount * high;                         // aplica realce
+    cv::min(dst32, 255.0f, dst32);
+    cv::max(dst32, 0.0f, dst32);
+    dst32.convertTo(out, CV_8U);
+
+    imagenOpencv = out;
+}    
+
+
+/**
+ * Valida si la imagen esta desenfocada
+ * 
+ *  param tolerancia: un valor menor a la tolerancia indica desenfocada .
+ */
+bool GImage::estaDesenfocada( double tolerancia )
+{
+    cv::Mat lap;
+    cv::Mat gray8;
+    
+    cv::cvtColor(imagenOpencv, gray8, cv::COLOR_BGR2GRAY );
+
+    cv::Laplacian(gray8, lap, CV_64F);
+    cv::Scalar mean, stddev;
+    cv::meanStdDev(lap, mean, stddev);
+
+    double variacion_laplaciana = stddev[0] * stddev[0];
+
+    if ( variacion_laplaciana < tolerancia ) return true;
+
+    return false;
+}
+
+ /**
+ * Valida si la imagen esta ruidosa o granulada por oscuridad
+ * 
+ *  param dark_abs : valor que indica si un pixel de la version blanco y negro debe ser considerado
+ *      oscuro o no.
+ * 
+ *  param mediaLuminancia: si la luminancia media es menor a este valor se considera ruidosa
+ * 
+ *  param limiteOscuridad : si el factor de pixeles oscuros (0 a 1) es mayor a este valor se considera ruidosa u oscura
+ * 
+ *  param limiteEnergia : si el valor de energia es mayor a este limite se considera ruidosa u oscura
+         */
+bool GImage::estaRuidosa( int dark_abs, double mediaLuminancia, double limiteOscuridad, double limiteEnergia )
+{
+    cv::Mat gray8;
+    
+    cv::cvtColor(imagenOpencv, gray8, cv::COLOR_BGR2GRAY );
+
+    // calcula luminancia media
+    cv::Scalar meanY, stdY;
+    cv::meanStdDev(gray8, meanY, stdY);
+    double mean_y = meanY[0];
+
+    // calcula porcentaje de pixeles muy oscuros
+    cv::Mat darkMask; 
+    cv::threshold(gray8, darkMask, dark_abs, 255, cv::THRESH_BINARY_INV);
+    double dark_frac = cv::countNonZero(darkMask) / double(gray8.total());
+
+    // Calcula energif HF 
+    cv::Mat base, residual32f;
+    cv::blur(gray8, base, cv::Size(3,3));               // box 3x3 (más rápido que Gauss)
+    cv::Mat residual16s; cv::subtract(gray8, base, residual16s, cv::noArray(), CV_16S);
+    residual16s.convertTo(residual32f, CV_32F);
+    cv::Scalar meanR, stdR; cv::meanStdDev(residual32f, meanR, stdR);
+    double hf_std = stdR[0];
+
+    if ( mean_y < mediaLuminancia ) return true;
+
+    if ( dark_frac > limiteOscuridad ) return true;
+
+    if (( hf_std > limiteEnergia ) && ( mean_y < 110.0 )) return true;
+
+    return false;
 }
 
 
@@ -787,3 +1077,22 @@ GImage GDibujo::flip( GImage imagen, int modo)
 
     return rpta;
 }
+
+/**
+ * Dibuja una imagen pequena o chica en una coordenadas de una imagen grande
+ * 
+ *  param imagen: imagen grande sobre la que se dibuja la imagen chica
+ * 
+ *  param x: coordenada X donde se diguja la imagen chica
+ * 
+ *  param y: coordenada y donde se dibuja la imagen chica
+ * 
+ *  param imagenChica: imagen que se dibuja sobre imagen.
+ */
+void GDibujo::drawImage( GImage imagen, int x, int y, GImage imagenChica )
+{
+    #ifdef GDIBUJO_USAR_OPENCV
+    cv::Rect r(x,y, imagenChica.ancho, imagenChica.altura);
+    imagenChica.imagenOpencv.copyTo(imagen.imagenOpencv(r));
+    #endif
+}  

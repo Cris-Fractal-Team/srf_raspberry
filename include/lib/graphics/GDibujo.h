@@ -260,6 +260,13 @@ class GImage : public GObject
          */
         GImage();
 
+        #ifdef GDIBUJO_USAR_OPENCV
+        /**
+         * Constructor
+         */
+        GImage( Mat imgOpenCV );
+        #endif
+
         /**
          * Destructor
          */
@@ -275,6 +282,14 @@ class GImage : public GObject
          * param formato : codigo del formato de la imagen
          */
         GImage( int ancho, int altura, int formato );
+
+        /**
+         * Aplica una mejora de contraste a la imagen
+         *
+         *  param clipLimit: Ajustar con valores entre 2 y 4 
+         * 
+         */
+        void aplicarCLAHE( float clipLimit);
 
         /**
          * Inicializa la imagen desde un buffer que contiene los datos de un archivo JPEG
@@ -342,6 +357,61 @@ class GImage : public GObject
          * Retorna true en caso la imagen esta vacia o no diene data
          */
         bool isEmpty();
+
+        /**
+         * Elimina el motion blur
+         */
+        void deblurMotionWiener( int len = 15, double angle = 0.0, double K = 0.01);
+
+        /**
+         * Aclara un poco la imagen
+         */
+        void sharpenUnsharp( float amount=1.0f, float radius=1.2f, float threshold=0.0f);
+
+        /**
+         * Valida si la imagen esta desenfocada
+         * 
+         *  param tolerancia: un valor menor a la tolerancia indica desenfocada.
+         */
+        bool estaDesenfocada( double tolerancia = 80 );
+
+        /**
+         * Valida si la imagen esta ruidosa o granulada por oscuridad
+         * 
+         *  param dark_abs : valor que indica si un pixel de la version blanco y negro debe ser considerado
+         *      oscuro o no.
+         * 
+         *  param mediaLuminancia: si la luminancia media es menor a este valor se considera ruidosa
+         * 
+         *  param limiteOscuridad : si el factor de pixeles oscuros (0 a 1) es mayor a este valor se considera ruidosa u oscura
+         * 
+         *  param limiteEnergia : si el valor de energia es mayor a este limite se considera ruidosa u oscura
+         */
+        bool estaRuidosa( int dark_abs = 25 , double mediaLuminancia = 60.0, double limiteOscuridad = 0.06 , double limiteEnergia = 9.0 );
+
+    private:
+
+    /**
+     * Desplazamiento circular 2D (tipo "roll") para centrar el PSF en (0,0) antes de la DFT
+     */
+    void circShift(const Mat& src, Mat& dst, int shiftY, int shiftX);
+
+    /**
+     * Genera un PSF de "motion blur" (línea anti-aliased) de longitud 'len' y ángulo 'theta' (grados)
+     */
+    Mat makeMotionPSF(int len, double thetaDeg);
+
+    /** 
+     * Convierte PSF (espacio) a OTF (frecuencia) del tamaño de salida 'outSz'
+     */
+    void psf2otf(const Mat& psf, Mat& otf, Size outSz);
+       
+    /**
+     * Deconvolución de Wiener (1 canal float [0..1])
+     */
+    void wienerDeconvSingle(const Mat& srcGray32, Mat& dstGray32, const Mat& psf, double K);
+
+
 };
 
 /**
@@ -509,6 +579,19 @@ class GDibujo
          * param modo : modo del flip, definido en las constantes GDIBUJO_FLIP_XXXXX
          */
         static GImage flip( GImage imagen, int modo);
+
+        /**
+         * Dibuja una imagen pequena o chica en una coordenadas de una imagen grande
+         * 
+         *  param imagen: imagen grande sobre la que se dibuja la imagen chica
+         * 
+         *  param x: coordenada X donde se diguja la imagen chica
+         * 
+         *  param y: coordenada y donde se dibuja la imagen chica
+         * 
+         *  param imagenChica: imagen que se dibuja sobre imagen.
+         */
+        static void drawImage( GImage imagen, int x, int y, GImage imagenChica );
 };
 
 #endif

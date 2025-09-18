@@ -15,6 +15,8 @@
 #include <string.h>
 #include <iostream>
 
+#include <chrono>
+
 #include <resolv.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -38,6 +40,8 @@ GHttpClient::GHttpClient()
 {
     dataCabecera = (char *)malloc(TAM_MAX_CABECERA+2);
     bufferResponse = NULL;
+    bio = NULL;
+    ctx = NULL;
 }
 
 
@@ -51,6 +55,7 @@ GHttpClient::~GHttpClient()
     {
         free(bufferResponse);
     }
+    cierraConexion();
 }
 
 
@@ -113,6 +118,7 @@ int GHttpClient::_doHttp( const char *servidor, int puerto, int usarSSL, const c
     free(comando);
     if ( rptaCon != 0 )
     {
+        cierraConexion();
         return rptaCon;
     }
 
@@ -129,28 +135,39 @@ int GHttpClient::_doHttp( const char *servidor, int puerto, int usarSSL, const c
         }
     }
 
+    auto enviaCabecera = std::chrono::high_resolution_clock::now();
     if ( cabeceraPeticion.length() > 0 )
     {
         rptaCon = writeData((char *)cabeceraPeticion.c_str(),cabeceraPeticion.length());
         if ( rptaCon != 0 )
         {
+            cierraConexion();
             return rptaCon;
         }
     }
 
     writeData("\r\n");
 
+    auto enviaCuerpo = std::chrono::high_resolution_clock::now();
     if ( post == 1 )
     {
         writeData(data,dataLen);
     }
+    auto leeRespuesta = std::chrono::high_resolution_clock::now();
 
     if ( rptaCon == 0 )
     {
         leeRespuestaHttp();
     }
+    auto finLeeRespuesta = std::chrono::high_resolution_clock::now();
 
     cierraConexion();    
+
+    auto durCabecera = std::chrono::duration_cast<std::chrono::milliseconds>(enviaCuerpo - enviaCabecera);
+    auto durCuerpo = std::chrono::duration_cast<std::chrono::milliseconds>(leeRespuesta - enviaCuerpo);
+    auto durRespuesta = std::chrono::duration_cast<std::chrono::milliseconds>(finLeeRespuesta - leeRespuesta);
+
+    // cout << "HTTP.T.Cabecera " << durCabecera.count() << " ms T.Cuerpo " << durCuerpo.count() << " ms T.Respuesta " << durRespuesta.count() << endl;
 
     return 0;
 }
@@ -190,6 +207,7 @@ int GHttpClient::iniciaConexion()
         if(BIO_do_connect(bio) <= 0)
         {
             // cout << "Error al abrir conexion " << endl;
+            cierraConexion();
             return 2;
         }
 
@@ -200,11 +218,12 @@ int GHttpClient::iniciaConexion()
         // inicia conexion con encriptado
         ctx = SSL_CTX_new(SSLv23_client_method());
         
-        cout << "Configuracion de ubicacion de certificados" << endl;
+        // cout << "Configuracion de ubicacion de certificados" << endl;
         if(! SSL_CTX_load_verify_locations(ctx, NULL, "/usr/lib/ssl/certs"))
         {
             cout << "Error al verificar la ubicacion de los certificados" << endl;
             free(cadenaCon);
+            cierraConexion();
             return 3;
         }    
         
@@ -219,12 +238,14 @@ int GHttpClient::iniciaConexion()
         if(BIO_do_connect(bio) <= 0)
         {
             cout << "Error al abrir conexion " << endl;
+            cierraConexion();
             return 4;
         }
 
         if(SSL_get_verify_result(ssl) != X509_V_OK)
         {
             cout << "Error al verificar el certificado" << endl;
+            cierraConexion();
             return 5;
         }
 
@@ -237,17 +258,32 @@ int GHttpClient::iniciaConexion()
  */
 void GHttpClient::cierraConexion()
 {
+    
+
     if ( usarOpenSSL == 0 )
     {
-        BIO_reset(bio);
-        BIO_free_all(bio);
+        if ( bio != NULL )
+        {
+            BIO_reset(bio);
+            BIO_free_all(bio);
+        }
     }
     else
     {
-        BIO_reset(bio);
-        BIO_free_all(bio);
-        SSL_CTX_free(ctx);
+        if ( bio != NULL )
+        {
+            BIO_reset(bio);
+            BIO_free_all(bio);
+        }
+        
+        if ( ctx != NULL )
+        {
+            SSL_CTX_free(ctx);
+        }            
     }
+
+    bio = NULL;
+    ctx = NULL;
 }
 
 
@@ -271,8 +307,9 @@ int GHttpClient::writeData( char *buffer, long len )
             if(! BIO_should_retry(bio))
             {
                 // cout << "Error al enviar datos al servidor " << endl;
-                BIO_reset(bio);
-                BIO_free_all(bio);
+                // BIO_reset(bio);
+                // BIO_free_all(bio);
+                cierraConexion();
                 return -1;
             }
         }
@@ -510,6 +547,10 @@ int GHttpClient::leeDataBloques()
     int rpta;
 
     lenData = 0;
+
+    if ( bufferResponse != NULL )
+        free(bufferResponse);
+
     bufferResponse = NULL;
     buffer = NULL;
     while(1)
