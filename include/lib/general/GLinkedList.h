@@ -447,7 +447,7 @@ GLinkedList<T> GLinkedList<T>::getClone()
 {
     GLinkedList<T> rpta;
 
-    rpta.addAll(this);
+    rpta.addAll(*this);
 
     return rpta;
 }

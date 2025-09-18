@@ -355,7 +355,7 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
     // GDibujo::drawElipse(imagen, punto, 2, 2, rojo, 1 );
     
     if ( previsualizaImgReconocimiento == true )
-    {
+    {   
         cv::imshow("cara-orig", imgCara);
         cv::imshow("cara-alin", imgCaraAlineada);
         cv::imshow("cara-sblur", imgCaraSinBlur);
@@ -375,6 +375,8 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
 
                     parametros.push_back(cv::IMWRITE_PNG_COMPRESSION);
                     parametros.push_back(3); 
+
+                    cout << "Guarda para alineada 1: " << pathCara << endl;
                     cv::imwrite(pathCara, imgCaraAlineada, parametros);
                 }
             }
@@ -394,6 +396,9 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
 
             parametros.push_back(cv::IMWRITE_PNG_COMPRESSION);
             parametros.push_back(3); 
+
+            cout << "Guarda para alineada 2 : " << pathCara << endl;
+
             cv::imwrite(pathCara, imgCaraSinBlur, parametros);
         }
     }
@@ -552,6 +557,7 @@ bool FaceRecHailo::ejecutar( GLinkedList<cv::Mat> *lstImagenes, GLinkedList<Dete
 
                         parametros.push_back(cv::IMWRITE_PNG_COMPRESSION);
                         parametros.push_back(3); 
+                        cout << "Guardando cara alineada :" << pathCara << endl;
                         cv::imwrite(pathCara, imgCaraAlineada, parametros);
                     }
                 }
