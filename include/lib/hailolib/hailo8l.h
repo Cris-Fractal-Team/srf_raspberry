@@ -188,7 +188,23 @@ class Hailo8LRunner : public GThread
          */
         vector<uint8_t> getOutputStream( string nombre );
 
+        /**
+         * Establece la prioridad del scheduler del grupo
+         */
+        void setGroupPriority( uint8_t prioridad );
+
+        /**
+         * Establece el tiempo maximo que debe pasar para asignar prioridad 
+         * a la inferencia de este ejecutor
+         */
+        void setSchedulerTimeout( long timeMs );
+
     private:
+
+        /**
+         * Referencia al grupo de modelos
+         */
+        std::shared_ptr<hailort::ConfiguredNetworkGroup> network_group;
 
         /**
          * Informacion de los streams de salida

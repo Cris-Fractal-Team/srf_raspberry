@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <filesystem>
+#include <algorithm>
 
 #include "lib/utils/fileutils.h"
 #include "lib/utils/GStringUtils.h"
@@ -191,18 +192,26 @@ std::vector<string>listArchivosDirectorio( string path )
     fs::directory_iterator dir_it(dir, fs::directory_options::skip_permission_denied), finLista;
     
     while( true )
-    {
+    {        
+        entry = *dir_it;
+        if ( entry.is_directory() )
+        {
+            dir_it.increment(ec);
+            if ( dir_it == finLista ) 
+                break;
+            continue;        
+        }
+            
+        rutaArchivo = entry.path();
+        lstArchivos.push_back(rutaArchivo);
+
         dir_it.increment(ec);
         if ( dir_it == finLista ) 
             break;
-
-        entry = *dir_it;
-        if ( entry.is_directory() )
-            continue;
-        
-        rutaArchivo = entry.path();
-        lstArchivos.push_back(rutaArchivo);
     }
+
+    std::sort(lstArchivos.begin(), lstArchivos.end());
+
 
     return lstArchivos;
 }

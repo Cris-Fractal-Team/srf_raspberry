@@ -100,8 +100,6 @@ int main( int argc, char *argv[])
             extractor.guardarCarasFrontalesAlineadas = proc.lstParamsApp->getStringBool("guardarCarasFrontalesAlineadas",false);
             extractor.encuadrarRostros = proc.lstParamsApp->getString("encuadrarRostros");
 
-            cout << "Pixel Suavizado Main : " << extractor.pixelSuavizado << endl;
-
             extractor.pathModeloDescFacial = proc.lstParamsApp->getString("pathModeloDescFacial");
             extractor.nombreCapaSalidaRedFacial = proc.lstParamsApp->getString("nombreUltimaCapaRedNeuronal");
             
@@ -113,29 +111,64 @@ int main( int argc, char *argv[])
             return 0;
         }
         else
+        if (( strcmp(argv[i],"-extraeCaras") == 0 ) && ( (i+1) < argc ))
+        {
+            cout << "Se extraen caras de fotos con un solo rostro"  << endl;
+            cout << "Archivo con descriptores: " << argv[i+i] << endl;
+            cout << endl;
+
+            ExtractorFacialArchivo extractor;
+            
+            extractor.alturaRostroMinima = proc.lstParamsApp->getStringLong("anchoMinCaraRec", 90);
+            extractor.anchoRostroMinimo = proc.lstParamsApp->getStringLong("alturaMinCaraRec", 90);  
+            extractor.toleranciaDetec = proc.lstParamsApp->getStringDouble("presicionDeteccion",0.40);
+            extractor.toleranciaIden = proc.lstParamsApp->getStringDouble("deltaRostroMax",0.60);
+           
+            extractor.paramContraste = proc.lstParamsApp->getStringDouble("paramContraste", 0);
+            extractor.pixelSuavizado = proc.lstParamsApp->getStringLong("pixelSuavizado", 5);
+            extractor.alturaImagenBase = proc.lstParamsApp->getStringLong("alturaImagenBase",0);
+            extractor.jpegSuavizado = proc.lstParamsApp->getStringLong("jpegSuavizado",100);
+            extractor.resizeSuavizado = proc.lstParamsApp->getStringDouble("resizeSuavizado",1);
+            extractor.guardarCarasFrontalesAlineadas = true;
+            extractor.encuadrarRostros = proc.lstParamsApp->getString("encuadrarRostros");
+
+            extractor.pathModeloDescFacial = proc.lstParamsApp->getString("pathModeloDescFacial");
+            extractor.nombreCapaSalidaRedFacial = proc.lstParamsApp->getString("nombreUltimaCapaRedNeuronal");
+            
+            extractor.previsualizaImgReconocimiento = proc.lstParamsApp->getStringBool("previsualizaImgReconocimiento",false);
+            extractor.esperarPrevImgReconocimiento = proc.lstParamsApp->getStringBool("esperarPrevImgReconocimiento",false);
+    
+            extractor.extreCarasDirectorio(argv[i+1]);
+            
+            return 0;
+        }           
+        else
         if ( strcmp(argv[i],"--help") == 0 )
         {
             cout << endl << "Ejecutar el programa sin parametros para funcionar como detector" << endl << endl ;
             
-            cout << endl << "Pasar el parametro: -procesa [archivoDatos] [directorioFotos] [archivoSalida]" << endl << endl;
+            cout << endl << "-procesa [archivoDatos] [directorioFotos] [archivoSalida]" << endl << endl;
             cout << "Para que se genere un [archivoSalida] usando los datos del [archivoDatos] " << endl;
             cout << "[archivoDatos] es un CSV con datos: idPersona,nombre,foto" << endl;
             cout << "Foto en el archivo CSV es el nombre de un archivo dentro del [directorioFotos]" << endl << endl;
 
-            cout << endl << "Pasar el parametro: -compara-simple [path_cara1] [path_cara2]" << endl << endl;
+            cout << endl << "-compara-simple [path_cara1] [path_cara2]" << endl << endl;
             cout << "Para que comparar y ver la similitud entre la foto de dos caras centradas frontalmente" << endl;
             cout << "con la misma resolucion que espera la red neuronal especificada en config.txt" << endl << endl;
 
-            cout << endl << "Pasar el parametro: -compara-busca [path_foto1] [path_foto2]" << endl << endl;
+            cout << endl << "-compara-busca [path_foto1] [path_foto2]" << endl << endl;
             cout << "Para buscar una cara en cada foto y luego compararlas" << endl;
             cout << "con la misma resolucion que espera la red neuronal especificada en config.txt" << endl << endl;
             
-            cout << endl << "Pasar el parametro: -preprocesa-dataset [path_dirfotos] [path_dircaras] [silimaridad_caras]" << endl << endl;
+            cout << endl << "-preprocesa-dataset [path_dirfotos] [path_dircaras] [silimaridad_caras]" << endl << endl;
             cout << "Busca un directorio con fotos (path_dirfotos) y borra todos los archivos que no tienen caras" << endl;
             cout << "Agrupa todas las fotos restantes del archivo de fotos por cara en base a similaridad entre ellas " << endl;
             cout << "crea un subdirectorio de la carpeta path_caras por cada grupo de caras y las copia en ellos" << endl;
 
-            
+            cout << endl << "-extraeCaras [path_fotos]" << endl << endl;
+            cout << "Detecta una cara de cada foto de un directorio, y las guarda alineadas y escaladas" << endl;
+            cout << "con la misma resolucion que espera la red neuronal especificada en config.txt" << endl << endl;
+           
             return 0;
         }
     }

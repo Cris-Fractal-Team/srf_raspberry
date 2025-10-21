@@ -46,6 +46,7 @@ float ComparadorFacial::comparaBusca( string pathCara1, string pathCara2, shared
     generadorDesc.paramContraste = paramContraste;
     generadorDesc.previsualizaImgReconocimiento = params->getStringBool("previsualizaImgReconocimiento", false);
     generadorDesc.esperarPrevImgReconocimiento = params->getStringBool("esperarPrevImgReconocimiento", false);
+    generadorDesc.guardarPrevImgReconocimiento = params->getStringBool("guardarPrevImgReconocimiento", false);
 
     // Cargamos el modelo de red neuronal
     generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
@@ -170,6 +171,7 @@ float ComparadorFacial::comparaSimple( string pathCara1, string pathCara2, share
     generadorDesc.paramContraste = paramContraste;
     generadorDesc.previsualizaImgReconocimiento = params->getStringBool("previsualizaImgReconocimiento", false);
     generadorDesc.esperarPrevImgReconocimiento = params->getStringBool("esperarPrevImgReconocimiento", false);
+    generadorDesc.guardarPrevImgReconocimiento = params->getStringBool("guardarPrevImgReconocimiento", false);
 
     // Cargamos el modelo de red neuronal
     generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;

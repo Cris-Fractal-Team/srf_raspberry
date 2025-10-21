@@ -130,6 +130,34 @@ vector<uint8_t> Hailo8LRunner::getOutputStream( string nombre )
 
 
 /**
+ * Establece la prioridad del scheduler del grupo
+ */
+void Hailo8LRunner::setGroupPriority( uint8_t prioridad )
+{
+    mtxBloquea();
+    while( network_group == NULL )
+    {
+        sleepUS(50);
+    }
+    cout << "Asignado prioridad : " << network_group  << endl;
+    network_group->set_scheduler_priority(prioridad);
+    mtxLibera();
+}
+
+/**
+ * Establece el tiempo maximo que debe pasar para asignar prioridad 
+ * a la inferencia de este ejecutor
+ */
+void Hailo8LRunner::setSchedulerTimeout( long timeMs )
+{
+    std::chrono::milliseconds SCHEDULER_TIMEOUT_MS((long long)timeMs);
+
+    mtxBloquea();
+    network_group->set_scheduler_timeout(SCHEDULER_TIMEOUT_MS);
+    mtxLibera();
+}
+
+/**
  * Funcion que se ejecuta en paralelo desde el thread
  */
 void Hailo8LRunner::runThread()
@@ -137,6 +165,10 @@ void Hailo8LRunner::runThread()
     string path;
     uint8_t *data;
     uint32_t dataSize;
+
+    std::chrono::milliseconds SCHEDULER_TIMEOUT_MS(5);
+    uint32_t SCHEDULER_THRESHOLD = 0;
+
 
     // Crea el dispositivo virtual
     // cout << "Creando VDevice" << endl;
@@ -151,6 +183,7 @@ void Hailo8LRunner::runThread()
 
     mtxBloquea();
     path = pathModelo;
+    network_group = NULL;
     mtxLibera();
 
     // Cargar el modelo HEF
@@ -164,7 +197,6 @@ void Hailo8LRunner::runThread()
         return;
     }
    
-
     // Obtiene informacion de los streams de salida
     cout << "Obtiene informacion de salida" << endl;
     hailort::Expected<std::vector<hailo_vstream_info_t>> output_vstream_info = hef->get_output_vstream_infos();
@@ -187,6 +219,7 @@ void Hailo8LRunner::runThread()
         setEstadoEjec(H8LR_LIB_ESTADO_ERROR_CARGA_RED);
         return;
     }
+    
 
     // crea el grupo de red
     hailort::Expected<hailort::ConfiguredNetworkGroupVector> network_groups = (*device).value()->configure(hef.value(), parametros.value());
@@ -207,10 +240,15 @@ void Hailo8LRunner::runThread()
         return;
     }
 
+    // obtenemos la primera red
+    mtxBloquea();
+    network_group = std::move(network_groups->at(0));
+    mtxLibera();
+    network_group->set_scheduler_timeout(SCHEDULER_TIMEOUT_MS);
+    network_group->set_scheduler_threshold(SCHEDULER_THRESHOLD);
+    
     cout << "Se crea el grupo de redes" << endl;
 
-    // obtenemos la primera red
-    std::shared_ptr<hailort::ConfiguredNetworkGroup> network_group = std::move(network_groups->at(0));
 
     // Creamos parametros para el stream de entrada
     hailort::Expected<std::map<std::string, hailo_vstream_params_t>> input_params = network_group->make_input_vstream_params({}, HAILO_FORMAT_TYPE_AUTO, HAILO_DEFAULT_VSTREAM_TIMEOUT_MS, HAILO_DEFAULT_VSTREAM_QUEUE_SIZE);
@@ -250,9 +288,8 @@ void Hailo8LRunner::runThread()
         errorEjec = H8LR_LIB_ERR_GET_STREAM_ENTRADA;
         setEstadoEjec(H8LR_LIB_ESTADO_ERROR_CARGA_RED);
         return;
-    }
-
-    cout << "Fin de carga" << endl;
+    }    
+    // cout << "Fin de carga" << endl;
 
     // Espera hasta que se solicite ejecutar redes
     setEstadoEjec(H8LR_LIB_ESTADO_RED_CARGADA);
@@ -265,15 +302,17 @@ void Hailo8LRunner::runThread()
         estInf = getEstadoInf();
         if (( estInf == H8LR_LIB_INF_ESPERA_DATA ) || ( estInf == H8LR_LIB_INF_ERRADA ))
         {
-            sleepMS(1);
+            sleepUS(50);
             continue;
         }
+
+        auto iniciaPreInferencia = std::chrono::high_resolution_clock::now();
         
         mtxBloquea();
         data = inferData;
         dataSize = inferDataSize;
         mtxLibera();
-
+        
         // Se debe ejecutar la inferencia
         // crea un memory view para el ingreso de datos
         mtxBloquea();
@@ -296,10 +335,16 @@ void Hailo8LRunner::runThread()
 
 
         // Ejecutar la inferencia
-        mtxBloquea();
-        hailo_status status = pipeline->infer(input_data_mem_views, output_data_mem_views, inferNumber);
+        mtxBloquea();        
+        // auto iniciaInferencia = std::chrono::high_resolution_clock::now();
+        hailo_status status = pipeline->infer(input_data_mem_views, output_data_mem_views, inferNumber);        
         mtxLibera();
+        // auto finInferencia = std::chrono::high_resolution_clock::now();
 
+        // auto durPre = std::chrono::duration_cast<std::chrono::microseconds>(iniciaInferencia - iniciaPreInferencia);
+        // auto durInf = std::chrono::duration_cast<std::chrono::microseconds>(finInferencia - iniciaInferencia);        
+        // cout << "    PreInferencia      : " << durPre.count() << endl;
+        // cout << "    Inferencia      : " << durInf.count() << endl;
 
         mtxBloquea();
         lastOutputData = output_data;
@@ -393,7 +438,7 @@ int Hailo8LRunner::getError()
 bool Hailo8LRunner::ejecutarInferencia( uint8_t *data, uint32_t dataSize, uint32_t num_inferencias )
 {       
     int estado;
-    auto inicio = std::chrono::high_resolution_clock::now(); // Inicia el cronómetro
+    // auto inicio = std::chrono::high_resolution_clock::now(); // Inicia el cronómetro
 
     mtxBloquea();
     inferData = data;
@@ -406,12 +451,12 @@ bool Hailo8LRunner::ejecutarInferencia( uint8_t *data, uint32_t dataSize, uint32
     estado = getEstadoInf();
     while( estado == H8LR_LIB_INF_ESPERA_INF)
     {
-        sleepUS(100);
+        sleepUS(50);
         estado = getEstadoInf();
     }
 
-    auto fin = std::chrono::high_resolution_clock::now(); // Finaliza el cronómetro
-    auto duracion = std::chrono::duration_cast<std::chrono::microseconds>(fin - inicio);
+    // auto fin = std::chrono::high_resolution_clock::now(); // Finaliza el cronómetro
+    // auto duracion = std::chrono::duration_cast<std::chrono::microseconds>(fin - inicio);
     // std::cout << "Tiempo de ejecución interno: " << duracion.count() << " ms\n";
 
     if ( estado == H8LR_LIB_INF_ESPERA_DATA )

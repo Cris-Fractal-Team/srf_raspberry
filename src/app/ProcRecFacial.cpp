@@ -1,4 +1,6 @@
 
+#include "lib/hailolib/hailo8l.h"
+
 #include "app/ProcRecFacial.h"
 #include "lib/graphics/GDibujo.h"
 #include "lib/graphics/ImageSource.h"
@@ -16,6 +18,8 @@
 #include <iostream>
 #include <cstring>
 
+#define NUM_ERRORES_CAMARA_MAXIMOS 1000
+
 
 /**
  * Lista con las ultimas caras detectadas
@@ -32,6 +36,7 @@ ProcesoRecFacial::ProcesoRecFacial()
     tiempoMaxNoReconocido = 10;
 
     numIndentificacionesMin = 3;
+    numCuadro = 0;
 }
 
 /**
@@ -40,6 +45,75 @@ ProcesoRecFacial::ProcesoRecFacial()
 void ProcesoRecFacial::setImageFactory( shared_ptr<ImageSourceFactory> factory )
 {
     imageSource = factory->getInstance();
+}
+
+/**
+ * Inicializa el detector de rostros
+ * Returna true si fue exitoso
+ */
+bool ProcesoRecFacial::inicializaDetectorRostros( hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr )
+{
+    // crea el detector
+    detector.setDimImagenes(640,640);    
+    detector.previsualizaImgParaDeteccion = lstParamsApp->getStringBool("previsualizaImgParaDeteccion", false);
+    detector.esperarPrevImgParaDeteccion = lstParamsApp->getStringBool("esperarPrevImgParaDeteccion", false);
+        
+    detector.runner.device = devicePtr;
+    if ( detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0 )
+    {
+        cout << "Error al cargar el modelo detector" << endl;    
+        return false;
+    }               
+    // if ( detector.cargarModelo("./models/scrfd_500m.hef") != 0 )
+    // {
+    //     cout << "Error al cargar el modelo detector" << endl;
+    //     errorInicial = true;
+    //     return;
+    // }           
+    // if ( detector.cargarModelo("./models/scrfd_10g.hef") != 0 )
+    // {
+    //     cout << "Error al cargar el modelo detector" << endl;
+    //     errorInicial = true;
+    //     return;
+    // }          
+    detector.prefijoImgDeteccion = "foto_";
+    detector.secuencialImgDeteccion = 1;
+    detector.runner.setGroupPriority(HAILO_SCHEDULER_PRIORITY_NORMAL);
+    detector.runner.setSchedulerTimeout(15);
+    cout << "Detector de rostros iniciado" << endl;
+    // detector.runner.printInfoStreamSalida();
+
+    return true;
+}
+
+/**
+ * Inicializa el generador de descriptores faciales
+ */
+bool ProcesoRecFacial::inicializaGeneradorDescriptores( hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr )
+{
+    // crea el generador de descriptores faciales
+    generadorDesc.runner.device = devicePtr;
+    generadorDesc.paramContraste = paramContraste;
+    generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
+    generadorDesc.previsualizaImgReconocimiento = lstParamsApp->getStringBool("previsualizaImgReconocimiento", false);
+    generadorDesc.esperarPrevImgReconocimiento = lstParamsApp->getStringBool("esperarPrevImgReconocimiento", false);
+    generadorDesc.guardarPrevImgReconocimiento = lstParamsApp->getStringBool("guardarPrevImgReconocimiento", false);
+    generadorDesc.guardarCarasFrontalesAlineadas = lstParamsApp->getStringBool("guardarCarasFrontalesAlineadas", false);
+    generadorDesc.prefijoImgReconocimiento = lstParamsApp->getString("prefijoImgReconocimiento");
+    generadorDesc.prefijoImgReconocimiento+= "_" + to_string(TimeDateUtils::getDateTimeMs()) + "_";
+    generadorDesc.similaridadFrontal = lstParamsApp->getStringDouble("similaridadFrontal", 5.0);
+        
+    if ( generadorDesc.cargarModelo(pathModeloDescFacial) != 0 )
+    {
+        cout << "Error al cargar modelo generador de descriptores" << endl;
+        return false;
+    }
+    generadorDesc.runner.setGroupPriority(HAILO_SCHEDULER_PRIORITY_MAX);
+    generadorDesc.runner.setSchedulerTimeout(10);
+    cout << "Generador de descriptores iniciado" << endl;
+    // generadorDesc.runner.printInfoStreamSalida();    
+
+    return true;
 }
 
 /**
@@ -56,16 +130,17 @@ void ProcesoRecFacial::iniciar()
     vector<TrackedDetectionHailo *> lstCarasTrack;
     hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr;
     float factorXVisor,factorYVisor;
-    DetectorCarasHailoSCRFD detector;        
-    FaceRecHailo generadorDesc;
+    
     int cargaEnDuro = 1;
+    int numErroresEnCamara = 0;
+    long long durCaptura, ultimaCapturaImagen = -1;
 
     errorInicial = false;
     numIndentificacionesMin = lstParamsApp->getStringLong("numIndentificacionesMin",3);
     
     // Crea el dispositivo virtual
     cout << "Creando VDevice" << endl;
-    hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();    
+    hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();        
     if (!device) 
     {
         cerr << "Error: No se pudo inicializar el dispositivo Hailo." << endl;
@@ -74,54 +149,8 @@ void ProcesoRecFacial::iniciar()
     }
     devicePtr = &device;
 
-    // crea el detector
-    detector.setDimImagenes(640,640);    
-    detector.previsualizaImgParaDeteccion = lstParamsApp->getStringBool("previsualizaImgParaDeteccion", false);
-    detector.esperarPrevImgParaDeteccion = lstParamsApp->getStringBool("esperarPrevImgParaDeteccion", false);
-        
-    detector.runner.device = &device;
-    if ( detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0 )
-    {
-        cout << "Error al cargar el modelo detector" << endl;
-        errorInicial = true;
-        return;
-    }               
-    // if ( detector.cargarModelo("./models/scrfd_500m.hef") != 0 )
-    // {
-    //     cout << "Error al cargar el modelo detector" << endl;
-    //     errorInicial = true;
-    //     return;
-    // }           
-    // if ( detector.cargarModelo("./models/scrfd_10g.hef") != 0 )
-    // {
-    //     cout << "Error al cargar el modelo detector" << endl;
-    //     errorInicial = true;
-    //     return;
-    // }           
-    cout << "Detector de rostros iniciado" << endl;
-    // detector.runner.printInfoStreamSalida();
-
-    // crea el generador de descriptores faciales
-    generadorDesc.runner.device = &device;
-    generadorDesc.paramContraste = paramContraste;
-    generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
-    generadorDesc.previsualizaImgReconocimiento = lstParamsApp->getStringBool("previsualizaImgReconocimiento", false);
-    generadorDesc.esperarPrevImgReconocimiento = lstParamsApp->getStringBool("esperarPrevImgReconocimiento", false);
-    generadorDesc.guardarPrevImgReconocimiento = lstParamsApp->getStringBool("guardarPrevImgReconocimiento", false);
-    generadorDesc.guardarCarasFrontalesAlineadas = lstParamsApp->getStringBool("guardarCarasFrontalesAlineadas", false);
-    generadorDesc.prefijoImgReconocimiento = lstParamsApp->getString("prefijoImgReconocimiento");
-    generadorDesc.prefijoImgReconocimiento+= "_" + to_string(TimeDateUtils::getDateTimeMs()) + "_";
-    generadorDesc.similaridadFrontal = lstParamsApp->getStringDouble("similaridadFrontal", 5.0);
-    
-    // if ( generadorDesc.cargarModelo("./models/arcface_mobilefacenet.hef") != 0 )
-    if ( generadorDesc.cargarModelo(pathModeloDescFacial) != 0 )
-    {
-        cout << "Error al cargar modelo generador de descriptores" << endl;
-        errorInicial = true;
-        return;
-    }
-    cout << "Generador de descriptores iniciado" << endl;
-    // generadorDesc.runner.printInfoStreamSalida();    
+    if ( inicializaDetectorRostros(devicePtr) == false ) return;
+    if ( inicializaGeneradorDescriptores(devicePtr) == false ) return;
 
     // Inicia el servidor web
     servidorWeb = make_shared<ServidorHttpImagenes>();
@@ -145,13 +174,38 @@ void ProcesoRecFacial::iniciar()
     while( finalizar == false )
     {
         auto inicio = std::chrono::high_resolution_clock::now();
-
         imagenCapturada = imageSource->getImage();
         
-        if (( imagenCapturada.ancho == 0 ) || ( imagenCapturada.altura == 0 ))
+        // validamos si se tiene una imagen valida
+        if ((( imagenCapturada.ancho == 0 ) || ( imagenCapturada.altura == 0 )) || ( imageSource->fechaUltimaCaptura < 0 ))
         {           
+            GThread::sleepMS(5);
             continue;
         }
+                     
+        if (( ultimaCapturaImagen > 0 ) && ( imageSource->fechaUltimaCaptura > 0  ))
+        {    
+            // validamos si el tiempo de la ultima captura es diferente    
+            durCaptura = imageSource->fechaUltimaCaptura - ultimaCapturaImagen;
+            if ( durCaptura == 0 )
+            {
+                // no se ha captura una imagen nueva
+                if ( numErroresEnCamara > NUM_ERRORES_CAMARA_MAXIMOS )
+                {
+                    imageSource->restart();
+                    numErroresEnCamara = 0;
+                    continue;
+                }
+
+                GThread::sleepMS(5);
+                numErroresEnCamara++;
+                continue;
+            }            
+        }
+        
+        ultimaCapturaImagen = imageSource->fechaUltimaCaptura;   
+        numErroresEnCamara = 0;   
+        numCuadro++;
         
         // invierte verticalmente
         if ( invertirVertical )
@@ -169,9 +223,7 @@ void ProcesoRecFacial::iniciar()
         auto finCaptura = std::chrono::high_resolution_clock::now();
         
         // detecta rostros
-        lstDet = detector.detectar_2_5g(imagenDeteccion, toleranciaDetec);        
-        // lstDet = detector.detectar_500m(imagenCapturada, toleranciaDetec);        
-        // lstDet = detector.detectar_10g(imagenCapturada, toleranciaDetec);        
+        lstDet = detector.detectar(imagenDeteccion, toleranciaDetec);   
         if ( detector.errorDeteccion == true )
         {
             cout << "Error al detectar rostros" << endl;
@@ -179,7 +231,6 @@ void ProcesoRecFacial::iniciar()
         }
         // elimina rostros pequeños
         lstDetFiltrado.clear();
-        // cout << "Num Caras Iniciales " << lstDet.size() << endl;
         for(DeteccionCaraHailo cara : lstDet)
         {
             if ((( cara.getAncho() > anchoRostroMinimo ) && ( cara.getAltura() > alturaRostroMinima))  &&              
@@ -194,24 +245,14 @@ void ProcesoRecFacial::iniciar()
                 // if ( cara.getAltura() == cara.getAncho() )
                     lstDetFiltrado.push_back(cara);
             }
-
-            // cara.ajustarCuadrado(anchoCamara, alturaCamara);
-            // lstDetFiltrado.push_back(cara);
         }        
-        // cout << "Num Caras Finales " << lstDetFiltrado.size() << endl;
 
-        // Analiza tracking 
-        // lstCaras = detTracker.analizaRapido(&lstDetFiltrado);
+        // Inicializa el tracking 
         lstCaras = detTracker.generaListaTrackTemporal(&lstDetFiltrado);
         auto finDeteccion = std::chrono::high_resolution_clock::now();
 
         // genera descriptores faciales
         calculaDescriptores( &generadorDesc, imagenCapturada, &lstCaras);
-        // if ( generadorDesc.errorCalculo == true )
-        // {
-        //     cout << "Error al generar descriptores faciales " << endl;
-        //     break;
-        // }
         auto finDescriptores = std::chrono::high_resolution_clock::now();
 
         // Busca coincidencias de las detecciones con el universo de personas conocidas
@@ -219,8 +260,6 @@ void ProcesoRecFacial::iniciar()
         auto finIdentificacion = std::chrono::high_resolution_clock::now();
 
         // Hace el tracking de las caras procesadas
-        // lstCarasTrack = detTracker.analizaPorIdentificacion(&lstCaras);
-        // imagenVisor = imagenCapturada.cloneResize(detector.imgModeloAncho, detector.imgModeloAltura);
         imagenVisor.ancho = detector.imgModeloAncho;
         imagenVisor.altura = detector.imgModeloAltura;
         imagenVisor.imagenOpencv = detector.imagenRedim;
@@ -247,16 +286,16 @@ void ProcesoRecFacial::iniciar()
         auto durDibuja = std::chrono::duration_cast<std::chrono::microseconds>(finDibuja - finNotifica);
         auto durTotal = std::chrono::duration_cast<std::chrono::microseconds>(finDibuja - inicio);
 
-        // cout << "Tiempos microsegundos " << endl << endl;
-        // cout << "Captura      : " << durCaptura.count() << endl;
-        // cout << "Detecta      : " << durDetecta.count() << endl;
-        // cout << "Descriptores : " << durDescriptor.count() << endl;
-        // cout << "Identifica : " << durIdentificacion.count() << endl;
-        // cout << "Tracking : " << durTracking.count() << endl;
-        // cout << "notifica : " << durNotifica.count() << endl;
-        // cout << "Dibujo       : " << durDibuja.count() << endl;
-        // cout << "** TOTA      : " << durTotal.count() << endl;
-        // cout << endl;
+        cout << "Tiempos microsegundos " << endl << endl;
+        cout << "Captura      : " << durCaptura.count() << endl;
+        cout << "Detecta      : " << durDetecta.count() << endl;
+        cout << "Descriptores : " << durDescriptor.count() << endl;
+        cout << "Identifica : " << durIdentificacion.count() << endl;
+        cout << "Tracking : " << durTracking.count() << endl;
+        cout << "notifica : " << durNotifica.count() << endl;
+        cout << "Dibujo       : " << durDibuja.count() << endl;
+        cout << "** TOTA      : " << durTotal.count() << endl;
+        cout << endl;
 
         // Envia la imagen al servidor web de configuracion        
         ProcesoRecFacial::lstUltCarasDet = lstCarasTrack;
@@ -275,12 +314,10 @@ void ProcesoRecFacial::iniciar()
             break;
         }
         else
-        if ( tecla == '1' )
+        if ( tecla == ' ' )
         {
-            cargaEnDuro = 1;
+            GDibujo::waitForKey(0);
         }
-
-        // SystemUtils::printRamUsage();
     }
     
     cout << "Finaliza Bucle reconocimiento" << endl;
@@ -312,9 +349,9 @@ void ProcesoRecFacial::iniciar()
 void ProcesoRecFacial::calculaDescriptores( FaceRecHailo *generador, GImage foto, vector<TrackedDetectionHailo *> *lstRostros )
 {
     GLinkedList<TrackedDetectionHailo *> lstCarasDet;
-    GLinkedList<GImage> lstCaras;
-    GLinkedList<DeteccionCaraHailo> lstDetecciones;
-    GLinkedList<SIMD_TYPE*>lstDescriptores;
+    // GLinkedList<GImage> lstCaras;
+    // GLinkedList<DeteccionCaraHailo> lstDetecciones;
+    // GLinkedList<SIMD_TYPE*>lstDescriptores;
     TrackedDetectionHailo *deteccion;
     int n = lstRostros->size();
         
@@ -332,24 +369,19 @@ void ProcesoRecFacial::calculaDescriptores( FaceRecHailo *generador, GImage foto
 
         // deteccion->cara.descCalculado = true;        
         deteccion->cara.calculaFotoCara(foto);
-        
-        // lstCaras.add(deteccion->cara.fotoCara);
-        // lstDetecciones.add(deteccion->cara.detRelCara);
-        // lstDescriptores.add(deteccion->cara.descriptor);
-
+                
         lstCarasDet.add(deteccion);
         
         // comantado porque se calcularan por batch
-        // generador->calculaDescriptor(deteccion->cara.fotoCara, deteccion->cara.detRelCara, deteccion->cara.descriptor);        
+        // deteccion->cara.descCalculado = generador->calculaDescriptor(deteccion->cara.fotoCara, deteccion->cara.detRelCara, deteccion->cara.descriptor);        
     }
 
     if ( n > 0)
-        // generador->calculaDescriptor(&lstCaras, &lstDetecciones, &lstDescriptores);
+    {
+        cout << "Num Rostros para identificar : " << n << endl;
         generador->calculaDescriptor(&lstCarasDet);
-
-    // lstCaras.reset();
-    // lstDetecciones.reset();
-    // lstDescriptores.reset();
+    }
+    
     lstCarasDet.reset();
 }
 
@@ -479,12 +511,19 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
     escalaXTrack = ((float)anchoVisualiza)/((float)NUM_ELEMS_DESC_FACIAL);
     escalaYTrack = ((float)alturaVisualiza)/((float)NUM_ELEMS_DESC_FACIAL);
 
+    // dibuja el rectangulo que representa la zona de interes
     rc.x1 = (int)((float)regionInteresInicioX)*escalaX;
     rc.x2 = (int)((float)regionInteresFinX)*escalaX;
     rc.y1 = 0;
     rc.y2 = alturaVisualiza;
     GDibujo::drawRect(imagenVisor, rc, azul, 1); 
 
+    // dibujamos el numero de cuadro
+    id = "Cuadro: " + to_string(numCuadro);     
+    GDibujo::drawRect(imagenVisor, GRect(0,0,300,30), azul, -1 );
+    GDibujo::drawText(imagenVisor, 10, 20, id , GDIBUJO_FONT_HELVETICA, blanco, 0.7, 1 );
+
+    // bucle que visualiza cada rostro
     int n = lstCaras->size();
     for(int i=0; i<n; i++ )
     {
@@ -495,6 +534,7 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
 
         cara = &det->cara;
 
+        // calcula la coordenade del recuadro del rostro, se escala a la resolucion del visor
         caja.x1 = cara->deteccion.ptoSupIzq.x * escalaX;        
         caja.y1 = cara->deteccion.ptoSupIzq.y * escalaY;
         caja.x2 = cara->deteccion.ptoInfDer.x * escalaX;
@@ -527,6 +567,8 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
             {
                 id.append(" - ");
                 id.append(GStringUtils::to_string_fixed(det->cara.identificador.getPromedioComparacion(),2));
+                id.append(" : ");
+                id.append(to_string(det->cara.identificador.getNumIdentificaciones()));
                 id.append(" : ");                
                 id.append(datosPersona->nombre);
                 
@@ -578,18 +620,18 @@ GImage ProcesoRecFacial::dibujaCaras( GImage imagen, vector<TrackedDetectionHail
 
         if ( datosPersona !=  NULL )
         {
-            if ( det->cara.identificador.fechaUltEvento == 0 )
-            {
-                GDibujo::drawRect(imagenVisor, caja, blanco, -1 );
-                GDibujo::drawText(imagenVisor, caja.x1, caja.y1+30, id , GDIBUJO_FONT_HELVETICA, azul, 0.8, 2 );
-            }
-            else
+            // if ( det->cara.identificador.fechaUltEvento == 0 )
+            // {
+            //     GDibujo::drawRect(imagenVisor, caja, blanco, -1 );
+            //     GDibujo::drawText(imagenVisor, caja.x1, caja.y1+30, id , GDIBUJO_FONT_HELVETICA, azul, 0.8, 2 );
+            // }
+            // else
+            if ( det->cara.identificador.fechaUltEvento > 0 )
             {
                 GDibujo::drawRect(imagenVisor, caja, azul, -1 );
                 GDibujo::drawText(imagenVisor, caja.x1, caja.y1+30, id , GDIBUJO_FONT_HELVETICA, blanco, 0.8, 2 );
-            }
-            
-        }        
+            }            
+        }               
     }
 
     return imagenVisor;

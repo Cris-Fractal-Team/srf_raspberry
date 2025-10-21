@@ -84,6 +84,11 @@ class ExtractorFacialArchivo
          */
         bool esperarPrevImgReconocimiento;
 
+        /**
+         * Indica si se debe guardar una imagen de reconocimiento si es que se presiona g o G 
+         */
+        bool guardarPrevImgReconocimiento;
+
 
         /**
          * Indica si se deben centrar los rostros detectados en un cuadrado
@@ -177,6 +182,15 @@ class ExtractorFacialArchivo
          * Ejecuta el proceso
          */
         void ejecutar();
+
+        /**
+         * Ejecuta el proceso que genera descriptor facial para todas las fotos
+         * de un directorio, y aprovecha que si la configuracion del app tiene la opcion 
+         * de guardar caras, estas se almacenan en el directorio por defecto de caras extraidas
+         * 
+         * @param directorio directorio donde cada foto es procesada
+         */
+        void extreCarasDirectorio( string directorio );
 
     private:
 

@@ -35,11 +35,24 @@ class ImageSource
         int ultimoErrorCodigo;
 
         /**
+         * Fecha de la ultima captura de imagen
+         */
+        long long fechaUltimaCaptura;
+
+        /**
          * Lista de parametros.
          * Los elementos de esta lista son punteros a GNamedVector donde el primer elemento
          * es el nombre del parametro y el segundo el valor
          */
         GHashMap lstParams;
+
+        /**
+         * Constructor
+         */
+        ImageSource()
+        {
+            fechaUltimaCaptura = -1;
+        }
 
         /**
          * Destructor
@@ -93,6 +106,11 @@ class ImageSource
          * Establece el valor de un parametro del tipo string
          */
         virtual void setStringParam( int param, string valor );
+
+        /**
+         * Se emplea para reiniciar a la camara usando la configuracion actual
+         */
+        virtual void restart() = 0;
 };
 
 /**
@@ -215,6 +233,11 @@ class InternalCameraSource : public ImageSource
          * Establece el valor de un parametro del tipo string
          */
         void setStringParam( int param, string valor ) override;
+
+        /**
+         * Se emplea para reiniciar a la camara usando la configuracion actual
+         */
+        void restart() override;
 };
 
 
@@ -301,6 +324,11 @@ class Esp32SocketCamera : public ImageSource
          */
         void setStringParam( int param, string valor ) override;
 
+        /**
+         * Se emplea para reiniciar a la camara usando la configuracion actual
+         */
+        void restart() override;
+
     private:
 
         /**
@@ -380,6 +408,11 @@ class OnvifCamera : public ImageSource , GThread
         static const string PARAM_URL_SERVIDOR;
 
         /**
+         * URL para acceder a la camara
+         */
+        string urlFinal;
+
+        /**
          * Referencia a la camara
          */
         std::unique_ptr<cv::VideoCapture> cap;
@@ -436,7 +469,17 @@ class OnvifCamera : public ImageSource , GThread
          */
         void runThread() override;
 
+        /**
+         * Se emplea para reiniciar a la camara usando la configuracion actual
+         */
+        void restart() override;
+
     private:
+
+        /**
+         * Reinicia la camara
+         */
+        void reiniciaCamara();
 
         /**
          * IP del servidor
@@ -467,6 +510,11 @@ class OnvifCamera : public ImageSource , GThread
          * Ultima imagen detectada
          */
         GImage imagenDet;
+
+        /**
+         * Valida si las imagenes a y b son iguales
+         */
+        bool frame_changed( cv::Mat &a, cv::Mat &b );        
 };
 
 
@@ -601,6 +649,11 @@ class VideoCamera : public ImageSource , GThread
          * Bucle del thread
          */
         void runThread() override;
+
+        /**
+         * Se emplea para reiniciar a la camara usando la configuracion actual
+         */
+        void restart() override;
 
     private:
 

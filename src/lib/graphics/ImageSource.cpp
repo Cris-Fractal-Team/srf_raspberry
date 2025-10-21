@@ -98,6 +98,7 @@ GImage InternalCameraSource::getImage()
 
     ultimoErrorCodigo = camara.errorEnLectura;
     ultimoErrorDesc = "Error al obtener imagen";
+    fechaUltimaCaptura = TimeDateUtils::getDateTimeMs();
 
     return img;
 }
@@ -136,6 +137,13 @@ void InternalCameraSource::setStringParam( int param, string valor )
 
 }
 
+/**
+ * Se emplea para reiniciar a la camara usando la configuracion actual
+ */
+void InternalCameraSource::restart()
+{
+
+}
 
 /**
  * Se encarga de crear la fuente
@@ -327,9 +335,19 @@ GImage Esp32SocketCamera::getImage()
         init();
     }
 
+    fechaUltimaCaptura = TimeDateUtils::getDateTimeMs();
+
     return rpta;
 }
 
+
+/**
+ * Se emplea para reiniciar a la camara usando la configuracion actual
+ */
+void Esp32SocketCamera::restart()
+{
+
+}
 
 /**
  * Actualiza la configuracion del dispositivo fisico en base a una lista
@@ -406,12 +424,22 @@ OnvifCamera::OnvifCamera()
 }
 
 /**
+ * Valida si las imagenes a y b son iguales
+ */
+bool OnvifCamera::frame_changed( cv::Mat &a, cv::Mat &b )
+{
+    if (a.empty() || b.empty() || a.size()!=b.size() || a.type()!=b.type()) return true;
+    double d = cv::norm(a, b, cv::NORM_INF); // fast; >0 means changed
+    return d > 0.0;
+}
+
+/**
  * Inicializa el proveedor
  */
 int OnvifCamera::init()
 {
     // string urlFinal = "rtps://";
-    string urlFinal = "rtsp://";
+    urlFinal = "rtsp://";
 
     ipServidor = lstParams.getString(OnvifCamera::PARAM_IP_SERVIDOR);
     puertoServidor = lstParams.getString(OnvifCamera::PARAM_PUERTO_SERVIDOR);
@@ -432,14 +460,32 @@ int OnvifCamera::init()
     gst_pipeline.append(urlFinal);
     gst_pipeline.append("  latency=100 ! decodebin ! videoconvert ! appsink");
 
+    // Esto es para GESTREAMER
+    urlFinal =
+        "rtspsrc location=" + urlFinal + " protocols=tcp latency=0 drop-on-latency=true do-rtsp-keep-alive=true ! "
+        "rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! "
+         "appsink sync=false max-buffers=1 drop=true";
+
     cout << "Accediento a la camara ONVIF: " << urlFinal << endl;    
-    cap = std::make_unique<cv::VideoCapture>();
-    
-    if ( !cap->open(urlFinal, cv::CAP_FFMPEG))    
-    {
-        std::cerr << "No se pudo conectar a la cámara ONVIF en " << urlFinal << std::endl;
-        return -1;
-    }
+
+    // Esto es para FFMPEG
+    // cap = std::make_unique<cv::VideoCapture>();
+
+    // Esto es para GSTREAMER
+    cap = std::make_unique<cv::VideoCapture>(urlFinal, cv::CAP_GSTREAMER);
+
+    // Esto es para FFMPEG
+    // setenv("OPENCV_FFMPEG_CAPTURE_OPTIONS",
+    //   "rtsp_transport;tcp|stimeout;5000000|rw_timeout;5000000|reorder_queue_size;0|max_delay;0|fflags;nobuffer|flags;low_delay|probesize;50000|analyzeduration;0",
+    //   1);
+    cap->set(cv::CAP_PROP_READ_TIMEOUT_MSEC,5000);
+    cap->set(cv::CAP_PROP_BUFFERSIZE, 1);
+
+    // Esto es para FFMPEG
+    // if ( !cap->open(urlFinal, cv::CAP_FFMPEG))    
+    // {
+    //     std::cerr << "No se pudo conectar a la cámara ONVIF en " << urlFinal << std::endl;
+    // }
 
     start();
 
@@ -488,6 +534,47 @@ GImage OnvifCamera::getImage()
     return imagen;
 }
 
+
+/**
+ * Se emplea para reiniciar a la camara usando la configuracion actual
+ */
+void OnvifCamera::restart()
+{
+   reiniciaCamara();
+}
+
+
+/**
+ * Reinicia la camara
+ */
+void OnvifCamera::reiniciaCamara()
+{
+     mtxBloquea();
+
+    cap->release();
+    cap.reset();
+    
+    // Esto es para FFMPEG
+    // cap = std::make_unique<cv::VideoCapture>();
+
+    // Esto es para GSTREAMER
+    cap = std::make_unique<cv::VideoCapture>(urlFinal, cv::CAP_GSTREAMER);
+
+    cap->set(cv::CAP_PROP_READ_TIMEOUT_MSEC,5000);
+    cap->set(cv::CAP_PROP_BUFFERSIZE, 1);
+
+    cout << "Reintentanto acceder a la camara" << endl;
+
+    // Esto es para FFMPEG
+    // if ( !cap->open(urlFinal, cv::CAP_FFMPEG))    
+    // {
+    //    std::cerr << "No se pudo re-conectar a la cámara ONVIF en " << urlFinal << std::endl;                
+    // }
+    cout << "Reiniciada finaliza" << endl;
+    mtxLibera();
+}
+
+
 /**
  * Actualiza la configuracion del dispositivo fisico en base a una lista
  * de parametros.
@@ -513,19 +600,37 @@ void OnvifCamera::setStringParam( int param, string valor )
 void OnvifCamera::runThread()
 {
     GImage imagen;
+    bool ok;
+    int numErrores = 0;
 
     while( isFinalizado() == false )
     {        
         cv::Mat frame;
+        ok = cap->read(frame);
+   
+        if ( ok && frame.empty() == false )
+        {
+            imagen.imagenOpencv = frame;
+            imagen.ancho = frame.cols;
+            imagen.altura = frame.rows;
 
-        *cap >> frame;
-        imagen.imagenOpencv = frame;
-        imagen.ancho = frame.cols;
-        imagen.altura = frame.rows;
+            mtxBloquea();
+            fechaUltimaCaptura = TimeDateUtils::getDateTimeMs();
+            imagenDet = imagen.clone();
+            mtxLibera();
+        }
+        else
+        {
+            numErrores++;
 
-        mtxBloquea();
-        imagenDet = imagen.clone();
-        mtxLibera();
+            if ( numErrores > 10 )
+            {            
+                cout << "La camara está caida "  << endl;
+                sleepSeg(50);
+                restart();
+                numErrores = 0;
+            }            
+        }
     }
     cout << "Thread Onvif finalizado" << endl;
 }
@@ -708,9 +813,18 @@ GImage VideoCamera::getImage()
     imagen.altura = frame.rows;
 
     imagenDet = imagen;
+    fechaUltimaCaptura = TimeDateUtils::getDateTimeMs();
 
     return imagen;
 }
+
+/**
+ * Se emplea para reiniciar a la camara usando la configuracion actual
+ */
+void VideoCamera::restart()
+{
+}
+
 
 /**
  * Actualiza la configuracion del dispositivo fisico en base a una lista
@@ -738,8 +852,6 @@ void VideoCamera::runThread()
 {
 
 }
-
-
 
 
 /**

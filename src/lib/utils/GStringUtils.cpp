@@ -328,3 +328,17 @@ string GStringUtils::to_string_fixed( double valor, int decimales )
     oss << std::fixed << std::setprecision(decimales) << valor;
     return oss.str();
 }
+
+
+/**
+ * Convierte un valor entero en un string con N digitos y completa si es necesario
+ * con ceros a la izquierd
+ */
+string GStringUtils::to_fixed_digits( int valor, int digits )
+{
+    std::ostringstream oss;
+    oss << std::setw(digits) << std::setfill('0') << valor;
+    std::string resultado = oss.str();
+
+    return resultado;
+}

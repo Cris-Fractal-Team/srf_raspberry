@@ -6,7 +6,7 @@
 #include <math.h>
 #include <arm_neon.h>
 #include <cmath>
-
+#include "lib/utils/GStringUtils.h"
 
 /**
  * Elimina las referencias que los universos de persona
@@ -237,7 +237,7 @@ FaceRecHailo::FaceRecHailo()
     errorCalculo = false;
     paramContraste = 2.0;
     maxBatchSize = 16;
-    similaridadFrontal = 5.0;
+    similaridadFrontal = 10.0;
 
     previsualizaImgReconocimiento = false;
     esperarPrevImgReconocimiento = false;
@@ -327,32 +327,8 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
     GImage imagenSinBlur(imgCaraAlineada);
     imagenSinBlur.sharpenUnsharp();
     imgCaraSinBlur = imagenSinBlur.imagenOpencv;
-    // imgCaraSinBlur = imgCaraAlineada;
 
     auto fin_blur = std::chrono::high_resolution_clock::now();
-
-    // GPoint punto;
-    // GColor rojo(255,0,0);
-
-    // punto.x = caraDet.ojoIzq.x;
-    // punto.y = caraDet.ojoIzq.y;
-    // GDibujo::drawElipse(imagen, punto, 2, 2, rojo, 1 );
-
-    // punto.x = caraDet.ojoDer.x;
-    // punto.y = caraDet.ojoDer.y;
-    // GDibujo::drawElipse(imagen, punto, 2, 2, rojo, 1 );
-
-    // punto.x = caraDet.nariz.x;
-    // punto.y = caraDet.nariz.y;
-    // GDibujo::drawElipse(imagen, punto, 2, 2, rojo, 1 );
-
-    // punto.x = caraDet.bocaIzq.x;
-    // punto.y = caraDet.bocaDer.y;
-    // GDibujo::drawElipse(imagen, punto, 2, 2, rojo, 1 );
-
-    // punto.x = caraDet.bocaDer.x;
-    // punto.y = caraDet.bocaDer.y;
-    // GDibujo::drawElipse(imagen, punto, 2, 2, rojo, 1 );
     
     if ( previsualizaImgReconocimiento == true )
     {   
@@ -369,7 +345,7 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
                     // guarda la cara visualizada
                     std::vector<int> parametros;
                     string pathCara = "./caras/cara_";
-                    pathCara.append(to_string(secuencialImgReconocimiento));
+                    pathCara.append(GStringUtils::to_fixed_digits(secuencialImgReconocimiento,6));
                     pathCara.append(".png");
                     secuencialImgReconocimiento++;
 
@@ -390,7 +366,7 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
             // guarda el rostro porque es frontal
             std::vector<int> parametros;
             string pathCara = "./caras/" + prefijoImgReconocimiento;
-            pathCara.append(to_string(secuencialImgReconocimiento));
+            pathCara.append(GStringUtils::to_fixed_digits(secuencialImgReconocimiento,6));
             pathCara.append(".png");
             secuencialImgReconocimiento++;
 
@@ -405,6 +381,7 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
     else
     {
         // no se procesa la cora no es frontal
+        // cout << "La cara no es frontal" << endl;
         return false;
     }
     
@@ -435,7 +412,7 @@ bool FaceRecHailo::ejecutar( cv::Mat imagen, DeteccionCaraHailo caraDet )
     // cout << "-- Blur      : " << durBlur.count() << endl;
     // cout << "-- Copia : " << durCopia.count() << endl;
     // cout << "-- Descriptor : " << durEjecuta.count() << endl;
-    // cout << ">> TOTAL      : " << durTotal.count() << endl;
+    cout << ">> TOTAL FaceRec      : " << durTotal.count() << endl;
     // cout << endl;
 
     return rpta;
@@ -551,18 +528,23 @@ bool FaceRecHailo::ejecutar( GLinkedList<cv::Mat> *lstImagenes, GLinkedList<Dete
                         // guarda la cara visualizada
                         std::vector<int> parametros;
                         string pathCara = "./caras/" + prefijoImgReconocimiento;
-                        pathCara.append(to_string(secuencialImgReconocimiento));
+                        pathCara.append(GStringUtils::to_fixed_digits(secuencialImgReconocimiento,6));
                         pathCara.append(".png");
                         secuencialImgReconocimiento++;
 
                         parametros.push_back(cv::IMWRITE_PNG_COMPRESSION);
                         parametros.push_back(3); 
-                        cout << "Guardando cara alineada :" << pathCara << endl;
+                        cout << "Guardando cara alineada 3:" << pathCara << endl;
                         cv::imwrite(pathCara, imgCaraAlineada, parametros);
                     }
                 }
             }
         }    
+        else
+        if ( caraFrontal == false )
+        {
+            // cout << "La cara no es frontal" << endl;
+        }
 
         if ( caraFrontal == true ) 
         {                    
@@ -571,12 +553,14 @@ bool FaceRecHailo::ejecutar( GLinkedList<cv::Mat> *lstImagenes, GLinkedList<Dete
                 // guarda el rostro porque es frontal
                 std::vector<int> parametros;
                 string pathCara = "./caras/" + prefijoImgReconocimiento ;
-                pathCara.append(to_string(secuencialImgReconocimiento));
+                pathCara.append(GStringUtils::to_fixed_digits(secuencialImgReconocimiento,6));
                 pathCara.append(".png");
                 secuencialImgReconocimiento++;
 
                 parametros.push_back(cv::IMWRITE_PNG_COMPRESSION);
                 parametros.push_back(3); 
+
+                cout << "Guardando cara alineada 3:" << pathCara << endl;
                 cv::imwrite(pathCara, imgCaraSinBlur, parametros);
             }
 

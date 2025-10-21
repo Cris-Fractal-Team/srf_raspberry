@@ -18,9 +18,9 @@ TrackedDetectionHailo::TrackedDetectionHailo()
  */
 DetectionTrackerHailo::DetectionTrackerHailo()
 {
-    deltaMaxX = 0.8;
-    deltaMaxY = 0.8;
-    maxCiclosInactivo = 1;
+    deltaMaxX = 0.5;
+    deltaMaxY = 0.5;
+    maxCiclosInactivo = 0;
     sgteId = 1;
 }
 

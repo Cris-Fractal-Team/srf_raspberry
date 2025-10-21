@@ -10,6 +10,10 @@
 #ifndef _DETECTOR_CARAS_HAILO_SCRFD_
 #define _DETECTOR_CARAS_HAILO_SCRFD_
 
+#define _DetectorCarasHailoSCRFD_500m_ 1
+#define _DetectorCarasHailoSCRFD_2_5g_ 2
+#define _DetectorCarasHailoSCRFD_10g_ 3
+
 using namespace std;
 
 /**
@@ -213,6 +217,16 @@ class DetectorCarasHailoSCRFD
         float nms_iou_thresh;
 
         /**
+         * Prefijo de las imagenes de deteccion guardadas
+         */
+        string prefijoImgDeteccion;
+
+        /**
+         * Contador del numero de imagenes guardadas
+         */
+        int secuencialImgDeteccion;
+
+        /**
          * Constructor
          */
         DetectorCarasHailoSCRFD();
@@ -231,6 +245,17 @@ class DetectorCarasHailoSCRFD
          * Ejecuta la deteccion
          */
         bool ejecutar( cv::Mat imagen );
+
+
+        /**
+         * Retorna las detecciones.
+         * El analiza el tipo de modelo y llama al metodo de deteccion correcto
+         * 
+         *      prec : 
+         *          Porcentaje de precicion o accurary esperada
+         */
+        std::vector<DeteccionCaraHailo> detectar( GImage image, float prec );
+
 
         /**
          * Retorna las detecciones
@@ -287,6 +312,11 @@ class DetectorCarasHailoSCRFD
         std::vector<DeteccionCaraHailo> getDetecciones_10g( float prec );
 
     private:
+
+        /**
+         * Codigo del tipo de modelo que al finel representa las salidas
+         */
+        int tipoModelo;
         
         /**
          * Extrae las cajas que rodean a las detecciones

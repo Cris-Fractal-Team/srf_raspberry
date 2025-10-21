@@ -26,6 +26,11 @@ class ProcesoRecFacial
         string idEquipo;
 
         /**
+         * Contador de cuadros
+         */
+        long long numCuadro;
+
+        /**
          * Generador de eventos que envia los datos en paralelo
          */
         GeneradorEventos generadorEventos;
@@ -238,6 +243,16 @@ class ProcesoRecFacial
          * Indica si se presento un error al iniciar el proceso
          */
         bool errorInicial;
+
+        /**
+         * Detector de rostros
+         */
+        DetectorCarasHailoSCRFD detector;        
+    
+        /**
+         * Generador de descriptres faciales
+         */
+        FaceRecHailo generadorDesc;
         
         /**
          * Mutex para areas criticas
@@ -291,6 +306,17 @@ class ProcesoRecFacial
          * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
          */
         double factorEscalaVisualizaY;
+
+        /**
+         * Inicializa el generador de descriptores faciales
+         */
+        bool inicializaGeneradorDescriptores( hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr );
+
+        /**
+         * Inicializa el detector de rostros
+         * Returna true si fue exitoso
+         */
+        bool inicializaDetectorRostros( hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr );
 };
 
 

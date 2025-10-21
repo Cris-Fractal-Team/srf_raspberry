@@ -48,7 +48,7 @@ alturaCaraRec=112
 
 # Indica que tanta es la similaridad entre puntos de un rostro y los frontales
 # Un valor de 5 es un contraste
-similaridadFrontal=10
+similaridadFrontal=12
 
 # Numero de identificaciones exitosas requeridas para generar un evento
 # y llamar al webservice 
@@ -64,14 +64,14 @@ deltaRostroMax=0.65
 
 # Diferencia maxima entre un rostro desconocido no frontal y un rostro conocido
 # Debido a que hay un giro en el rostro se requiere ser menos tolerante
-deltaRostroMovidoMax=0.80
+deltaRostroMovidoMax=0.90
 
 # Angulo de desviacion horizontal o vertical minimo para considerar un rostro no frontal
 # Un rostro con desviacion mayor o igual a este angulo, es evaluado con el deltaRostroMovidoMax
 anguloRostroMovido=35
 
 # Presicion o accuracy de la deteccion de rostros
-presicionDeteccion=0.50
+presicionDeteccion=0.450
 
 # Tiempo de revalidar rostros detectados en ms
 tiempoRevalidacion=1000
@@ -90,13 +90,19 @@ _pathModeloDescFacial=./models/arcface_mobilefacenet_h8l.hef
 _pathModeloDescFacial=./models/arcface_r50.hef
 _pathModeloDescFacial=./models/r50_fractal_v3.hef
 _pathModeloDescFacial=./models/mbf_finetuned-20250902-1101.hef
-_pathModeloDescFacial=./models/fractal_20250916_1253.hef
+pathModeloDescFacial=./models/fractal_20250916_1253.hef
 
 # Este funciona bien
 _pathModeloDescFacial=./models/mbf_fractal_v2.hef
 _pathModeloDescFacial=./models/mbf_finetuned.hef
-pathModeloDescFacial=./models/mbf_finetuned_20250917.hef
-
+_pathModeloDescFacial=./models/mbf_finetuned_20250917.hef
+_pathModeloDescFacial=./models/mbf_finetuned_20250924.hef
+_pathModeloDescFacial=./models/mbf_finetuned_20250926.hef
+_pathModeloDescFacial=./models/mbf_finetuned_20250930_1807.hef
+_pathModeloDescFacial=./models/mbf_finetuned_20250930_2233.hef
+_pathModeloDescFacial=./models/mbf_20251002.hef
+_pathModeloDescFacial=./models/mbf_finetuned_20251008.hef
+_pathModeloDescFacial=./models/mbf_finetuned_2025_10_10_00_40_51.hef
 
 # Nombre de la capa final del modelo que genera descriptor facial
 _nombreUltimaCapaRedNeuronal=arcface_mobilefacenet/fc1
@@ -104,6 +110,9 @@ _nombreUltimaCapaRedNeuronal=arcface_r50/fc1
 _nombreUltimaCapaRedNeuronal=r50/fc1
 _nombreUltimaCapaRedNeuronal=mbf/fc1
 nombreUltimaCapaRedNeuronal=mbf_finetuned/fc1
+
+# Ruta de la red que hace deteccion de rostros
+pathDetectorRostros=./models/scrfd_2.5g.hef
 
 # *************************************************************************************
 #  Configuracion de LOGS 
@@ -142,24 +151,36 @@ _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R100_j80_C0_cuad_fractal_v3
 _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j80_C0_fractal_20250902-1102.txt
 _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j100_C0_fractal_20250902-1102.txt
 _pathBDPersonas=./data/colegio-20250916.txt
-pathBDPersonas=./data/colegio-20250918-g0-r0-j100-h1080.txt
 
+_pathBDPersonas=./data/colegio-20250918-g0-r0-j100-h1080.txt
+_pathBDPersonas=./data/colegio-20250924-g0-r0-j100-h1080.txt
+_pathBDPersonas=./data/colegio-20250926-g0-r0-j100-h1080.txt
+_pathBDPersonas=./data/colegio-20250926-g0-r0-j80-h1080.txt
+_pathBDPersonas=./data/colegio-20250930_1839-g0-r0-j80-h1080.txt
+_pathBDPersonas=./data/colegio-20250930_2234-g0-r0-j80-h1080.txt
+_pathBDPersonas=./data/colegio-20251002-2151-g0-r0-j80-h1080.txt
 
-# pathBDPersonas=./data/personas-fractal.txt
+pathBDPersonas=./data/colegio-20251010_2146-g0-r0-j60-h800.txt
+
 
 # *************************************************************************************
 #  Configuracion para camaras onvif 
 # *************************************************************************************
 
 # Parte final o sufijo del URL para camaras Dahua
-urlServidor=/cam/realmonitor?channel=1&subtype=0
+# urlServidor=/cam/realmonitor?channel=1&subtype=0
 
 # Parte final o fuijo del URL para camaras TAPO TP-Link
-# urlServidor=/stream1
+urlServidor=/stream1
 
-onvifLogin=admin
-onvifPassword=12345678@
-onvifIP=192.168.3.201
+#onvifLogin=admin
+#onvifPassword=12345678@
+#onvifIP=192.168.3.201
+#onvifPuerto=554
+
+onvifLogin=administrador
+onvifPassword=giulli2907
+onvifIP=192.168.3.139
 onvifPuerto=554
 
 # *************************************************************************************
@@ -176,17 +197,17 @@ esperarPrevImgParaDeteccion=N
 
 # Indica se se desea previsualizar las cara original
 # y la centrada antes de generar una descripcion facial
-previsualizaImgReconocimiento=S
+previsualizaImgReconocimiento=N
 
 # Indica se se desea esperar la presidon de una tecla 
 # luego previsualizar las imagenes para reconocimiento facial
-esperarPrevImgReconocimiento=S
+esperarPrevImgReconocimiento=N
 
 # Indica se se desea procesar la tecla presionada luego de
 # visualizar las caras para reconocimiento
 # si se presiona la tecla "g" o "G" mayuscula se guarda
 # un PNG del rostro alineado
-guardarPrevImgReconocimiento=S
+guardarPrevImgReconocimiento=N
 
 # Prefijo que se le pone a las imagenes de reconocimiento que se guardan
 prefijoImgReconocimiento=oficial_
@@ -213,12 +234,12 @@ reflejarVerticalmente=S
 urlBaseServidorIden_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canadacentral-01.azurewebsites.net/srf/sensor/eventoSensor
 urlBaseServidorNoIden_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canadacentral-01.azurewebsites.net/srf/sensor/eventoDesconocidoSensor
 urlBaseServidorUnificado_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canadacentral-01.azurewebsites.net/srf/sensor/eventoDesconocidoSensor
-_urlBaseServidorIden=http://iawks02.local/clientes/fractal/registra_data.php
-_urlBaseServidorNoIden=http://iawks02.local/clientes/fractal/registra_data.php
-_urlBaseServidorUnificado=http://iawks02.local/clientes/fractal/registra_data.php
-urlBaseServidorIden=http://lap01.local/clientes/fractal/registra_data.php
-urlBaseServidorNoIden=http://lap01.local/clientes/fractal/registra_data.php
-urlBaseServidorUnificado=http://lap01.local/clientes/fractal/registra_data.php
+urlBaseServidorIden=http://iawks02.local/clientes/fractal/registra_data.php
+urlBaseServidorNoIden=http://iawks02.local/clientes/fractal/registra_data.php
+urlBaseServidorUnificado=http://iawks02.local/clientes/fractal/registra_data.php
+_urlBaseServidorIden=http://lap01.local/clientes/fractal/registra_data.php
+_urlBaseServidorNoIden=http://lap01.local/clientes/fractal/registra_data.php
+_urlBaseServidorUnificado=http://lap01.local/clientes/fractal/registra_data.php
 
 
 # nivel de calidad JPEG
@@ -265,22 +286,40 @@ videoPath_2=./videos/pasillo.mp4
 videoPath_=./videos/colegio_1.mp4
 videoPath_c1=./videos/colegio_2.mp4
 videoPath_c2=./videos/colegio_3.mp4
+
+# Erick 1000, 2220
 videoPath_=./videos/colegio_con_erick.mp4
+
 videoPath_=./videos/entrada-2025-08-11-06.45.00-07.00.00.mp4
 videoPath_=./videos/entrada-2025-08-12-06.45.00.mp4
 videoPath_=./videos/entrada-2025-08-12-06.30.00.mp4
-videoPath_=./videos/entrada-2025-08-13-08.15.00.mp4
-videoPath_=./videos/entrada-2025-08-13-08.30.00.mp4
-videoPath_=./videos/entrada_0821_07.00.mp4
-videoPath_=./videos/entrada_0821_07.15.mp4
-videoPath_=./videos/entrada_0820_12.30.mp4
-videoPath_=./videos/entrada_0820_12.45.mp4
-videoPath_=./videos/entrada-0812_14.45.mp4
-videoPath=./videos/20250915-no-detecta-cris.mp4
+
+_videoPath=./videos/entrada-2025-08-13-08.15.00.mp4
+
+# Cris y Erick 7500, 8870,  Sra Ana 8100
+_videoPath=./videos/entrada-2025-08-13-08.30.00.mp4
+
+# Sale ramon jacobo con lentes a los 5230
+_videoPath=./videos/entrada_0821_07.00.mp4
+
+_videoPath=./videos/entrada_0821_07.15.mp4
+_videoPath=./videos/entrada_0820_12.30.mp4
+_videoPath=./videos/entrada_0820_12.45.mp4
+
+# FP 8720 nina
+_videoPath=./videos/entrada-0812_14.45.mp4
+
+# Aqui sale Cris y Ramon Jacobo, no se identificaba a Cris, y a Ramon tampoco - 6200
+# dos trabajadores a las 8940, Erick Vasquz a las 8700
+_videoPath=./videos/20250915-no-detecta-cris.mp4
+
+
+# Entrada 150 Falsos positivos, 4500 Ramon
+videoPath=./videos/entrada_09302025/07.30.00.mp4
 
 
 # Cantidad de imagenes por segundo del video
-videoVelocidadImgPorSegundo=2
+videoVelocidadImgPorSegundo=10
 
 # Indica si se debe reiniciar automaticamente el video
 videoInfinito=N
@@ -299,7 +338,7 @@ videoCUadroInicial_jueves_14_08.15=4300
 videoCUadroInicial_jueves_14_08.30=7500,8100
 videoCuadroInicial_0821_07.00=5230
 videoCuadroInicial_20250915=6200
-videoCuadroInicial=6200
+videoCuadroInicial=0
 
 # *************************************************************************************
 # Configuracion para la creacion de la BD de personas conocidas
@@ -316,7 +355,7 @@ pixelSuavizado=0
 resizeSuavizado=0
 
 # Suavizado del JPEG que genera artefactos de compresion
-jpegSuavizado=100
+jpegSuavizado=50
 
 # Paramtro del nivel de contraste que se genera
 paramContraste=0
@@ -329,5 +368,5 @@ paramContraste=0
 encuadrarRostros=S
 
 # Altura a la que se escalan las imagenes antes de detectar rostros, esto tambien elimina detalles
-alturaImagenBase=1080
+alturaImagenBase=800
 

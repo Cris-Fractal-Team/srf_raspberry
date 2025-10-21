@@ -17,6 +17,7 @@ ExtractorFacialArchivo::ExtractorFacialArchivo()
     resizeSuavizado = 1;
     jpegSuavizado = 100;
     guardarCarasFrontalesAlineadas = false;
+    guardarPrevImgReconocimiento = false;
 }
 
 /**
@@ -68,7 +69,7 @@ void ExtractorFacialArchivo::ejecutar()
     generadorDesc.guardarCarasFrontalesAlineadas = guardarCarasFrontalesAlineadas;
     generadorDesc.previsualizaImgReconocimiento = previsualizaImgReconocimiento;
     generadorDesc.esperarPrevImgReconocimiento = esperarPrevImgReconocimiento;
-
+    generadorDesc.guardarPrevImgReconocimiento = guardarPrevImgReconocimiento;
 
     if ( generadorDesc.cargarModelo(pathModeloDescFacial) != 0 )
     {
@@ -86,6 +87,7 @@ void ExtractorFacialArchivo::ejecutar()
         if ( lstValores.size() != 3 )
             continue;
 
+        // extraemos los datos de la persona
         idPersona = lstValores.getString(0);
         nombre = lstValores.getString(1);
         pathFoto = lstValores.getString(2);
@@ -96,6 +98,7 @@ void ExtractorFacialArchivo::ejecutar()
         GImage rostro = GDibujo::read(pathFotos + pathFoto);   
         if ( alturaImagenBase > 0 )
         {
+            // se escala la imagen segun parametro de configuracion
             long long ancho;
             float factor = ((float)alturaImagenBase) / (float)rostro.altura;
 
@@ -103,14 +106,7 @@ void ExtractorFacialArchivo::ejecutar()
             rostro = rostro.cloneResize(ancho,alturaImagenBase);
         }
         GImage rostroOrig = rostro.clone();
-        
-        // cv::imshow("Original Escalada", rostro.imagenOpencv);
-
-        // Simular compresión JPEG en memoria
-        // std::vector<uchar> buf;
-        // std::vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 30}; // Ajusta el nivel de calidad (ej. 40-60)
-        // cv::imencode(".jpg", rostro.imagenOpencv, buf, params);
-        // rostro.imagenOpencv = cv::imdecode(buf, cv::IMREAD_COLOR);
+    
         
         cout << "Ancho del rostro " << rostro.ancho << " Altura " << rostro.altura << endl;
         lstDet = detector.detectar_2_5g(rostro, toleranciaDetec);        
@@ -125,8 +121,6 @@ void ExtractorFacialArchivo::ejecutar()
             DeteccionCaraHailo det = lstDet.at(0);
             DeteccionCaraHailo det1 = lstDet.at(0);
             cv::Mat blurred, tmp;  
-
-            // cout << "Cara detectada" << endl;
                         
             if ( encuadrarRostros.compare("S") == 0 ) 
                 det.ajustarCuadrado(rostro.ancho, rostro.altura);
@@ -134,43 +128,25 @@ void ExtractorFacialArchivo::ejecutar()
             if ( encuadrarRostros.compare("M") == 0 ) 
                 det.ajustarMiniCuadrado(rostro.ancho, rostro.altura);
             
-
             rostroOrig = rostro.clone();
 
-            // GDibujo::drawRect(rostroOrig, GRect(det.ptoSupIzq.x, det.ptoSupIzq.y, det.ptoInfDer.x, det.ptoInfDer.y), GColor(255,0,0), 2);
-            // GDibujo::drawRect(rostroOrig, GRect(det1.ptoSupIzq.x, det1.ptoSupIzq.y, det1.ptoInfDer.x, det1.ptoInfDer.y), GColor(0,0,255), 2);
-            
-            // cv::imshow("Deteccion", rostro.imagenOpencv); 
-            
+            // se aplican efectos para simular calidad de camara IP
             if ( pixelSuavizado > 0 )
-            {
-                          
-                cv::GaussianBlur(rostro.imagenOpencv, blurred, cv::Size(pixelSuavizado,pixelSuavizado), 0);
-                                
-                // cv::imshow("Blured", rostro.imagenOpencv);
-                // cv::waitKey(0);
-
+            {                          
+                cv::GaussianBlur(rostro.imagenOpencv, blurred, cv::Size(pixelSuavizado,pixelSuavizado), 0);                        
                 rostro.imagenOpencv = blurred;          
             }
-
-            
-            
+                        
             if ( resizeSuavizado > 1 )
             {   
                 cv::resize(rostro.imagenOpencv , tmp, cv::Size(resizeSuavizado,resizeSuavizado), 0, 0, cv::INTER_AREA);
                 cv::resize(tmp, rostro.imagenOpencv, rostro.imagenOpencv.size(), 0, 0, cv::INTER_LINEAR);
-
-                // cv::imshow("Suavizado", rostro.imagenOpencv);
-                // cv::waitKey(0);
             }
             else
             if ( ( resizeSuavizado > 0.0 ) && ( resizeSuavizado < 1 ))
             {   
                 cv::resize(rostro.imagenOpencv , tmp, cv::Size(), resizeSuavizado, resizeSuavizado, cv::INTER_AREA);
                 cv::resize(tmp, rostro.imagenOpencv, rostro.imagenOpencv.size(), 0, 0, cv::INTER_LINEAR);
-
-                // cv::imshow("Suavizado", rostro.imagenOpencv);
-                // cv::waitKey(0);
             }
                         
             if ( jpegSuavizado < 100 )
@@ -179,17 +155,11 @@ void ExtractorFacialArchivo::ejecutar()
                 std::vector<int> p = { cv::IMWRITE_JPEG_QUALITY, 40 };
                 cv::imencode(".jpg", rostro.imagenOpencv, buf, p);
                 rostro.imagenOpencv = cv::imdecode(buf, cv::IMREAD_COLOR);
-
-                // cv::imshow("JPEG", rostro.imagenOpencv);
-                // cv::waitKey(0);
             }            
 
+            // se calcula el rostro invertido de la persona para tener un promedio 
             GImage rostroExtraido = rostro.getRect(det.ptoSupIzq.x, det.ptoSupIzq.y, det.ptoInfDer.x, det.ptoInfDer.y);
-            GImage rostroInvertido = GDibujo::flip(rostroExtraido, GDIBUJO_FLIP_VER);
-
-            // cv::imshow("Extraido", rostroExtraido.imagenOpencv);
-            // cv::imshow("Invertido", rostroInvertido.imagenOpencv);
-            // cv::waitKey(0);
+            // GImage rostroInvertido = GDibujo::flip(rostroExtraido, GDIBUJO_FLIP_VER);
 
             det.desplazaPtosCara(-det.ptoSupIzq.x, -det.ptoSupIzq.y);
             det.desplazaRegion(-det.ptoSupIzq.x, -det.ptoSupIzq.y);
@@ -197,14 +167,10 @@ void ExtractorFacialArchivo::ejecutar()
             SIMD_TYPE descriptorOrig[NUM_ELEMS_DESC_FACIAL];
             SIMD_TYPE descriptorFlip[NUM_ELEMS_DESC_FACIAL];
             SIMD_TYPE descriptorUnif[NUM_ELEMS_DESC_FACIAL];       
-            // cout << "Calculando descriptor: " << rostroOrig.ancho << " x " << rostroOrig.altura << " Det: " << 
-            //     det.ptoSupIzq.x << " , " << det.ptoSupIzq.y << " , " <<  
-            //     det.ptoInfDer.x << " , " << det.ptoInfDer.y << endl;     
-                        
-            // cv::waitKey(0);
+
             generadorDesc.calculaDescriptor(rostroExtraido, det, descriptorOrig);     
-            generadorDesc.calculaDescriptor(rostroInvertido, det, descriptorFlip);
-            fuse_flip_embeddings(descriptorOrig, descriptorFlip, descriptorUnif);
+            // generadorDesc.calculaDescriptor(rostroInvertido, det, descriptorFlip);
+            // fuse_flip_embeddings(descriptorOrig, descriptorFlip, descriptorUnif);
             
             string fila = nombre;
             fila.append(",");
@@ -213,7 +179,7 @@ void ExtractorFacialArchivo::ejecutar()
 
             for(int j=0; j<NUM_ELEMS_DESC_FACIAL; j++)
             {
-                fila.append(to_string(descriptorUnif[j]));
+                fila.append(to_string(descriptorOrig[j]));
                 fila.append(",");
             }
             fila.append("\n");
@@ -316,4 +282,148 @@ void ExtractorFacialArchivo::fuse_flip_embeddings(SIMD_TYPE *e_orig,
         }        
     }
     l2_normalize(e_unificado);
+}
+
+/**
+ * Ejecuta el proceso que genera descriptor facial para todas las fotos
+ * de un directorio y guarda las caras frontales en el directorio configurado
+ * 
+ * @param directorio directorio donde cada foto es procesada
+ */
+void ExtractorFacialArchivo::extreCarasDirectorio( string directorio )
+{
+    int i,n;
+
+    vector<DeteccionCaraHailo> lstDet;
+    string fila,idPersona,pathFoto,nombre;
+    string datosArchivo = leeArchivoTexto(pathArchivoDatos);
+    GVector lstFilas = GStringUtils::split(datosArchivo, "\n");
+    hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr;
+    DetectorCarasHailoSCRFD detector;        
+    FaceRecHailo generadorDesc;
+    vector<string> lstArchivos;
+    
+    // obtiene los archivos del directorio
+    lstArchivos = listArchivosDirectorio(directorio);
+    cout << "Total archivos encontrados: " << lstArchivos.size() << endl;
+
+    // inicializa el dispositivo
+    hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();    
+    if (!device) 
+    {
+        cerr << "Error: No se pudo inicializar el dispositivo Hailo." << endl;        
+        return;
+    }
+    devicePtr = &device;
+
+    // configura el detector
+    detector.setDimImagenes(640,640);
+    detector.runner.device = &device;
+    if ( detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0 )
+    {
+        cout << "Error al cargar el modelo detector" << endl;        
+        return;
+    }           
+    cout << "Detector de rostros iniciado" << endl;
+
+    // crea el generador de descriptores faciales
+    generadorDesc.runner.device = &device;
+    generadorDesc.paramContraste = paramContraste;
+    generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
+    generadorDesc.guardarCarasFrontalesAlineadas = guardarCarasFrontalesAlineadas;
+    generadorDesc.previsualizaImgReconocimiento = previsualizaImgReconocimiento;
+    generadorDesc.esperarPrevImgReconocimiento = esperarPrevImgReconocimiento;
+    generadorDesc.guardarPrevImgReconocimiento = guardarPrevImgReconocimiento;
+
+    if ( generadorDesc.cargarModelo(pathModeloDescFacial) != 0 )
+    {
+        cout << "Error al cargar modelo generador de descriptores" << endl;
+        return;
+    }
+    cout << "Generador de descriptores iniciado" << endl;
+     
+    n = lstArchivos.size();
+    for(i=0;i<n;i++)
+    {
+        pathFoto = lstArchivos[i];        
+        cout << i << ") Proceasndo Archivo:" << pathFoto << endl;
+        
+        GImage rostro = GDibujo::read(pathFoto);   
+        if ( alturaImagenBase > 0 )
+        {
+            long long ancho;
+            float factor = ((float)alturaImagenBase) / (float)rostro.altura;
+
+            ancho = (int)(((float)rostro.ancho)*factor);
+            rostro = rostro.cloneResize(ancho,alturaImagenBase);
+        }
+        GImage rostroOrig = rostro.clone();
+                
+        cout << "Ancho del rostro " << rostro.ancho << " Altura " << rostro.altura << endl;
+        lstDet = detector.detectar_2_5g(rostro, toleranciaDetec);        
+        if ( detector.errorDeteccion == true )
+        {
+            cout << "Error al detectar rostros" << endl;
+            break;
+        }
+
+        if ( lstDet.size() > 0 )
+        {            
+            DeteccionCaraHailo det = lstDet.at(0);
+            DeteccionCaraHailo det1 = lstDet.at(0);
+            cv::Mat blurred, tmp;  
+                        
+            if ( encuadrarRostros.compare("S") == 0 ) 
+                det.ajustarCuadrado(rostro.ancho, rostro.altura);
+            else
+            if ( encuadrarRostros.compare("M") == 0 ) 
+                det.ajustarMiniCuadrado(rostro.ancho, rostro.altura);
+            
+
+            rostroOrig = rostro.clone(); 
+            
+            if ( pixelSuavizado > 0 )
+            {
+                          
+                cv::GaussianBlur(rostro.imagenOpencv, blurred, cv::Size(pixelSuavizado,pixelSuavizado), 0);                            
+                rostro.imagenOpencv = blurred;          
+            }
+                    
+            if ( resizeSuavizado > 1 )
+            {   
+                cv::resize(rostro.imagenOpencv , tmp, cv::Size(resizeSuavizado,resizeSuavizado), 0, 0, cv::INTER_AREA);
+                cv::resize(tmp, rostro.imagenOpencv, rostro.imagenOpencv.size(), 0, 0, cv::INTER_LINEAR);
+            }
+            else
+            if ( ( resizeSuavizado > 0.0 ) && ( resizeSuavizado < 1 ))
+            {   
+                cv::resize(rostro.imagenOpencv , tmp, cv::Size(), resizeSuavizado, resizeSuavizado, cv::INTER_AREA);
+                cv::resize(tmp, rostro.imagenOpencv, rostro.imagenOpencv.size(), 0, 0, cv::INTER_LINEAR);
+            }
+                        
+            if ( jpegSuavizado < 100 )
+            {
+                std::vector<uchar> buf;
+                std::vector<int> p = { cv::IMWRITE_JPEG_QUALITY, 40 };
+                cv::imencode(".jpg", rostro.imagenOpencv, buf, p);
+                rostro.imagenOpencv = cv::imdecode(buf, cv::IMREAD_COLOR);
+            }            
+
+            GImage rostroExtraido = rostro.getRect(det.ptoSupIzq.x, det.ptoSupIzq.y, det.ptoInfDer.x, det.ptoInfDer.y);
+        
+            det.desplazaPtosCara(-det.ptoSupIzq.x, -det.ptoSupIzq.y);
+            det.desplazaRegion(-det.ptoSupIzq.x, -det.ptoSupIzq.y);
+            
+            SIMD_TYPE descriptorOrig[NUM_ELEMS_DESC_FACIAL];
+            SIMD_TYPE descriptorFlip[NUM_ELEMS_DESC_FACIAL];
+            SIMD_TYPE descriptorUnif[NUM_ELEMS_DESC_FACIAL];       
+        
+            generadorDesc.calculaDescriptor(rostroExtraido, det, descriptorOrig);     
+            
+        }
+        else
+        {
+            cout << "!!! NO se detecto un rostro" << endl;
+        }
+    }
 }

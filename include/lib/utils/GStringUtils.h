@@ -121,7 +121,12 @@ class GStringUtils
          * Convierte un valor decimal a un string con una cantidad de decimales de presicion
          */
         static string to_string_fixed( double valor, int decimales );
-    
+
+        /**
+         * Convierte un valor entero en un string con N digitos y completa si es necesario
+         * con ceros a la izquierd
+         */
+        static string to_fixed_digits( int valor, int digits );    
 };
 
 #endif

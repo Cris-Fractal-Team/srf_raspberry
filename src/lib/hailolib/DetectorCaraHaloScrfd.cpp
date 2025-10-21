@@ -3,6 +3,7 @@
 #include <cmath>
 #include "lib/hailolib/DetectorCaraHaloScrfd.h"
 #include "lib/utils/NumberUtils.h"
+#include "lib/utils/GStringUtils.h"
 
 /**
  * Retorna el acho de la cara
@@ -318,7 +319,7 @@ void DeteccionCaraHailo::ajustarMiniCuadrado( int anchoMax, int alturaMax )
  */
 DetectorCarasHailoSCRFD::DetectorCarasHailoSCRFD()
 {
-    nms_iou_thresh = 0.7;
+    nms_iou_thresh = 0.6;
 
     previsualizaImgParaDeteccion = false;
     esperarPrevImgParaDeteccion = false;
@@ -339,7 +340,47 @@ void DetectorCarasHailoSCRFD::setDimImagenes( int ancho, int altura )
  */
 int DetectorCarasHailoSCRFD::cargarModelo( string path )
 {
-    return runner.cargarRed(path);
+    int resultado = runner.cargarRed(path);
+
+    if ( resultado == 0 )
+    {
+        char *pos;
+        hailo_vstream_info_t infoVstr;
+        std::vector<hailo_vstream_info_t> lstInfo;
+
+        lstInfo = runner.getOutVStreamsInfo();            
+        infoVstr = lstInfo.at(0);
+
+        pos = strstr(infoVstr.name, "2_5g");
+        cout << "1ra capa de salida: " << infoVstr.name << " : " << pos << endl;
+        
+        if ( strstr(infoVstr.name,"500m") != NULL )
+        {
+            tipoModelo = _DetectorCarasHailoSCRFD_500m_;
+        }
+        else
+        if ( strstr(infoVstr.name,"2_5g") != NULL )
+        {
+            tipoModelo = _DetectorCarasHailoSCRFD_2_5g_;
+        }
+        else    
+        if ( strstr(infoVstr.name,"10g") != NULL )
+        {
+            tipoModelo = _DetectorCarasHailoSCRFD_10g_;
+        }
+        else 
+        {
+            tipoModelo = 0;
+        }
+
+        cout << "Tipo de modelo SCRFD detectado : " << tipoModelo << endl;
+    }
+    else
+    {
+        tipoModelo = 0;
+    }
+
+    return resultado;
 }
 
 /**
@@ -347,7 +388,7 @@ int DetectorCarasHailoSCRFD::cargarModelo( string path )
  */
 bool DetectorCarasHailoSCRFD::ejecutar( cv::Mat imagen )
 {
-    int deltaBorde;
+    int deltaBorde,tecla;
 
     // auto inicio = std::chrono::high_resolution_clock::now();
     anchoImgOrig = imagen.cols;
@@ -381,7 +422,21 @@ bool DetectorCarasHailoSCRFD::ejecutar( cv::Mat imagen )
         cv::imshow("Cuadro Deteccion", imagenRedim);
         if ( esperarPrevImgParaDeteccion == true )
         {
-            cv::waitKey(0);
+            tecla = cv::waitKey(3);
+            if ( tecla == 'p' )
+            {
+                // se guarda la imagen para usarla luego
+                std::vector<int> parametros;
+                string pathFoto = "./fotos/" + prefijoImgDeteccion;
+                pathFoto.append(GStringUtils::to_fixed_digits(secuencialImgDeteccion,6));
+                pathFoto.append(".png");
+                secuencialImgDeteccion++;
+
+                parametros.push_back(cv::IMWRITE_PNG_COMPRESSION);
+                parametros.push_back(3); 
+                cout << "Guardando foto para deteccion :" << pathFoto << endl;
+                cv::imwrite(pathFoto, imagenRedim, parametros);
+    }
         }
     }
 
@@ -782,6 +837,27 @@ float DetectorCarasHailoSCRFD::compute_iou(const DeteccionCaraHailo& a, const De
     return inter_area / (area_a + area_b - inter_area);
 }
 
+
+/**
+ * Retorna las detecciones.
+ * El analiza el tipo de modelo y llama al metodo de deteccion correcto
+ * 
+ *      prec : 
+ *          Porcentaje de precicion o accurary esperada
+ */
+std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::detectar( GImage image, float prec )
+{
+    if ( tipoModelo == _DetectorCarasHailoSCRFD_500m_ ) return detectar_500m(image,prec);
+    else
+    if ( tipoModelo == _DetectorCarasHailoSCRFD_2_5g_ ) return detectar_2_5g(image,prec);
+    else
+    if ( tipoModelo == _DetectorCarasHailoSCRFD_10g_ ) return detectar_10g(image,prec);
+
+    std::vector<DeteccionCaraHailo> blanco;
+
+    return blanco;
+}
+       
 
 /**
  * Retorna las detecciones
