@@ -5,9 +5,9 @@
 #include "lib/utils/GLog.h"
 
 /**
- * Trama que se solicita enviar perteneciente a una persona identificada
+ * Encola un ping para “identificados”
  */
-void GeneradorPings::agregarTramaIden( string trama )
+void GeneradorPings::encolarPingIdentificado(string trama)
 {
     mtxBloquea();
     lstTramasPendIden.add(trama);
@@ -16,9 +16,9 @@ void GeneradorPings::agregarTramaIden( string trama )
 }
 
 /**
- * Trama que se solicita enviar perteneciente a una persona NO identificada
+ * Encola un ping para “no identificados”
  */
-void GeneradorPings::agregarTramaNoIden( string trama )
+void GeneradorPings::encolarPingNoIdentificado(string trama)
 {
     mtxBloquea();
     lstTramasPendNoIden.add(trama);
@@ -42,7 +42,6 @@ bool GeneradorPings::hayEventosPend()
 
     return rpta;
 }
-
 
 /**
  * Bucle del thread
@@ -75,14 +74,12 @@ void GeneradorPings::runThread()
         if ( lstTramasPendIden.size() > 0 ) 
         {
             trama = lstTramasPendIden.get(0);
-            // En este generador, siempre se usa urlPing
-            urlServidor = urlPing;
+            urlServidor = urlPing; // único endpoint de pings
         }            
         else 
         {
             trama = lstTramasPendNoIden.get(0);
-            // En este generador, siempre se usa urlPing
-            urlServidor = urlPing;
+            urlServidor = urlPing; // único endpoint de pings
         }
         mtxLibera();
 

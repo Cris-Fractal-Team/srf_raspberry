@@ -1,10 +1,11 @@
-
 #ifndef _GENERADOR_PINGS_
 #define _GENERADOR_PINGS_
 
+#include <string>
+using std::string;
+
 #include "lib/general/GThread.h"
 #include "lib/general/GLinkedList.h"
-
 
 /**
  * Clase que encola los pings que se deben enviar al servidor
@@ -35,6 +36,16 @@ class GeneradorPings : public GThread
         string urlPing;
 
         /**
+         * Encola un ping para “identificados”
+         */
+        void encolarPingIdentificado(string trama);
+
+        /**
+         * Encola un ping para “no identificados”
+         */
+        void encolarPingNoIdentificado(string trama);
+
+        /**
          * Bucle del thread
          */
         void runThread() override;
@@ -43,7 +54,6 @@ class GeneradorPings : public GThread
          * Valida si hay eventos pendientes de ser procesado
          **/
         bool hayEventosPend();
-
 
     private:
 
