@@ -164,7 +164,7 @@ void ProcesoRecFacial::iniciar()
 
     // ejecuta el procesador de eventos    
     generadorEventos.start();
-
+    generadorPings.start();
     factorXVisor = (float)anchoCamara / ((float)640);
     factorYVisor = (float)alturaCamara / ((float)640);
         
@@ -322,7 +322,8 @@ void ProcesoRecFacial::iniciar()
     
     cout << "Finaliza Bucle reconocimiento" << endl;
     GDibujo::closeAllWindows();    
-    imageSource->stop();    
+    imageSource->stop();
+    generadorPings.finalizar();     
     generadorEventos.finalizar();
     
     universoPersonas.lstPerIdentificadas.reset();
@@ -689,6 +690,13 @@ void ProcesoRecFacial::leeParametros(string path)
 {
     pathParametros = path;
     lstParamsApp = leeArchivoConfig(pathParametros);
+
+     // --- Config Pings (desde config.txt) ---
+    generadorPings.urlPing          = lstParamsApp->getString("urlPing", "http://127.0.0.1:8080/api/ping");
+    generadorPings.generarLogPing   = lstParamsApp->getStringBool("generarLogPing", true);
+    generadorPings.pathLogPing      = lstParamsApp->getString("pathLogPing", "./pings.log");
+    generadorPings.usarEndpointUnificado = true;
+    // ---------------------------------------
 }
 
 

@@ -5,6 +5,7 @@
 
 #include "app/EmisorImagenesHTTP.h"
 #include "app/GeneradorEventos.h"
+#include "app/GeneradorPings.h"
 #include "lib/graphics/ImageSource.h"
 #include "lib/general/GThread.h"
 #include "lib/hailolib/hailo8l.h"
@@ -29,6 +30,11 @@ class ProcesoRecFacial
          * Contador de cuadros
          */
         long long numCuadro;
+
+        /**
+         * Generador de pings que envia los datos en paralelo
+         */
+        GeneradorPings generadorPings;
 
         /**
          * Generador de eventos que envia los datos en paralelo

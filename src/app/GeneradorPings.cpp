@@ -1,14 +1,13 @@
-
-
 #include <iostream>
-#include "app/GeneradorEventos.h"
+#include <chrono>
+#include "app/GeneradorPings.h"
 #include "lib/web/GHttpClient.h"
 #include "lib/utils/GLog.h"
 
 /**
  * Trama que se solicita enviar perteneciente a una persona identificada
  */
-void GeneradorEventos::agregarTramaIden( string trama )
+void GeneradorPings::agregarTramaIden( string trama )
 {
     mtxBloquea();
     lstTramasPendIden.add(trama);
@@ -19,7 +18,7 @@ void GeneradorEventos::agregarTramaIden( string trama )
 /**
  * Trama que se solicita enviar perteneciente a una persona NO identificada
  */
-void GeneradorEventos::agregarTramaNoIden( string trama )
+void GeneradorPings::agregarTramaNoIden( string trama )
 {
     mtxBloquea();
     lstTramasPendNoIden.add(trama);
@@ -30,7 +29,7 @@ void GeneradorEventos::agregarTramaNoIden( string trama )
 /**
  * Valida si hay eventos pendientes de ser procesado
  **/
-bool GeneradorEventos::hayEventosPend()
+bool GeneradorPings::hayEventosPend()
 {
     bool rpta;
 
@@ -48,19 +47,19 @@ bool GeneradorEventos::hayEventosPend()
 /**
  * Bucle del thread
  */
-void GeneradorEventos::runThread()
+void GeneradorPings::runThread()
 {
     string trama;    
     string urlServidor;
     int i;
 
-    if ( generarLogEventos == true )
+    if ( generarLogPing == true )
     {
-        cout << "Creando archivo de logs " << endl;
-        GLog::open(pathLogEventos);
+        std::cout << "Creando archivo de logs de pings" << std::endl;
+        GLog::open(pathLogPing);
     }
     
-    cout << "Thread Generador Eventos iniciado" << endl;
+    std::cout << "Thread Generador Pings iniciado" << std::endl;
     while( isFinalizado() == false )
     {
         auto inicioBucle = std::chrono::high_resolution_clock::now();
@@ -76,14 +75,14 @@ void GeneradorEventos::runThread()
         if ( lstTramasPendIden.size() > 0 ) 
         {
             trama = lstTramasPendIden.get(0);
-            if ( usarEndpointUnificado == false ) urlServidor = urlServidorIden;
-            else urlServidor = urlServidorUnificado;
+            // En este generador, siempre se usa urlPing
+            urlServidor = urlPing;
         }            
         else 
         {
             trama = lstTramasPendNoIden.get(0);
-            if ( usarEndpointUnificado == false )  urlServidor = urlServidorNoIden;
-            else urlServidor = urlServidorUnificado;
+            // En este generador, siempre se usa urlPing
+            urlServidor = urlPing;
         }
         mtxLibera();
 
@@ -91,13 +90,13 @@ void GeneradorEventos::runThread()
         GHttpClient httpClient;
         httpClient.setHeader("Content-Type","application/json");
         // cout << "Trama JSON:" << trama << endl;        
-        i = httpClient.doHttp(urlServidor, "POST", (char *)trama.c_str(), trama.length());
+        i = httpClient.doHttp(urlServidor, "POST", (char *)trama.c_str(), (int)trama.length());
 
         auto finHttp = std::chrono::high_resolution_clock::now();
 
         auto durInicio = std::chrono::duration_cast<std::chrono::microseconds>(obtieneTrama - inicioBucle);
-        auto durTrama = std::chrono::duration_cast<std::chrono::microseconds>(inicioHttp - obtieneTrama);
-        auto durHttp = std::chrono::duration_cast<std::chrono::milliseconds>(finHttp - inicioHttp);
+        auto durTrama  = std::chrono::duration_cast<std::chrono::microseconds>(inicioHttp - obtieneTrama);
+        auto durHttp   = std::chrono::duration_cast<std::chrono::milliseconds>(finHttp - inicioHttp);
         
         if ( i == 0 )
         {
@@ -106,31 +105,31 @@ void GeneradorEventos::runThread()
             if ( lstTramasPendIden.size() > 0 )  
             {
                 lstTramasPendIden.remove(0);
-                // cout << "Eventos Identificados pendientes " <<  lstTramasPendIden.size() << " T.Inicio " << durInicio.count()  <<  " mcs T.Trama " << durTrama.count() << " mcs T.Http " << durHttp.count() << " ms " << endl;
+                // cout << "Pings Identificados pendientes " <<  lstTramasPendIden.size() << " T.Inicio " << durInicio.count()  <<  " mcs T.Trama " << durTrama.count() << " mcs T.Http " << durHttp.count() << " ms " << endl;
             }
             else 
             {
                 lstTramasPendNoIden.remove(0);    
-                // cout << "Eventos No Identificados pendientes " <<  lstTramasPendNoIden.size() << " T.Inicio " << durInicio.count()  <<  " mcs T.Trama " << durTrama.count() << " mcs T.Http " << durHttp.count() << " ms " << endl;     
+                // cout << "Pings No Identificados pendientes " <<  lstTramasPendNoIden.size() << " T.Inicio " << durInicio.count()  <<  " mcs T.Trama " << durTrama.count() << " mcs T.Http " << durHttp.count() << " ms " << endl;     
             }            
             mtxLibera();
         }
         else
         {
-            cout << "Error al enviar deteccion" << endl;
+            std::cout << "Error al enviar ping" << std::endl;
         }
 
-        if ( generarLogEventos )
+        if ( generarLogPing )
         {
             GLog::writeSimple(trama, false);
         }
     }
 
-    if ( generarLogEventos )
+    if ( generarLogPing )
     {
-        cout << "Cerrando archivo de Logs" << endl;
+        std::cout << "Cerrando archivo de Logs de pings" << std::endl;
         GLog::close();
     }
 
-    cout << "Thread generador de eventos finalizado" << endl;
+    std::cout << "Thread generador de pings finalizado" << std::endl;
 }
