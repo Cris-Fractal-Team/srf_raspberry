@@ -13,7 +13,8 @@
 #include "lib/hailolib/FaceRecHailo.h"
 #include "lib/hailolib/DetectionTrackerHailo.h"
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
-
+#include "app/GeneradorPings.h"
+#include "app/GeneradorPingsAppWeb.h"
 /**
  * Clase que representa todo el proceso que hace el reconocimiento facial
  */
@@ -35,6 +36,8 @@ class ProcesoRecFacial
          * Generador de pings que envia los datos en paralelo
          */
         GeneradorPings generadorPings;
+
+        GeneradorPingsAppWeb generadorPingsAppWeb;
 
         /**
          * Generador de eventos que envia los datos en paralelo

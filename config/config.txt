@@ -89,8 +89,8 @@ reportarDesconocidos=N
 _pathModeloDescFacial=./models/arcface_mobilefacenet_h8l.hef
 _pathModeloDescFacial=./models/arcface_r50.hef
 _pathModeloDescFacial=./models/r50_fractal_v3.hef
-_pathModeloDescFacial=./models/mbf_finetuned-20250902-1101.hef
-pathModeloDescFacial=./models/fractal_20250916_1253.hef
+pathModeloDescFacial=./models/mbf_finetuned_20250917.hef
+
 
 # Este funciona bien
 _pathModeloDescFacial=./models/mbf_fractal_v2.hef
@@ -303,7 +303,7 @@ _videoPath=./videos/entrada-2025-08-13-08.30.00.mp4
 _videoPath=./videos/entrada_0821_07.00.mp4
 
 _videoPath=./videos/entrada_0821_07.15.mp4
-_videoPath=./videos/entrada_0820_12.30.mp4
+videoPath=./videos/entrada_0820_12.30.mp4
 _videoPath=./videos/entrada_0820_12.45.mp4
 
 # FP 8720 nina
@@ -315,7 +315,7 @@ _videoPath=./videos/20250915-no-detecta-cris.mp4
 
 
 # Entrada 150 Falsos positivos, 4500 Ramon
-videoPath=./videos/entrada_09302025/07.30.00.mp4
+_videoPath=./videos/entrada_09302025/07.30.00.mp4
 
 
 # Cantidad de imagenes por segundo del video
@@ -370,3 +370,13 @@ encuadrarRostros=S
 # Altura a la que se escalan las imagenes antes de detectar rostros, esto tambien elimina detalles
 alturaImagenBase=800
 
+# Ping Configuracion
+
+urlPing=http://127.0.0.1:8080/api/ping
+generarLogPing=true
+pathLogPing=./ping.log
+
+appWebUrl=https://configsrfbackendpreprod-ece0h9hsa5fdebg9.canadacentral-01.azurewebsites.net
+generarLogPingAppWeb=true
+pathLogPingAppWeb=./pings_app_web.log
+pingIntervalMsAppWeb=18000
