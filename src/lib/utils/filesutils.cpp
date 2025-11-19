@@ -52,6 +52,12 @@ shared_ptr<GHashMap> leeArchivoConfig(  string path, bool convierteNombresLowerC
 
     while( getline(file, line))
     {      
+        int len = line.length();
+        if (( len > 0 ) && ( line[len-1] == '\r'))
+        {
+            line.erase(len-1,1);
+        }
+
         pos = line.find("=");
         if ( pos < 0 ) continue;
 

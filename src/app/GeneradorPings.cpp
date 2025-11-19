@@ -62,6 +62,28 @@ void GeneradorPings::runThread()
     while( isFinalizado() == false )
     {
         auto inicioBucle = std::chrono::high_resolution_clock::now();
+
+        {
+            auto ahora = std::chrono::steady_clock::now();
+            auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(ahora - ultimoPingTp).count();
+            if (diffMs >= pingIntervalMs) {
+                const std::string pingPayload = "{\"tipo\":\"ping\",\"intervalo_ms\":" + std::to_string(pingIntervalMs) + "}";
+        
+                GHttpClient httpClientPing;
+                httpClientPing.setHeader("Content-Type","application/json");
+                int rc = httpClientPing.doHttp(urlPing, "POST", (char*)pingPayload.c_str(), (int)pingPayload.size());
+        
+                if (generarLogPing) {
+                    if (rc == 0) GLog::writeSimple("[PING 5s] OK -> " + urlPing, true);
+                    else         GLog::writeSimple("[PING 5s] ERROR code=" + std::to_string(rc) + " -> " + urlPing, true);
+                } else {
+                    std::cout << ((rc==0) ? "[PING 5s] OK " : "[PING 5s] ERROR ") << "url=" << urlPing << std::endl;
+                }
+        
+                ultimoPingTp = ahora; // resetea el reloj del ping forzado
+            }
+        }
+        
         if ( hayEventosPend() == false )
         {
             sleepMS(5);

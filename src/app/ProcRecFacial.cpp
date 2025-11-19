@@ -162,9 +162,10 @@ void ProcesoRecFacial::iniciar()
     factorEscalaVisualizaX = ((double)anchoVisualiza) / ((double)anchoCamara);
     factorEscalaVisualizaY = ((double)alturaVisualiza) / ((double)alturaCamara);
 
-    // ejecuta el procesador de eventos    
+    // ejecuta el procesador de eventos
     generadorEventos.start();
-    generadorPings.start();
+    generadorPings.start();    
+
     factorXVisor = (float)anchoCamara / ((float)640);
     factorYVisor = (float)alturaCamara / ((float)640);
         
@@ -286,16 +287,16 @@ void ProcesoRecFacial::iniciar()
         auto durDibuja = std::chrono::duration_cast<std::chrono::microseconds>(finDibuja - finNotifica);
         auto durTotal = std::chrono::duration_cast<std::chrono::microseconds>(finDibuja - inicio);
 
-        cout << "Tiempos microsegundos " << endl << endl;
-        cout << "Captura      : " << durCaptura.count() << endl;
-        cout << "Detecta      : " << durDetecta.count() << endl;
-        cout << "Descriptores : " << durDescriptor.count() << endl;
-        cout << "Identifica : " << durIdentificacion.count() << endl;
-        cout << "Tracking : " << durTracking.count() << endl;
-        cout << "notifica : " << durNotifica.count() << endl;
-        cout << "Dibujo       : " << durDibuja.count() << endl;
-        cout << "** TOTA      : " << durTotal.count() << endl;
-        cout << endl;
+        // cout << "Tiempos microsegundos " << endl << endl;
+        // cout << "Captura      : " << durCaptura.count() << endl;
+        // cout << "Detecta      : " << durDetecta.count() << endl;
+        // cout << "Descriptores : " << durDescriptor.count() << endl;
+        // cout << "Identifica : " << durIdentificacion.count() << endl;
+        // cout << "Tracking : " << durTracking.count() << endl;
+        // cout << "notifica : " << durNotifica.count() << endl;
+        // cout << "Dibujo       : " << durDibuja.count() << endl;
+        // cout << "** TOTA      : " << durTotal.count() << endl;
+        // cout << endl;
 
         // Envia la imagen al servidor web de configuracion        
         ProcesoRecFacial::lstUltCarasDet = lstCarasTrack;
@@ -325,6 +326,7 @@ void ProcesoRecFacial::iniciar()
     imageSource->stop();
     generadorPings.finalizar();     
     generadorEventos.finalizar();
+
     
     universoPersonas.lstPerIdentificadas.reset();
     universoPersonas.lstPerNoIdent.reset();
@@ -692,9 +694,9 @@ void ProcesoRecFacial::leeParametros(string path)
     lstParamsApp = leeArchivoConfig(pathParametros);
 
      // --- Config Pings (desde config.txt) ---
-    generadorPings.urlPing          = lstParamsApp->getString("urlPing", "http://127.0.0.1:8080/api/ping");
-    generadorPings.generarLogPing   = lstParamsApp->getStringBool("generarLogPing", true);
-    generadorPings.pathLogPing      = lstParamsApp->getString("pathLogPing", "./pings.log");
+    generadorPings.urlPing          = lstParamsApp->getString("urlPing");
+    generadorPings.generarLogPing   = lstParamsApp->getStringBool("generarLogPing", false);
+    generadorPings.pathLogPing      = lstParamsApp->getString("pathLogPing");
     generadorPings.usarEndpointUnificado = true;
     // ---------------------------------------
 }

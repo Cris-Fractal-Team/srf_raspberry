@@ -1,6 +1,6 @@
 #ifndef _GENERADOR_PINGS_
 #define _GENERADOR_PINGS_
-
+#include <chrono>
 #include <string>
 using std::string;
 
@@ -55,6 +55,8 @@ class GeneradorPings : public GThread
          **/
         bool hayEventosPend();
 
+
+        long pingIntervalMs = 5000;
     private:
 
         /**
@@ -66,6 +68,8 @@ class GeneradorPings : public GThread
          * Lista de tramas pendientes de enviar de personas no identificadas
          */
         GLinkedList<string> lstTramasPendNoIden;
+
+        std::chrono::steady_clock::time_point ultimoPingTp = std::chrono::steady_clock::now();
 };
 
 #endif
