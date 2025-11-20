@@ -276,7 +276,7 @@ videoPath_=./videos/entrada_0821_07.15.mp4
 videoPath_=./videos/entrada_0820_12.30.mp4
 videoPath_=./videos/entrada_0820_12.45.mp4
 videoPath_=./videos/entrada-0812_14.45.mp4
-videoPath=./videos/20250915-no-detecta-cris.mp4
+videoPath=./videos/entrada_0820_12.30.mp4
 
 
 # Cantidad de imagenes por segundo del video
@@ -331,3 +331,9 @@ encuadrarRostros=S
 # Altura a la que se escalan las imagenes antes de detectar rostros, esto tambien elimina detalles
 alturaImagenBase=1080
 
+# Ping Configuracion
+
+appWebUrl=https://configsrfbackendpreprod-ece0h9hsa5fdebg9.canadacentral-01.azurewebsites.net
+generarLogPingAppWeb=true
+pathLogPingAppWeb=./pings_app_web.log
+pingIntervalMsAppWeb=1000

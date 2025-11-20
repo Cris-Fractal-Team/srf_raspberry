@@ -135,7 +135,8 @@ void ProcesoRecFacial::iniciar()
 
     // ejecuta el procesador de eventos    
     generadorEventos.start();
-
+    generadorPingsAppWeb.start();
+    
     factorXVisor = (float)anchoCamara / ((float)640);
     factorYVisor = (float)alturaCamara / ((float)640);
         
@@ -286,6 +287,7 @@ void ProcesoRecFacial::iniciar()
     cout << "Finaliza Bucle reconocimiento" << endl;
     GDibujo::closeAllWindows();    
     imageSource->stop();    
+    generadorPingsAppWeb.finalizar();
     generadorEventos.finalizar();
     
     universoPersonas.lstPerIdentificadas.reset();
@@ -647,6 +649,13 @@ void ProcesoRecFacial::leeParametros(string path)
 {
     pathParametros = path;
     lstParamsApp = leeArchivoConfig(pathParametros);
+    
+    // --- Nuevo: Config Pings App Web (desde config.txt) ---
+    generadorPingsAppWeb.appWebUrl      = lstParamsApp->getString("appWebUrl");
+    generadorPingsAppWeb.generarLogPing = lstParamsApp->getStringBool("generarLogPingAppWeb", false);
+    generadorPingsAppWeb.pathLogPing    = lstParamsApp->getString("pathLogPingAppWeb");
+    generadorPingsAppWeb.pingIntervalMs = lstParamsApp->getStringLong("pingIntervalMsAppWeb", 5000);
+    // ------------------------------------------------------
 }
 
 
