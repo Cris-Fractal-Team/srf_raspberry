@@ -176,7 +176,7 @@ void Hailo8LRunner::runThread()
         return;
     }    
     outVStreamsInfo = output_vstream_info.value();
-    printInfoStreamSalida();
+    // printInfoStreamSalida();
 
     // crea los parametros por defecto
     hailort::Expected<hailort::NetworkGroupsParamsMap> parametros = (*device).value()->create_configure_params(hef.value()); 

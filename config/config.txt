@@ -176,17 +176,17 @@ esperarPrevImgParaDeteccion=N
 
 # Indica se se desea previsualizar las cara original
 # y la centrada antes de generar una descripcion facial
-previsualizaImgReconocimiento=S
+previsualizaImgReconocimiento=N
 
 # Indica se se desea esperar la presidon de una tecla 
 # luego previsualizar las imagenes para reconocimiento facial
-esperarPrevImgReconocimiento=S
+esperarPrevImgReconocimiento=N
 
 # Indica se se desea procesar la tecla presionada luego de
 # visualizar las caras para reconocimiento
 # si se presiona la tecla "g" o "G" mayuscula se guarda
 # un PNG del rostro alineado
-guardarPrevImgReconocimiento=S
+guardarPrevImgReconocimiento=N
 
 # Prefijo que se le pone a las imagenes de reconocimiento que se guardan
 prefijoImgReconocimiento=oficial_
@@ -336,4 +336,10 @@ alturaImagenBase=1080
 appWebUrl=https://configsrfbackendpreprod-ece0h9hsa5fdebg9.canadacentral-01.azurewebsites.net
 generarLogPingAppWeb=true
 pathLogPingAppWeb=./pings_app_web.log
-pingIntervalMsAppWeb=1000
+pingIntervalMsAppWeb=3000000
+
+dotnetUrl=https://aisenseapi.com/services/v1/health
+dotnetEndpointMonitoreo=/ping/log
+generarLogPingMonitoreo=true
+pathLogPingMonitoreo=./pings_app_monitoreo.log
+pingIntervalMsMonitoreo=1000

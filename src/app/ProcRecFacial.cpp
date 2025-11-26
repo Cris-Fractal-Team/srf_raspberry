@@ -135,8 +135,9 @@ void ProcesoRecFacial::iniciar()
 
     // ejecuta el procesador de eventos    
     generadorEventos.start();
+    generadorPingsMonitoreo.start();
     generadorPingsAppWeb.start();
-    
+
     factorXVisor = (float)anchoCamara / ((float)640);
     factorYVisor = (float)alturaCamara / ((float)640);
         
@@ -288,6 +289,7 @@ void ProcesoRecFacial::iniciar()
     GDibujo::closeAllWindows();    
     imageSource->stop();    
     generadorPingsAppWeb.finalizar();
+    generadorPingsMonitoreo.finalizar();
     generadorEventos.finalizar();
     
     universoPersonas.lstPerIdentificadas.reset();
@@ -656,6 +658,10 @@ void ProcesoRecFacial::leeParametros(string path)
     generadorPingsAppWeb.pathLogPing    = lstParamsApp->getString("pathLogPingAppWeb");
     generadorPingsAppWeb.pingIntervalMs = lstParamsApp->getStringLong("pingIntervalMsAppWeb", 5000);
     // ------------------------------------------------------
+    generadorPingsMonitoreo.dotnetUrl      = lstParamsApp->getString("dotnetUrl");
+    generadorPingsMonitoreo.generarLogPing = lstParamsApp->getStringBool("generarLogPingMonitoreo", false);
+    generadorPingsMonitoreo.pathLogPing    = lstParamsApp->getString("pathLogPingMonitoreo");
+    generadorPingsMonitoreo.pingIntervalMs = lstParamsApp->getStringLong("pingIntervalMsMonitoreo", 5000);
 }
 
 
