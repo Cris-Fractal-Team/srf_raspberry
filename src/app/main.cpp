@@ -231,7 +231,8 @@ int main( int argc, char *argv[])
     proc.generadorEventos.generarLogEventos = proc.lstParamsApp->getStringBool("generarLogEventos", false);
     proc.generadorEventos.usarEndpointUnificado = proc.lstParamsApp->getStringBool("usarEndPointUnificado", false);
 
-    proc.iniciar();
+    // proc.iniciar();
+    // proc.procDescargaDescFaciales.ejecutarDescargaYGeneracion();
 
     return 0;
 }

@@ -14,6 +14,7 @@
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
 #include "app/GeneradorPingsAppWeb.h"
 #include "app/GeneradorPingsMonitoreo.h"
+#include "app/ProcDescargaDescFaciales.h"
 
 /**
  * Clase que representa todo el proceso que hace el reconocimiento facial
@@ -42,6 +43,10 @@ class ProcesoRecFacial
          */
         GeneradorPingsMonitoreo generadorPingsMonitoreo;
         
+        /**
+         * Hilo de descarga
+         */
+        ProcDescargaDescFaciales procDescargaDescFaciales;
         /**
          * Lista de parametros que se configuran a nivel del
          * app web de la aplicacion, es decir son variables

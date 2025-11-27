@@ -137,7 +137,6 @@ void ProcesoRecFacial::iniciar()
     generadorEventos.start();
     generadorPingsMonitoreo.start();
     generadorPingsAppWeb.start();
-
     factorXVisor = (float)anchoCamara / ((float)640);
     factorYVisor = (float)alturaCamara / ((float)640);
         
@@ -662,6 +661,11 @@ void ProcesoRecFacial::leeParametros(string path)
     generadorPingsMonitoreo.generarLogPing = lstParamsApp->getStringBool("generarLogPingMonitoreo", false);
     generadorPingsMonitoreo.pathLogPing    = lstParamsApp->getString("pathLogPingMonitoreo");
     generadorPingsMonitoreo.pingIntervalMs = lstParamsApp->getStringLong("pingIntervalMsMonitoreo", 5000);
+    // ------------------------------------------------------
+    procDescargaDescFaciales.appWebUrl      = lstParamsApp->getString("zipUrl");
+    procDescargaDescFaciales.generarLog = lstParamsApp->getStringBool("generarLogPingMonitoreo", false);
+    procDescargaDescFaciales.pathLog    = lstParamsApp->getString("pathLogPingMonitoreo");
+    procDescargaDescFaciales.endpointDescargaZip    = lstParamsApp->getString("zipEndpoint");
 }
 
 
