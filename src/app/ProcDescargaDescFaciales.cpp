@@ -7,10 +7,143 @@
 #include "lib/utils/GLog.h"
 #include "lib/utils/GStringUtils.h"
 
+bool ProcDescargaDescFaciales::descargarZipRostros(
+    const std::string& downloadUrl, const std::string& datasetDirectory) {
+    const std::string scriptsDirectory = "./scripts";
+    std::string scriptPath = scriptsDirectory + "/descargarZipRostros.sh";
+
+    std::string downloadCommand =
+        scriptPath + " \"" + downloadUrl + "\" \"" + datasetDirectory + "\"";
+
+    if (generarLog) {
+        GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando descarga: " +
+                              downloadCommand,
+                          true);
+    } else {
+        std::cout << "[ProcDescargaDescFaciales] Ejecutando descarga: "
+                  << downloadCommand << std::endl;
+    }
+
+    int downloadExitCode = std::system(downloadCommand.c_str());
+    if (downloadExitCode != 0) {
+        if (generarLog) {
+            GLog::writeSimple(
+                "[ProcDescargaDescFaciales] ERROR al ejecutar "
+                "descargarZipRostros.sh (codigo " +
+                    std::to_string(downloadExitCode) + ")",
+                true);
+        } else {
+            std::cout << "[ProcDescargaDescFaciales] ERROR al ejecutar "
+                         "descargarZipRostros.sh (codigo "
+                      << downloadExitCode << ")" << std::endl;
+        }
+        return false;
+    }
+
+    return true;
+}
+
+bool ProcDescargaDescFaciales::generarDescriptoresFaciales(
+    const std::string& datasetDirectory) {
+    (void)datasetDirectory;
+
+    if (generarLog) {
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] Iniciando extractor.ejecutar() "
+            "para generar descriptores faciales",
+            true);
+    } else {
+        std::cout
+            << "[ProcDescargaDescFaciales] Iniciando extractor.ejecutar() "
+               "para generar descriptores faciales"
+            << std::endl;
+    }
+
+    extractor.ejecutar();
+
+    if (generarLog) {
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] extractor.ejecutar() finalizado", true);
+    } else {
+        std::cout
+            << "[ProcDescargaDescFaciales] extractor.ejecutar() finalizado"
+            << std::endl;
+    }
+
+    return true;
+}
+
+void ProcDescargaDescFaciales::crearCopiaSeguridadDescriptores(
+    const std::string& datasetDirectory) {
+    const std::string scriptsDirectory = "./scripts";
+    std::string scriptPath =
+        scriptsDirectory + "/copiaDeSeguridadDescFaciales.sh";
+
+    std::time_t currentTime = std::time(nullptr);
+    std::string backupLabel =
+        "rostros_" + std::to_string(static_cast<long long>(currentTime));
+
+    std::string backupCommand =
+        scriptPath + " \"" + datasetDirectory + "\" \"" + backupLabel + "\"";
+
+    if (generarLog) {
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] Ejecutando backup: " + backupCommand,
+            true);
+    } else {
+        std::cout << "[ProcDescargaDescFaciales] Ejecutando backup: "
+                  << backupCommand << std::endl;
+    }
+
+    int backupExitCode = std::system(backupCommand.c_str());
+    if (backupExitCode != 0 && generarLog) {
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] AVISO: error al crear copia de "
+            "seguridad (codigo " +
+                std::to_string(backupExitCode) + ")",
+            true);
+    } else if (backupExitCode != 0) {
+        std::cout << "[ProcDescargaDescFaciales] AVISO: error al crear copia "
+                     "de seguridad (codigo "
+                  << backupExitCode << ")" << std::endl;
+    }
+}
+
+void ProcDescargaDescFaciales::limpiarArchivosRostros(
+    const std::string& datasetDirectory) {
+    const std::string scriptsDirectory = "./scripts";
+    std::string scriptPath = scriptsDirectory + "/limpiarRostros.sh";
+
+    std::string cleanupCommand = scriptPath + " \"" + datasetDirectory + "\"";
+
+    if (generarLog) {
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] Ejecutando limpieza: " + cleanupCommand,
+            true);
+    } else {
+        std::cout << "[ProcDescargaDescFaciales] Ejecutando limpieza: "
+                  << cleanupCommand << std::endl;
+    }
+
+    int cleanupExitCode = std::system(cleanupCommand.c_str());
+    if (cleanupExitCode != 0 && generarLog) {
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] AVISO: error al limpiar rostros "
+            "(codigo " +
+                std::to_string(cleanupExitCode) + ")",
+            true);
+    } else if (cleanupExitCode != 0) {
+        std::cout
+            << "[ProcDescargaDescFaciales] AVISO: error al limpiar rostros "
+               "(codigo "
+            << cleanupExitCode << ")" << std::endl;
+    }
+}
+
 bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
     try {
-        std::string urlDescarga = construirUrlDescarga();
-        if (urlDescarga.empty()) {
+        std::string downloadUrl = construirUrlDescarga();
+        if (downloadUrl.empty()) {
             if (generarLog) {
                 GLog::open(pathLog);
                 GLog::writeSimple(
@@ -23,47 +156,62 @@ bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
             return false;
         }
 
+        std::string datasetDirectory = extractor.pathFotos;
+
         if (generarLog) {
             GLog::open(pathLog);
             GLog::writeSimple(
-                "[ProcDescargaDescFaciales] Iniciando script "
-                "generarDescFaciales.sh con URL: " +
-                    urlDescarga,
+                "[ProcDescargaDescFaciales] Iniciando flujo descarga + "
+                "generación + backup + limpieza con URL: " +
+                    downloadUrl,
                 true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] Iniciando script "
-                         "generarDescFaciales.sh con URL: "
-                      << urlDescarga << std::endl;
+            std::cout
+                << "[ProcDescargaDescFaciales] Iniciando flujo descarga + "
+                   "generación + backup + limpieza con URL: "
+                << downloadUrl << std::endl;
         }
 
-        bool ok = ejecutarScriptShell(urlDescarga);
+        bool isSuccessful = true;
 
-        extractor.ejecutar();
+        if (!descargarZipRostros(downloadUrl, datasetDirectory)) {
+            isSuccessful = false;
+        }
+
+        if (isSuccessful) {
+            if (!generarDescriptoresFaciales(datasetDirectory)) {
+                isSuccessful = false;
+            }
+        }
+
+        crearCopiaSeguridadDescriptores(datasetDirectory);
+        limpiarArchivosRostros(datasetDirectory);
 
         if (generarLog) {
-            if (ok)
+            if (isSuccessful)
                 GLog::writeSimple(
-                    "[ProcDescargaDescFaciales] Script generarDescFaciales.sh "
-                    "ejecutado correctamente",
+                    "[ProcDescargaDescFaciales] Flujo completado correctamente",
                     true);
             else
                 GLog::writeSimple(
-                    "[ProcDescargaDescFaciales] ERROR al ejecutar script "
-                    "generarDescFaciales.sh",
+                    "[ProcDescargaDescFaciales] Flujo finalizado con errores "
+                    "en "
+                    "la descarga o generacion de descriptores",
                     true);
             GLog::close();
         } else {
-            if (ok)
-                std::cout << "[ProcDescargaDescFaciales] Script "
-                             "generarDescFaciales.sh ejecutado correctamente"
+            if (isSuccessful)
+                std::cout << "[ProcDescargaDescFaciales] Flujo completado "
+                             "correctamente"
                           << std::endl;
             else
-                std::cout << "[ProcDescargaDescFaciales] ERROR al ejecutar "
-                             "script generarDescFaciales.sh"
+                std::cout << "[ProcDescargaDescFaciales] Flujo finalizado con "
+                             "errores "
+                             "en la descarga o generacion de descriptores"
                           << std::endl;
         }
 
-        return ok;
+        return isSuccessful;
     } catch (const std::exception& ex) {
         if (generarLog) {
             GLog::open(pathLog);

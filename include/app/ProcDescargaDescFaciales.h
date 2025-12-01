@@ -2,6 +2,7 @@
 #define _PROC_DESCARGA_DESC_FACIALES_
 
 #include <string>
+
 #include "app/ExtractorFacialArchivo.h"
 
 class ProcDescargaDescFaciales {
@@ -76,6 +77,12 @@ class ProcDescargaDescFaciales {
      * Ejecuta el script de shell con la URL como argumento.
      */
     bool ejecutarScriptShell(const std::string& urlDescarga) const;
+
+    bool descargarZipRostros(const std::string& downloadUrl,
+                             const std::string& datasetDirectory);
+    bool generarDescriptoresFaciales(const std::string& datasetDirectory);
+    void crearCopiaSeguridadDescriptores(const std::string& datasetDirectory);
+    void limpiarArchivosRostros(const std::string& datasetDirectory);
 };
 
 #endif
