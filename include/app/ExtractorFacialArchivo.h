@@ -37,6 +37,7 @@ class ExtractorFacialArchivo
 {
     public:
 
+        hailort::Expected<std::unique_ptr<hailort::VDevice>> *vdevice = nullptr;
         /**
          * Ruta del archivo de da
          */

@@ -239,6 +239,14 @@ class ProcesoRecFacial
          */
         void leeParametros( string path );
 
+        void setFlagProcesarImagenes( bool valor );
+
+        bool getFlagProcesarImagenes();
+
+        void setUsandoNPU( bool valor );
+
+        bool getUsandoNPU();
+
     private:        
         
         /**
@@ -255,6 +263,13 @@ class ProcesoRecFacial
          * Indica si se presento un error al iniciar el proceso
          */
         bool errorInicial;
+
+        /**
+         * Indica si se debe captura imagenes y hacer identificacion facial
+         */
+        bool flagProcesarImagenes = true;
+
+        bool usandoNpu = false;
         
         /**
          * Mutex para areas criticas

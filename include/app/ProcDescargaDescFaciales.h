@@ -2,6 +2,7 @@
 #define _PROC_DESCARGA_DESC_FACIALES_
 
 #include <string>
+#include "app/ExtractorFacialArchivo.h"
 
 class ProcDescargaDescFaciales {
    public:
@@ -18,6 +19,21 @@ class ProcDescargaDescFaciales {
      * appWebUrl.
      */
     std::string endpointDescargaZip;
+
+    /*
+     *Directorio de extracción de archivos
+     */
+    std::string directorioExtraccion;
+
+    /*
+     *Directorio de extracción de backup o versiones
+     */
+    std::string directorioBackup;
+
+    /*
+     *Archivo indice para la generacion de descriptores faciales
+     */
+    std::string archivoIndice;
 
     /**
      * Ruta al script de shell que hará la descarga y generación.
@@ -44,6 +60,11 @@ class ProcDescargaDescFaciales {
      * Retorna true si el script termina con código 0.
      */
     bool ejecutarDescargaYGeneracion();
+
+    /**
+     * Extractor facial de los Archivos "datos.txt".
+     */
+    ExtractorFacialArchivo extractor;
 
    private:
     /**

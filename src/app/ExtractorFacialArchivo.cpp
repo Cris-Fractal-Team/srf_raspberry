@@ -42,17 +42,15 @@ void ExtractorFacialArchivo::ejecutar()
     }
 
     // inicializa el dispositivo
-    hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();    
-    if (!device) 
-    {
-        cerr << "Error: No se pudo inicializar el dispositivo Hailo." << endl;        
+    // hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();    
+    if (vdevice == nullptr || !(*vdevice)) {
+        cerr << "Error: VDevice no inicializado en ExtractorFacialArchivo." << endl;
         return;
     }
-    devicePtr = &device;
 
     // configura el detector
     detector.setDimImagenes(640,640);
-    detector.runner.device = &device;
+    detector.runner.device = vdevice;
     if ( detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0 )
     {
         cout << "Error al cargar el modelo detector" << endl;        
@@ -61,7 +59,7 @@ void ExtractorFacialArchivo::ejecutar()
     cout << "Detector de rostros iniciado" << endl;
 
     // crea el generador de descriptores faciales
-    generadorDesc.runner.device = &device;
+    generadorDesc.runner.device = vdevice;
     generadorDesc.paramContraste = paramContraste;
     // if ( generadorDesc.cargarModelo("./models/arcface_mobilefacenet.hef") != 0 )
     generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;

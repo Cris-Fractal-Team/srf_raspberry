@@ -211,7 +211,7 @@ int main( int argc, char *argv[])
         imageSource =  dynamic_pointer_cast<ImageSourceFactory>(intImgFac);        
     }
 
-    // valida si se debe o no invertir verticalmente la imagen de la camara
+    // valida si s debe o no invertir verticalmente la imagen de la camara
     string invVertical = proc.lstParamsApp->getString("reflejarVerticalmente");
     if ( invVertical.compare("S") ) proc.invertirVertical = true;
     else proc.invertirVertical = false;
@@ -231,7 +231,7 @@ int main( int argc, char *argv[])
     proc.generadorEventos.generarLogEventos = proc.lstParamsApp->getStringBool("generarLogEventos", false);
     proc.generadorEventos.usarEndpointUnificado = proc.lstParamsApp->getStringBool("usarEndPointUnificado", false);
 
-    // proc.iniciar();
+    proc.iniciar();
     // proc.procDescargaDescFaciales.ejecutarDescargaYGeneracion();
 
     return 0;

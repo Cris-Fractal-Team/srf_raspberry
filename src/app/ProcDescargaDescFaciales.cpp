@@ -38,6 +38,8 @@ bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
 
         bool ok = ejecutarScriptShell(urlDescarga);
 
+        extractor.ejecutar();
+
         if (generarLog) {
             if (ok)
                 GLog::writeSimple(
