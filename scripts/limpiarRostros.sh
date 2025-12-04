@@ -37,4 +37,6 @@ echo "[limpiarRostros] Limpiando directorio ${TARGET_DATASET_DIR}, conservando s
 find "${TARGET_DATASET_DIR}" -type f ! -name 'rostros_conocidos.txt' -delete
 find "${TARGET_DATASET_DIR}" -type d ! -path "${TARGET_DATASET_DIR}" -empty -delete
 
+cp "${DESCRIPTORS_FILE}" data/
+
 echo "[limpiarRostros] Limpieza completada."
