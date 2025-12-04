@@ -11,6 +11,7 @@ fi
 
 URL_ZIP="$1"
 DATASET_DIR_ARG="${2%/}"
+TOKEN="$3"
 
 # Root del proyecto = carpeta padre de scripts/
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -31,7 +32,7 @@ mkdir -p "${TARGET_DATASET_DIR}"
 cd "${PROJECT_ROOT}"
 
 echo "[descargarZipRostros] Descargando ZIP en PROJECT_ROOT..."
-curl -fSL -OJ "${URL_ZIP}"
+curl -H "Authorization: Bearer ${TOKEN}" -fSL -OJ "${URL_ZIP}"
 
 echo "[descargarZipRostros] Descarga finalizada. Buscando ZIP más reciente..."
 ZIP_FILE="$(ls -t *.zip 2>/dev/null | head -n 1 || true)"

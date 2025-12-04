@@ -7,11 +7,27 @@
 
 class ProcDescargaDescFaciales {
    public:
+   /**
+    * Nro de serie del equipo
+    */
+    std::string idEquipo;
+
     /**
      * URL base de la app web, por ejemplo:
      *   http://localhost:8080
      */
     std::string appWebUrl;
+
+    /**
+     * URL base del backend dotnet, por ejemplo:
+     *   http://localhost:8080
+     */
+    std::string dotnetUrl;
+
+    /**
+     * Endpoint para marcar como completas las tareas:
+     */
+    std::string endpointCompletado;
 
     /**
      * Endpoint de descarga del ZIP, por ejemplo:
@@ -20,6 +36,14 @@ class ProcDescargaDescFaciales {
      * appWebUrl.
      */
     std::string endpointDescargaZip;
+
+    /**
+     * Endpoint de autenticacion, por ejemplo:
+     *   /srf/auth/login
+     * Si viene vacío y ya tienes una URL completa, puedes pasarla toda en
+     * appWebUrl.
+     */
+    std::string endpointAuth;
 
     /*
      *Directorio de extracción de archivos
@@ -67,6 +91,17 @@ class ProcDescargaDescFaciales {
      */
     ExtractorFacialArchivo extractor;
 
+    /**
+     *Credenciales para iniciar sesion
+     */
+    std::string username;
+    std::string password;
+
+    /**
+     * Id tarea programada para completar
+     */
+    int idTareaProgramada = -1;
+
    private:
     /**
      * Construye la URL completa de descarga.
@@ -78,11 +113,37 @@ class ProcDescargaDescFaciales {
      */
     bool ejecutarScriptShell(const std::string& urlDescarga) const;
 
+    /**
+     * Ejecutar script de descarga de rostros
+     */
     bool descargarZipRostros(const std::string& downloadUrl,
                              const std::string& datasetDirectory);
+    /**
+     * Ejecutar procedimiento para generar descriptores faciales
+     */
     bool generarDescriptoresFaciales(const std::string& datasetDirectory);
+
+    /**
+     * Ejecutar procedimiento para guardar una copia de seguridad de los descriptores faciales
+     */
     void crearCopiaSeguridadDescriptores(const std::string& datasetDirectory);
+
+    /**
+     * Ejecutar script para limpiar archivos utilizados para generar descriptores faciales
+     */
     void limpiarArchivosRostros(const std::string& datasetDirectory);
+
+    /**
+     * Inicio de sesión para obtener el token
+     */
+    void iniciarSesion();
+
+    /**
+     * Marcar un tarea como completada
+     */
+    void notificarTareaCompletada();
+
+    std::string token;
 };
 
 #endif

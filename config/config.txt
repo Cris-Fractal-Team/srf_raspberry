@@ -333,19 +333,27 @@ alturaImagenBase=1080
 
 # Ping Configuracion
 
-appWebUrl=https://configsrfbackendpreprod-ece0h9hsa5fdebg9.canadacentral-01.azurewebsites.net
+appWebUrl=https://configsrfbackendstaging-b3ehbheceabrbubp.canadacentral-01.azurewebsites.net
 generarLogPingAppWeb=true
 pathLogPingAppWeb=./pings_app_web.log
 pingIntervalMsAppWeb=3000000
+/==
 
-dotnetUrl=https://aisenseapi.com/services/v1/health
-dotnetEndpointMonitoreo=/ping/log
+dotnetUrl=http://192.168.3.103:8080/api
+dotnetEndpointMonitoreo=/ping/log/
+dotnetEndpointCompletado=/ping/completo/
+
 generarLogPingMonitoreo=false
 pathLogPingMonitoreo=./pings_app_monitoreo.log
 pingIntervalMsMonitoreo=1000
 
 zipUrl=https://configsrfbackendstaging-b3ehbheceabrbubp.canadacentral-01.azurewebsites.net
 zipEndpoint=/srf/sensor/descargarZip?idEmpresa=2
+authEndpoint=/srf/auth/login
+
+# Credenciales
+username=dalcantara
+password=kirukato
 
 # Extractor Config
 

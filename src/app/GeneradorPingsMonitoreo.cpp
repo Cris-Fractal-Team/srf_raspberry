@@ -1,9 +1,10 @@
 #include "app/GeneradorPingsMonitoreo.h"
 
+#include <exception>
 #include <iostream>
 #include <string>
-#include <exception>
 
+#include "app/ProcRecFacial.h"
 #include "lib/json/json.hpp"
 #include "lib/utils/GLog.h"
 #include "lib/utils/GStringUtils.h"
@@ -13,27 +14,30 @@ using json = nlohmann::json;
 
 void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
     try {
-        /*  std::string serieEquipo = GStringUtils::trim(idEquipo);
-            std::string urlConsultaMonitoreo =
-            dotnetUrl + "/api/ping/log/" + serieEquipo +
-            "?idTareaProgramada=" + std::to_string(idTareaProgramada); */
         std::string urlConsultaMonitoreo =
-            dotnetUrl;
+            dotnetUrl + dotnetEndpointMonitoreo + idEquipo;
+
+        if (idTareaProgramada != 0) {
+            urlConsultaMonitoreo +=
+                "?idTareaProgramada=" + std::to_string(idTareaProgramada);
+        }
 
         GHttpClient httpClientConsulta;
 
         int resultadoSolicitudMonitoreo =
             httpClientConsulta.doHttp(urlConsultaMonitoreo, "GET", nullptr, 0);
-            
+
         if (resultadoSolicitudMonitoreo != 0) {
             if (generarLogPing) {
                 GLog::writeSimple(
-                    "[GeneradorPingsMonitoreo] ERROR al hacer GET pings dotnet. code=" +
+                    "[GeneradorPingsMonitoreo] ERROR al hacer GET pings "
+                    "dotnet. code=" +
                         std::to_string(resultadoSolicitudMonitoreo) +
                         " url=" + urlConsultaMonitoreo,
                     true);
             } else {
-                std::cout << "[GeneradorPingsMonitoreo] ERROR al hacer GET pings dotnet "
+                std::cout << "[GeneradorPingsMonitoreo] ERROR al hacer GET "
+                             "pings dotnet "
                           << "url=" << urlConsultaMonitoreo
                           << " code=" << resultadoSolicitudMonitoreo
                           << std::endl;
@@ -43,57 +47,105 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
 
         std::string cuerpoRespuesta = httpClientConsulta.responseToStr();
 
+        // Parsear JSON
         json jsonRespuesta = json::parse(cuerpoRespuesta);
-        // const string& jsonMensaje = jsonRespuesta["mensaje"];
-        std::string jsonMensaje = jsonRespuesta.value("status", std::string{});
+
+        bool success = jsonRespuesta.value("success", false);
 
         if (generarLogPing) {
             if (resultadoSolicitudMonitoreo == 0)
-                GLog::writeSimple("[GeneradorPingsMonitoreo] APP_WEB PING OK -> " + dotnetUrl, true);
+                GLog::writeSimple(
+                    "[GeneradorPingsMonitoreo] DOTNET PING OK -> " +
+                        urlConsultaMonitoreo +
+                        " | success=" + std::string(success ? "true" : "false"),
+                    true);
             else
                 GLog::writeSimple(
-                    "[GeneradorPingsMonitoreo] APP_WEB PING ERROR code=" +
+                    "[GeneradorPingsMonitoreo] DOTNET PING ERROR code=" +
                         std::to_string(resultadoSolicitudMonitoreo) + " -> " +
-                        dotnetUrl,
+                        urlConsultaMonitoreo,
                     true);
         } else {
             std::cout << ((resultadoSolicitudMonitoreo == 0)
-                              ? "[GeneradorPingsMonitoreo] APP_WEB PING OK "
-                              : "[GeneradorPingsMonitoreo] APP_WEB PING ERROR ")
-                      << "url=" << dotnetUrl
-                      << " code=" << resultadoSolicitudMonitoreo << std::endl;
+                              ? "[GeneradorPingsMonitoreo] DOTNET PING OK "
+                              : "[GeneradorPingsMonitoreo] DOTNET PING ERROR ")
+                      << "url=" << urlConsultaMonitoreo
+                      << " code=" << resultadoSolicitudMonitoreo
+                      << " success=" << (success ? "true" : "false")
+                      << std::endl;
         }
-        std::cout << "[GeneradorPingsMonitoreo] Mensaje de la API: " << jsonMensaje << std::endl;
-        /* if (!jsonRespuesta.contains("pending") ||
-            !jsonRespuesta["pending"].is_array() ||
-            jsonRespuesta["pending"].empty()) {
+
+        if (!success) {
             return;
         }
 
-        const json& jsonTareaPendiente = jsonRespuesta["pending"][0];
+        if (!jsonRespuesta.contains("pending") ||
+            !jsonRespuesta["pending"].is_array()) {
+            if (generarLogPing) {
+                GLog::writeSimple(
+                    "[GeneradorPingsMonitoreo] Respuesta sin array 'pending'",
+                    true);
+            } else {
+                std::cout
+                    << "[GeneradorPingsMonitoreo] Respuesta sin array 'pending'"
+                    << std::endl;
+            }
+            return;
+        }
 
-        int idTareaProgramadaDesdeJson =
-            jsonTareaPendiente.value("idTareaProgramada", 0);
-        int tipoDeTarea = jsonTareaPendiente.value("tipoDeTarea", 0);
+        const json& listaTareasPendientes = jsonRespuesta["pending"];
 
-        procesarTareaProgramada(tipoDeTarea, idTareaProgramadaDesdeJson); */
+        if (listaTareasPendientes.empty()) {
+            return;
+        }
+
+        for (const auto& jsonTarea : listaTareasPendientes) {
+            if (!jsonTarea.is_object()) {
+                continue;
+            }
+
+            int idTareaProgramadaDesdeJson =
+                jsonTarea.value("idTareaProgramada", 0);
+            int tipoDeTarea = jsonTarea.value("tipoDeTarea", 0);
+
+            if (generarLogPing) {
+                GLog::writeSimple(
+                    "[GeneradorPingsMonitoreo] Tarea pendiente recibida -> "
+                    "idTareaProgramada=" +
+                        std::to_string(idTareaProgramadaDesdeJson) +
+                        " tipoDeTarea=" + std::to_string(tipoDeTarea),
+                    true);
+            } else {
+                std::cout
+                    << "[GeneradorPingsMonitoreo] Tarea pendiente recibida -> "
+                    << "idTareaProgramada=" << idTareaProgramadaDesdeJson
+                    << " tipoDeTarea=" << tipoDeTarea << std::endl;
+            }
+
+            // Procesa cada tarea de la lista
+            procesarTareaProgramada(tipoDeTarea, idTareaProgramadaDesdeJson);
+        }
+
     } catch (const std::exception& ex) {
         if (generarLogPing) {
-            GLog::writeSimple(
-                std::string("[GeneradorPingsMonitoreo] Excepción en consultarTareasProgramadas: ") +
-                    ex.what(),
-                true);
+            GLog::writeSimple(std::string("[GeneradorPingsMonitoreo] Excepción "
+                                          "en consultarTareasProgramadas: ") +
+                                  ex.what(),
+                              true);
         } else {
-            std::cout << "[GeneradorPingsMonitoreo] Excepción en consultarTareasProgramadas: "
+            std::cout << "[GeneradorPingsMonitoreo] Excepción en "
+                         "consultarTareasProgramadas: "
                       << ex.what() << std::endl;
         }
     } catch (...) {
         if (generarLogPing) {
             GLog::writeSimple(
-                "[GeneradorPingsMonitoreo] Excepción desconocida en consultarTareasProgramadas",
+                "[GeneradorPingsMonitoreo] Excepción desconocida en "
+                "consultarTareasProgramadas",
                 true);
         } else {
-            std::cout << "[GeneradorPingsMonitoreo] Excepción desconocida en consultarTareasProgramadas"
+            std::cout << "[GeneradorPingsMonitoreo] Excepción desconocida en "
+                         "consultarTareasProgramadas"
                       << std::endl;
         }
     }
@@ -108,6 +160,8 @@ void GeneradorPingsMonitoreo::procesarTareaProgramada(
             idTareaProgramada = idTareaProgramadaDesdeJson;
             break;
         case 2:
+            procRecFacial->setIdTareaProgramada(idTareaProgramadaDesdeJson);
+            procRecFacial->setFlagProcesarImagenes(true);
             break;
         default:
             break;
@@ -117,9 +171,10 @@ void GeneradorPingsMonitoreo::procesarTareaProgramada(
 void GeneradorPingsMonitoreo::runThread() {
     try {
         if (dotnetUrl.empty()) {
-            std::cout << "[GeneradorPingsMonitoreo] dotnetUrl vacío. No se iniciará "
-                         "el envío de pings dotnet."
-                      << std::endl;
+            std::cout
+                << "[GeneradorPingsMonitoreo] dotnetUrl vacío. No se iniciará "
+                   "el envío de pings dotnet."
+                << std::endl;
             return;
         }
 
@@ -130,8 +185,9 @@ void GeneradorPingsMonitoreo::runThread() {
             GLog::open(pathLogPing);
         }
 
-        std::cout << "[GeneradorPingsMonitoreo] Thread iniciado. url=" << dotnetUrl
-                  << " intervalo=" << pingIntervalMs << " ms" << std::endl;
+        std::cout << "[GeneradorPingsMonitoreo] Thread iniciado. url="
+                  << dotnetUrl << " intervalo=" << pingIntervalMs << " ms"
+                  << std::endl;
 
         while (isFinalizado() == false) {
             try {
@@ -150,49 +206,57 @@ void GeneradorPingsMonitoreo::runThread() {
             } catch (const std::exception& ex) {
                 if (generarLogPing) {
                     GLog::writeSimple(
-                        std::string("[GeneradorPingsMonitoreo] Excepción en bucle del thread: ") +
+                        std::string("[GeneradorPingsMonitoreo] Excepción en "
+                                    "bucle del thread: ") +
                             ex.what(),
                         true);
                 } else {
-                    std::cout << "[GeneradorPingsMonitoreo] Excepción en bucle del thread: "
+                    std::cout << "[GeneradorPingsMonitoreo] Excepción en bucle "
+                                 "del thread: "
                               << ex.what() << std::endl;
                 }
             } catch (...) {
                 if (generarLogPing) {
                     GLog::writeSimple(
-                        "[GeneradorPingsMonitoreo] Excepción desconocida en bucle del thread",
+                        "[GeneradorPingsMonitoreo] Excepción desconocida en "
+                        "bucle del thread",
                         true);
                 } else {
-                    std::cout << "[GeneradorPingsMonitoreo] Excepción desconocida en bucle del thread"
+                    std::cout << "[GeneradorPingsMonitoreo] Excepción "
+                                 "desconocida en bucle del thread"
                               << std::endl;
                 }
             }
         }
 
         if (generarLogPing) {
-            std::cout << "[GeneradorPingsMonitoreo] Cerrando archivo de logs de "
-                         "pings dotnet"
-                      << std::endl;
+            std::cout
+                << "[GeneradorPingsMonitoreo] Cerrando archivo de logs de "
+                   "pings dotnet"
+                << std::endl;
             GLog::close();
         }
         std::cout << "[GeneradorPingsMonitoreo] Thread finalizado" << std::endl;
     } catch (const std::exception& ex) {
         if (generarLogPing) {
-            GLog::writeSimple(
-                std::string("[GeneradorPingsMonitoreo] Excepción fuera del bucle del thread: ") +
-                    ex.what(),
-                true);
+            GLog::writeSimple(std::string("[GeneradorPingsMonitoreo] Excepción "
+                                          "fuera del bucle del thread: ") +
+                                  ex.what(),
+                              true);
         } else {
-            std::cout << "[GeneradorPingsMonitoreo] Excepción fuera del bucle del thread: "
+            std::cout << "[GeneradorPingsMonitoreo] Excepción fuera del bucle "
+                         "del thread: "
                       << ex.what() << std::endl;
         }
     } catch (...) {
         if (generarLogPing) {
             GLog::writeSimple(
-                "[GeneradorPingsMonitoreo] Excepción desconocida fuera del bucle del thread",
+                "[GeneradorPingsMonitoreo] Excepción desconocida fuera del "
+                "bucle del thread",
                 true);
         } else {
-            std::cout << "[GeneradorPingsMonitoreo] Excepción desconocida fuera del bucle del thread"
+            std::cout << "[GeneradorPingsMonitoreo] Excepción desconocida "
+                         "fuera del bucle del thread"
                       << std::endl;
         }
     }

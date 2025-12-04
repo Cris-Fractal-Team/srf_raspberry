@@ -13,8 +13,9 @@
 #include "lib/hailolib/DetectionTrackerHailo.h"
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
 #include "app/GeneradorPingsAppWeb.h"
-#include "app/GeneradorPingsMonitoreo.h"
 #include "app/ProcDescargaDescFaciales.h"
+
+class GeneradorPingsMonitoreo;
 
 /**
  * Clase que representa todo el proceso que hace el reconocimiento facial
@@ -41,7 +42,7 @@ class ProcesoRecFacial
         /**
          * Generador de pings de monitoreo
          */
-        GeneradorPingsMonitoreo generadorPingsMonitoreo;
+        GeneradorPingsMonitoreo* generadorPingsMonitoreo = nullptr;
         
         /**
          * Hilo de descarga
@@ -200,6 +201,10 @@ class ProcesoRecFacial
         int regionInteresFinX;
         
         /**
+         * Tarea programada para marcar como completa
+         */
+        int idTareaProgramada = -1;
+        /**
          * Servidor web que permite configurar el dispositivo
          */
         shared_ptr<ServidorHttpImagenes> servidorWeb;
@@ -243,6 +248,10 @@ class ProcesoRecFacial
 
         bool getFlagProcesarImagenes();
 
+        void setIdTareaProgramada( int valor );
+
+        int getIdTareaProgramada();
+
         void setUsandoNPU( bool valor );
 
         bool getUsandoNPU();
@@ -267,7 +276,7 @@ class ProcesoRecFacial
         /**
          * Indica si se debe captura imagenes y hacer identificacion facial
          */
-        bool flagProcesarImagenes = true;
+        bool flagProcesarImagenes = false;
 
         bool usandoNpu = false;
         

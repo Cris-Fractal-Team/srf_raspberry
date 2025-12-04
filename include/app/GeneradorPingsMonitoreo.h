@@ -8,6 +8,8 @@ using std::string;
 #include "lib/general/GThread.h"
 #include "lib/general/GLinkedList.h"
 
+class ProcesoRecFacial;
+
 /**
  * Clase que encola los pings que se deben enviar al servidor
  * web y los envia en paralelo, además de consultar el endpoint
@@ -50,6 +52,8 @@ public:
      */
     string idEquipo;
 
+    string dotnetEndpointMonitoreo;
+
     /**
      * Intervalo (ms) del ping de monitoreo
      */
@@ -75,6 +79,10 @@ public:
      **/
     bool hayEventosPend();
 
+    /**
+     * Proceso de Reconocimiento facial de los Archivos.
+     */
+    ProcesoRecFacial* procRecFacial = nullptr;
 private:
 
     /**
