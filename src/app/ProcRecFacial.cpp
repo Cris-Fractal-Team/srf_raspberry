@@ -136,6 +136,9 @@ void ProcesoRecFacial::iniciar() {
     detector.esperarPrevImgParaDeteccion =
         lstParamsApp->getStringBool("esperarPrevImgParaDeteccion", false);
 
+    generadorPingsMonitoreo->idEquipo = GStringUtils::trim(idEquipo);
+    procDescargaDescFaciales.idEquipo = GStringUtils::trim(idEquipo);
+
     detector.runner.device = &device;
     if (detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0) {
         cout << "Error al cargar el modelo detector" << endl;
@@ -215,6 +218,10 @@ void ProcesoRecFacial::iniciar() {
             if (!getUsandoNPU()) {
                 procDescargaDescFaciales.idTareaProgramada = getIdTareaProgramada();
                 procDescargaDescFaciales.ejecutarDescargaYGeneracion();
+                string paramUnificarDescr = lstParamsApp->getString("unificarDescriptores");
+                bool unifidarDescr = false;
+                if ( paramUnificarDescr.compare("S") == 0 ) unifidarDescr = true;
+                universoPersonas.cargarpPerConocidas(lstParamsApp->getString("pathBDPersonas"), unifidarDescr);
                 setFlagProcesarImagenes(false);
             }
             usleep(20000);
@@ -748,8 +755,6 @@ void ProcesoRecFacial::leeParametros(string path) {
         lstParamsApp->getString("pathLogPingMonitoreo");
     generadorPingsMonitoreo->pingIntervalMs =
         lstParamsApp->getStringLong("pingIntervalMsMonitoreo", 5000);
-    generadorPingsMonitoreo->idEquipo = "81c010e49938edf3";
-    procDescargaDescFaciales.idEquipo = generadorPingsMonitoreo->idEquipo;
     // ------------------------------------------------------
     procDescargaDescFaciales.dotnetUrl = lstParamsApp->getString("dotnetUrl");
     procDescargaDescFaciales.endpointCompletado = lstParamsApp->getString("dotnetEndpointCompletado");

@@ -46,7 +46,7 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
         }
 
         std::string cuerpoRespuesta = httpClientConsulta.responseToStr();
-
+        cout << urlConsultaMonitoreo << endl;
         // Parsear JSON
         json jsonRespuesta = json::parse(cuerpoRespuesta);
 
