@@ -142,7 +142,7 @@ _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R100_j80_C0_cuad_fractal_v3
 _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j80_C0_fractal_20250902-1102.txt
 _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j100_C0_fractal_20250902-1102.txt
 _pathBDPersonas=./data/colegio-20250916.txt
-pathBDPersonas=./data/colegio-20250918-g0-r0-j100-h1080.txt
+pathBDPersonas=./data/rostros_conocidos.txt
 
 
 # pathBDPersonas=./data/personas-fractal.txt
@@ -276,7 +276,7 @@ videoPath_=./videos/entrada_0821_07.15.mp4
 videoPath_=./videos/entrada_0820_12.30.mp4
 videoPath_=./videos/entrada_0820_12.45.mp4
 videoPath_=./videos/entrada-0812_14.45.mp4
-videoPath=./videos/entrada_0820_12.30.mp4
+videoPath=./videos/video_prueba.mp4
 
 
 # Cantidad de imagenes por segundo del video
@@ -299,7 +299,7 @@ videoCUadroInicial_jueves_14_08.15=4300
 videoCUadroInicial_jueves_14_08.30=7500,8100
 videoCuadroInicial_0821_07.00=5230
 videoCuadroInicial_20250915=6200
-videoCuadroInicial=6200
+videoCuadroInicial=1250
 
 # *************************************************************************************
 # Configuracion para la creacion de la BD de personas conocidas
@@ -356,7 +356,9 @@ username=dalcantara
 password=kirukato
 
 # Extractor Config
-
 directorioExtraccion=./descriptores_faciales/
 archivoIndice=datos.txt
 archivoFinal=rostros_conocidos.txt
+
+#Logger
+logLevel=INFO

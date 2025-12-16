@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Uso:
-#   ./scripts/copiaDeSeguridadDescFaciales.sh <DIRECTORIO_DATASET> [ETIQUETA_OPCIONAL]
-
-if [[ $# -lt 1 ]]; then
-  echo "[copiaDeSeguridadDescFaciales] Uso: $0 <DIRECTORIO_DATASET> [ETIQUETA_OPCIONAL]"
+if [[ $# -lt 4 ]]; then
+  echo "[copiaDeSeguridadDescFaciales] Uso: $0 <DIRECTORIO_DATASET> <API_URL> <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL]"
   exit 1
 fi
 
 DATASET_DIR_ARG="${1%/}"
-CUSTOM_LABEL="${2-}"
+API_URL="${2}"
+SERIE_EQUIPO="${3}"
+TOKEN="${4}"
+CUSTOM_LABEL="${5-}"
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -60,4 +60,50 @@ if [[ -n "${LATEST_ZIP}" ]]; then
   rm -f "${LATEST_ZIP}"
 fi
 
-echo "[copiaDeSeguridadDescFaciales] Proceso de backup finalizado."
+echo "[copiaDeSeguridadDescFaciales] Proceso de backup local finalizado."
+
+if [[ -z "${API_URL}" ]]; then
+  echo "[copiaDeSeguridadDescFaciales] No se subió el backup: API_URL vacía"
+  exit 0
+fi
+
+if [[ -z "${TOKEN}" ]]; then
+  echo "[copiaDeSeguridadDescFaciales] No se subió el backup: TOKEN vacío"
+  exit 0
+fi
+
+BACKUP_ENDPOINT="${API_URL%/}/srf/backup/desc-facial/${SERIE_EQUIPO}"
+
+echo "[copiaDeSeguridadDescFaciales] Subiendo backup a: ${BACKUP_ENDPOINT}"
+echo "[copiaDeSeguridadDescFaciales] Archivo: ${BACKUP_FILE}"
+
+FILE_B64="$(base64 -w0 "${BACKUP_FILE}")"
+
+JSON_PAYLOAD=$(printf '{"nombreArchivo":"%s","archivoBase64":"%s"}' "${BASE_LABEL}" "${FILE_B64}")
+
+RESPONSE_FILE="$(mktemp)"
+
+set +e
+HTTP_CODE=$(
+  curl -sS -o "${RESPONSE_FILE}" -w '%{http_code}' \
+    -X POST "${BACKUP_ENDPOINT}" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -d "${JSON_PAYLOAD}"
+)
+CURL_EXIT=$?
+set -e
+
+if [[ "${CURL_EXIT}" -ne 0 ]]; then
+  echo "[copiaDeSeguridadDescFaciales] ERROR al invocar API (curl exit code ${CURL_EXIT})"
+elif [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
+  echo "[copiaDeSeguridadDescFaciales] Backup subido correctamente. Respuesta API:"
+  cat "${RESPONSE_FILE}"
+  echo
+else
+  echo "[copiaDeSeguridadDescFaciales] ERROR: API respondió HTTP ${HTTP_CODE}"
+  cat "${RESPONSE_FILE}"
+  echo
+fi
+
+rm -f "${RESPONSE_FILE}"

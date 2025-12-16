@@ -131,12 +131,6 @@ bool ProcDescargaDescFaciales::descargarZipRostros(
 
     int downloadExitCode = std::system(downloadCommand.c_str());
 
-    if (!token.empty()) {
-        std::fill(token.begin(), token.end(), '\0');
-        token.clear();
-        token.shrink_to_fit();
-    }
-
     if (downloadExitCode != 0) {
         if (generarLog) {
             GLog::writeSimple(
@@ -186,8 +180,10 @@ void ProcDescargaDescFaciales::crearCopiaSeguridadDescriptores(
     std::string backupLabel =
         "rostros_" + std::to_string(static_cast<long long>(currentTime));
 
+    std::string apiUrl = GStringUtils::trim(appWebUrl);
+
     std::string backupCommand =
-        scriptPath + " \"" + datasetDirectory + "\" \"" + backupLabel + "\"";
+        scriptPath + " \"" + datasetDirectory + "\" \"" + apiUrl + "\" \"" + idEquipo + "\" \"" + token + "\" \"" + backupLabel + "\"";
 
     if (generarLog) {
         GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando backup: " + backupCommand, true);
@@ -294,6 +290,12 @@ bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
         }
 
         notificarTareaCompletada();
+
+        if (!token.empty()) {
+            std::fill(token.begin(), token.end(), '\0');
+            token.clear();
+            token.shrink_to_fit();
+        }
 
         return isSuccessful;
     } catch (const std::exception& ex) {
