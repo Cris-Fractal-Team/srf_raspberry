@@ -296,6 +296,8 @@ DescPersonaExterno* IdentificadorPerHailo::encuentraPerCercana( GLinkedList<Desc
  */
 void IdentificadorPerHailo::cargarpPerConocidas( string path, bool unificarDesc )
 {
+    resetUniverso();
+
     std::ifstream file(path);
 
     if ( !file.is_open() )
@@ -394,6 +396,24 @@ void IdentificadorPerHailo::cargarpPerConocidas( string path, bool unificarDesc 
     cout << "Se leyeron " << numPer << " rostros conocidos" << endl;
 }
 
+/**
+ * Reinciar universo de personas
+ */
+void IdentificadorPerHailo::resetUniverso()
+{
+    // Reinicia IDs para desconocidos
+    idSgtePerDesc = 1;
+
+    // Limpia listas internas
+    lstPerIdentificadas.reset();
+    lstPerNoIdent.reset();
+
+    // Limpia las personas repartidas entre los threads
+    if (gestorThreads != nullptr)
+    {
+        gestorThreads->resetPersonas();
+    }
+}
 
 /**
  * Retorna el promedio de los descriptores
@@ -760,6 +780,18 @@ void GestorThIdentificacionPersonas::addPersona( DescPersonaExterno persona )
 }
 
 
+void GestorThIdentificacionPersonas::resetPersonas()
+{
+    numPersonas = 0;
+
+    int n = lstThreads.size();
+    for (int i = 0; i < n; ++i)
+    {
+        ThIdentificadorPersonas *th = lstThreads.get(i);
+        th->resetPersonas();
+    }
+}
+
 /**
  * Constructor
  */
@@ -769,7 +801,14 @@ ThIdentificadorPersonas::ThIdentificadorPersonas()
     indiceEncontrado = -1;
     distanciaCalculada = -1;
 }
-
+\
+void ThIdentificadorPersonas::resetPersonas()
+{
+    auto lock = getLock();
+    lstDatos.reset();
+    indiceEncontrado     = -1;
+    distanciaCalculada   = -1;
+}
 
 /**
  * Constructor

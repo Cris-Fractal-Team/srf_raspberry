@@ -1,30 +1,36 @@
-
-
-#include <iostream>
+#include <chrono>
 #include "app/GeneradorEventos.h"
 #include "lib/web/GHttpClient.h"
-#include "lib/utils/GLog.h"
+#include "lib/utils/Logger.h"
+
+static constexpr const char* LOG_COMPONENT = "GeneradorEventos";
 
 /**
  * Trama que se solicita enviar perteneciente a una persona identificada
  */
-void GeneradorEventos::agregarTramaIden( string trama )
+void GeneradorEventos::agregarTramaIden(string trama)
 {
     mtxBloquea();
     lstTramasPendIden.add(trama);
-    // cout << "Num tramas identificadas pendientes " << lstTramasPendIden.size() << endl;
     mtxLibera();
+
+    LOG_DEBUG(LOG_COMPONENT,
+              "Encolando trama IDENT. Pendientes="
+                  << lstTramasPendIden.size());
 }
 
 /**
  * Trama que se solicita enviar perteneciente a una persona NO identificada
  */
-void GeneradorEventos::agregarTramaNoIden( string trama )
+void GeneradorEventos::agregarTramaNoIden(string trama)
 {
     mtxBloquea();
     lstTramasPendNoIden.add(trama);
-    // cout << "Num tramas NO identificadas pendientes " << lstTramasPendNoIden.size() << endl;
     mtxLibera();
+
+    LOG_DEBUG(LOG_COMPONENT,
+              "Encolando trama NO IDENT. Pendientes="
+                  << lstTramasPendNoIden.size());
 }
 
 /**
@@ -35,36 +41,33 @@ bool GeneradorEventos::hayEventosPend()
     bool rpta;
 
     mtxBloquea();
-    if ( lstTramasPendIden.size() > 0 ) rpta=true;
+    if (lstTramasPendIden.size() > 0)
+        rpta = true;
+    else if (lstTramasPendNoIden.size() > 0)
+        rpta = true;
     else
-    if ( lstTramasPendNoIden.size() > 0 ) rpta=true;
-    else rpta = false;
+        rpta = false;
     mtxLibera();
 
     return rpta;
 }
-
 
 /**
  * Bucle del thread
  */
 void GeneradorEventos::runThread()
 {
-    string trama;    
+    string trama;
     string urlServidor;
     int i;
 
-    if ( generarLogEventos == true )
-    {
-        cout << "Creando archivo de logs " << endl;
-        GLog::open(pathLogEventos);
-    }
-    
-    cout << "Thread Generador Eventos iniciado" << endl;
-    while( isFinalizado() == false )
+    LOG_INFO(LOG_COMPONENT, "Thread Generador Eventos iniciado");
+
+    while (isFinalizado() == false)
     {
         auto inicioBucle = std::chrono::high_resolution_clock::now();
-        if ( hayEventosPend() == false )
+
+        if (hayEventosPend() == false)
         {
             sleepMS(5);
             continue;
@@ -73,64 +76,82 @@ void GeneradorEventos::runThread()
         auto obtieneTrama = std::chrono::high_resolution_clock::now();
 
         mtxBloquea();
-        if ( lstTramasPendIden.size() > 0 ) 
+        bool esIdent = false;
+        if (lstTramasPendIden.size() > 0)
         {
             trama = lstTramasPendIden.get(0);
-            if ( usarEndpointUnificado == false ) urlServidor = urlServidorIden;
-            else urlServidor = urlServidorUnificado;
-        }            
-        else 
+            esIdent = true;
+            if (usarEndpointUnificado == false)
+                urlServidor = urlServidorIden;
+            else
+                urlServidor = urlServidorUnificado;
+        }
+        else
         {
             trama = lstTramasPendNoIden.get(0);
-            if ( usarEndpointUnificado == false )  urlServidor = urlServidorNoIden;
-            else urlServidor = urlServidorUnificado;
+            esIdent = false;
+            if (usarEndpointUnificado == false)
+                urlServidor = urlServidorNoIden;
+            else
+                urlServidor = urlServidorUnificado;
         }
         mtxLibera();
 
         auto inicioHttp = std::chrono::high_resolution_clock::now();
+
         GHttpClient httpClient;
-        httpClient.setHeader("Content-Type","application/json");
-        // cout << "Trama JSON:" << trama << endl;        
-        i = httpClient.doHttp(urlServidor, "POST", (char *)trama.c_str(), trama.length());
+        httpClient.setHeader("Content-Type", "application/json");
+        i = httpClient.doHttp(urlServidor,
+                              "POST",
+                              (char*)trama.c_str(),
+                              trama.length());
 
         auto finHttp = std::chrono::high_resolution_clock::now();
 
         auto durInicio = std::chrono::duration_cast<std::chrono::microseconds>(obtieneTrama - inicioBucle);
-        auto durTrama = std::chrono::duration_cast<std::chrono::microseconds>(inicioHttp - obtieneTrama);
-        auto durHttp = std::chrono::duration_cast<std::chrono::milliseconds>(finHttp - inicioHttp);
-        
-        if ( i == 0 )
+        auto durTrama  = std::chrono::duration_cast<std::chrono::microseconds>(inicioHttp - obtieneTrama);
+        auto durHttp   = std::chrono::duration_cast<std::chrono::milliseconds>(finHttp - inicioHttp);
+
+        if (i == 0)
         {
-            // exito en la transferencia se saca de la cola
             mtxBloquea();
-            if ( lstTramasPendIden.size() > 0 )  
+            if (esIdent && lstTramasPendIden.size() > 0)
             {
                 lstTramasPendIden.remove(0);
-                // cout << "Eventos Identificados pendientes " <<  lstTramasPendIden.size() << " T.Inicio " << durInicio.count()  <<  " mcs T.Trama " << durTrama.count() << " mcs T.Http " << durHttp.count() << " ms " << endl;
+                LOG_INFO(
+                    LOG_COMPONENT,
+                    "Evento IDENT enviado OK. Pendientes="
+                        << lstTramasPendIden.size()
+                        << " T.Inicio=" << durInicio.count() << "us"
+                        << " T.Trama=" << durTrama.count() << "us"
+                        << " T.Http=" << durHttp.count() << "ms");
             }
-            else 
+            else if (!esIdent && lstTramasPendNoIden.size() > 0)
             {
-                lstTramasPendNoIden.remove(0);    
-                // cout << "Eventos No Identificados pendientes " <<  lstTramasPendNoIden.size() << " T.Inicio " << durInicio.count()  <<  " mcs T.Trama " << durTrama.count() << " mcs T.Http " << durHttp.count() << " ms " << endl;     
-            }            
+                lstTramasPendNoIden.remove(0);
+                LOG_INFO(
+                    LOG_COMPONENT,
+                    "Evento NO IDENT enviado OK. Pendientes="
+                        << lstTramasPendNoIden.size()
+                        << " T.Inicio=" << durInicio.count() << "us"
+                        << " T.Trama=" << durTrama.count() << "us"
+                        << " T.Http=" << durHttp.count() << "ms");
+            }
             mtxLibera();
+
+            if (generarLogEventos)
+            {
+                LOG_DEBUG(LOG_COMPONENT,
+                          "Trama enviada (resumen): " << trama);
+            }
         }
         else
         {
-            cout << "Error al enviar deteccion" << endl;
-        }
-
-        if ( generarLogEventos )
-        {
-            GLog::writeSimple(trama, false);
+            LOG_ERROR(LOG_COMPONENT,
+                      "Error al enviar deteccion. code="
+                          << i << " url=" << urlServidor);
         }
     }
 
-    if ( generarLogEventos )
-    {
-        cout << "Cerrando archivo de Logs" << endl;
-        GLog::close();
-    }
-
-    cout << "Thread generador de eventos finalizado" << endl;
+    LOG_INFO(LOG_COMPONENT, "Thread Generador Eventos finalizado");
 }

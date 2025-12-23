@@ -77,6 +77,11 @@ class IdentificadorPerHailo
         void cargarpPerConocidas(string path, bool unificarDesc);
 
         /**
+         * Reiniciar el universo de personas conocidas, leídas en BD
+         */
+        void resetUniverso();
+
+        /**
          * Dado un descriptor facial, se retorna una referencia en caso
          * se encuentre a la descripcion de una persona externa
          *
@@ -258,6 +263,11 @@ class ThIdentificadorPersonas : public GThread
          */
         float getDistanciaEncontrada();
 
+         /**
+         * Reinicia la lista de personas
+         */
+        void resetPersonas();
+
         /**
          * Se invoca para indicar que el Thread debe finalizar su bucle de ejecucion
          */
@@ -344,6 +354,11 @@ class GestorThIdentificacionPersonas
          * Agrega una persona a la lista de personas conocidas sobre las que se haria la busqueda
          */
         void addPersona( DescPersonaExterno persona );
+
+        /**
+         * Reiniciar base de datos de personas
+         */
+        void resetPersonas();
 
         /**
          * Destructor
