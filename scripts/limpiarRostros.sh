@@ -2,14 +2,20 @@
 set -euo pipefail
 
 # Uso:
-#   ./scripts/limpiarRostros.sh <DIRECTORIO_DATASET>
+#   ./scripts/limpiarRostros.sh <DIRECTORIO_DATASET> [NOMBRE_ARCHIVO_FINAL]
+#
+# - Si no se pasa NOMBRE_ARCHIVO_FINAL, usa: rostros_conocidos.txt
+# - Conserva solo ese archivo dentro del dataset, elimina lo demás
+# - Copia el archivo final a: <PROJECT_ROOT>/data/
 
-if [[ $# < 1 ]]; then
-  echo "[limpiarRostros] Uso: $0 <DIRECTORIO_DATASET>"
+if [[ $# -lt 1 ]]; then
+  echo "[limpiarRostros] Uso: $0 <DIRECTORIO_DATASET> [NOMBRE_ARCHIVO_FINAL]"
   exit 1
 fi
 
 DATASET_DIR_ARG="${1%/}"
+DESCRIPTORS_NAME="${2-rostros_conocidos.txt}"
+
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Normalizamos el directorio dataset a absoluto
@@ -24,19 +30,21 @@ if [[ ! -d "${TARGET_DATASET_DIR}" ]]; then
   exit 1
 fi
 
-DESCRIPTORS_FILE="${TARGET_DATASET_DIR}/rostros_conocidos.txt"
+DESCRIPTORS_FILE="${TARGET_DATASET_DIR}/${DESCRIPTORS_NAME}"
 
 if [[ ! -f "${DESCRIPTORS_FILE}" ]]; then
   echo "[limpiarRostros] AVISO: no se encontró ${DESCRIPTORS_FILE}. No se hará limpieza agresiva."
   exit 0
 fi
 
-echo "[limpiarRostros] PROJECT_ROOT: ${PROJECT_ROOT}"
-echo "[limpiarRostros] Limpiando directorio ${TARGET_DATASET_DIR}, conservando solo rostros_conocidos.txt"
+mkdir -p "${PROJECT_ROOT}/data"
 
-find "${TARGET_DATASET_DIR}" -type f ! -name 'rostros_conocidos.txt' -delete
+echo "[limpiarRostros] PROJECT_ROOT: ${PROJECT_ROOT}"
+echo "[limpiarRostros] Limpiando directorio ${TARGET_DATASET_DIR}, conservando solo ${DESCRIPTORS_NAME}"
+
+find "${TARGET_DATASET_DIR}" -type f ! -name "${DESCRIPTORS_NAME}" -delete
 find "${TARGET_DATASET_DIR}" -type d ! -path "${TARGET_DATASET_DIR}" -empty -delete
 
-cp "${DESCRIPTORS_FILE}" data/
+cp "${DESCRIPTORS_FILE}" "${PROJECT_ROOT}/data/"
 
 echo "[limpiarRostros] Limpieza completada."

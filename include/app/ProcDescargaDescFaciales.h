@@ -7,9 +7,9 @@
 
 class ProcDescargaDescFaciales {
    public:
-   /**
-    * Nro de serie del equipo
-    */
+    /**
+     * Nro de serie del equipo
+     */
     std::string idEquipo;
 
     /**
@@ -62,6 +62,8 @@ class ProcDescargaDescFaciales {
 
     /*
      *Archivo final de la generacion de descriptores faciales
+     * - Si viene vacío, se usa "rostros_conocidos.txt" como default en scripts.
+     * - Si viene con ruta, se tomará el basename (ej: "/tmp/x/abc.txt" => "abc.txt")
      */
     std::string archivoFinal;
 
@@ -83,11 +85,11 @@ class ProcDescargaDescFaciales {
 
     /**
      * Ejecuta el flujo:
-     *  1) Construye la URL de descarga (appWebUrl + endpointDescargaZip o
-     * appWebUrl si ya es completa) 2) Llama al script de shell pasando la URL
-     * como parámetro
+     *  1) Inicia sesión para obtener token
+     *  2) Construye la URL de descarga
+     *  3) Descarga ZIP + genera descriptores + backup + limpieza
      *
-     * Retorna true si el script termina con código 0.
+     * Retorna true si el flujo termina OK.
      */
     bool ejecutarDescargaYGeneracion();
 
@@ -123,6 +125,7 @@ class ProcDescargaDescFaciales {
      */
     bool descargarZipRostros(const std::string& downloadUrl,
                              const std::string& datasetDirectory);
+
     /**
      * Ejecutar procedimiento para generar descriptores faciales
      */
@@ -147,6 +150,13 @@ class ProcDescargaDescFaciales {
      * Marcar un tarea como completada
      */
     void notificarTareaCompletada();
+
+    /**
+     * Obtiene el nombre del archivo final que deben usar los scripts.
+     * - Si archivoFinal está vacío => "rostros_conocidos.txt"
+     * - Si tiene ruta => basename
+     */
+    std::string obtenerNombreArchivoFinal() const;
 
     std::string token;
 };

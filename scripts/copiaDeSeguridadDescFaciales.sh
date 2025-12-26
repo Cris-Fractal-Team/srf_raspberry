@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Uso:
+#   ./scripts/copiaDeSeguridadDescFaciales.sh <DIRECTORIO_DATASET> <API_URL> <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL] [NOMBRE_ARCHIVO_FINAL]
+#
+# - Si no se pasa NOMBRE_ARCHIVO_FINAL => usa: rostros_conocidos.txt
+# - Si existe un ZIP reciente en PROJECT_ROOT, usa el nombre del ZIP como etiqueta base
+# - Si no existe ZIP, usa ETIQUETA_OPCIONAL o default "rostros_YYYYmmdd_HHMMSS"
+# - Copia a: <PROJECT_ROOT>/desc_faciales_versiones/<ETIQUETA>.txt
+# - Luego intenta subirlo al endpoint: /srf/backup/desc-facial/<SERIE_EQUIPO>
+
 if [[ $# -lt 4 ]]; then
-  echo "[copiaDeSeguridadDescFaciales] Uso: $0 <DIRECTORIO_DATASET> <API_URL> <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL]"
+  echo "[copiaDeSeguridadDescFaciales] Uso: $0 <DIRECTORIO_DATASET> <API_URL> <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL] [NOMBRE_ARCHIVO_FINAL]"
   exit 1
 fi
 
@@ -11,6 +20,7 @@ API_URL="${2}"
 SERIE_EQUIPO="${3}"
 TOKEN="${4}"
 CUSTOM_LABEL="${5-}"
+DESCRIPTORS_NAME="${6-rostros_conocidos.txt}"
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -20,7 +30,7 @@ else
   TARGET_DATASET_DIR="${PROJECT_ROOT}/${DATASET_DIR_ARG}"
 fi
 
-DESCRIPTORS_FILE="${TARGET_DATASET_DIR}/rostros_conocidos.txt"
+DESCRIPTORS_FILE="${TARGET_DATASET_DIR}/${DESCRIPTORS_NAME}"
 BACKUP_DIR="${PROJECT_ROOT}/desc_faciales_versiones"
 
 mkdir -p "${BACKUP_DIR}"

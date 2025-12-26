@@ -2,25 +2,40 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <exception>
-#include <iostream>
 #include <ctime>
+#include <exception>
+#include <string>
 
+#include "lib/json/json.hpp"
 #include "lib/utils/GLog.h"
 #include "lib/utils/GStringUtils.h"
+#include "lib/utils/Logger.h"
 #include "lib/web/GHttpClient.h"
-#include "lib/json/json.hpp"
 
 using json = nlohmann::json;
+
+static constexpr const char* LOG_COMPONENT = "ProcDescargaDescFaciales";
+
+static std::string basenamePortable(const std::string& path) {
+    if (path.empty()) return "";
+    size_t pos = path.find_last_of("/\\");
+    return (pos == std::string::npos) ? path : path.substr(pos + 1);
+}
+
+std::string ProcDescargaDescFaciales::obtenerNombreArchivoFinal() const {
+    const std::string defaultName = "rostros_conocidos.txt";
+    std::string b = basenamePortable(archivoFinal);
+    if (b.empty()) return defaultName;
+    return b;
+}
 
 void ProcDescargaDescFaciales::iniciarSesion() {
     std::string baseTrim = GStringUtils::trim(appWebUrl);
     std::string endpointTrim = GStringUtils::trim(endpointAuth);
     std::string authUrl;
 
-    if (!endpointTrim.empty() &&
-        (endpointTrim.rfind("http://", 0) == 0 ||
-         endpointTrim.rfind("https://", 0) == 0)) {
+    if (!endpointTrim.empty() && (endpointTrim.rfind("http://", 0) == 0 ||
+                                  endpointTrim.rfind("https://", 0) == 0)) {
         authUrl = endpointTrim;
     } else if (endpointTrim.empty()) {
         authUrl = baseTrim;
@@ -37,9 +52,10 @@ void ProcDescargaDescFaciales::iniciarSesion() {
 
     if (authUrl.empty()) {
         if (generarLog) {
-            GLog::writeSimple("[ProcDescargaDescFaciales] URL de autenticacion vacia", true);
+            GLog::writeSimple(
+                "[ProcDescargaDescFaciales] URL de autenticacion vacia", true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] URL de autenticacion vacia" << std::endl;
+            LOG_WARN(LOG_COMPONENT, "URL de autenticacion vacia");
         }
         return;
     }
@@ -48,24 +64,31 @@ void ProcDescargaDescFaciales::iniciarSesion() {
     loginJson["username"] = username;
     loginJson["password"] = password;
     std::string body = loginJson.dump();
+
     if (generarLog) {
-        GLog::writeSimple("[ProcDescargaDescFaciales] Iniciando sesion en: " + authUrl, true);
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] Iniciando sesion en: " + authUrl, true);
     } else {
-        std::cout << "[ProcDescargaDescFaciales] Iniciando sesion en: " << authUrl << std::endl;
+        LOG_INFO(LOG_COMPONENT, "Iniciando sesion en: " << authUrl);
     }
 
     GHttpClient httpClient;
 
     char* bodyPtr = body.empty() ? nullptr : &body[0];
     httpClient.setHeader("Content-Type", "application/json");
+
     int rc = httpClient.doHttp(authUrl, "POST", bodyPtr,
                                static_cast<int>(body.size()));
 
     if (rc != 0) {
         if (generarLog) {
-            GLog::writeSimple("[ProcDescargaDescFaciales] ERROR en iniciarSesion. rc=" + std::to_string(rc), true);
+            GLog::writeSimple(
+                "[ProcDescargaDescFaciales] ERROR en iniciarSesion. rc=" +
+                    std::to_string(rc),
+                true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] ERROR en iniciarSesion. rc=" << rc << std::endl;
+            LOG_ERROR(LOG_COMPONENT, "ERROR en iniciarSesion. rc="
+                                         << rc << " url=" << authUrl);
         }
         return;
     }
@@ -73,9 +96,11 @@ void ProcDescargaDescFaciales::iniciarSesion() {
     std::string responseBody = httpClient.responseToStr();
     if (responseBody.empty()) {
         if (generarLog) {
-            GLog::writeSimple("[ProcDescargaDescFaciales] Respuesta de login vacia", true);
+            GLog::writeSimple(
+                "[ProcDescargaDescFaciales] Respuesta de login vacia", true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] Respuesta de login vacia" << std::endl;
+            LOG_WARN(LOG_COMPONENT,
+                     "Respuesta de login vacia. url=" << authUrl);
         }
         return;
     }
@@ -85,9 +110,14 @@ void ProcDescargaDescFaciales::iniciarSesion() {
 
         if (!respJson.contains("token") || !respJson["token"].is_string()) {
             if (generarLog) {
-                GLog::writeSimple("[ProcDescargaDescFaciales] Respuesta de login sin campo token valido", true);
+                GLog::writeSimple(
+                    "[ProcDescargaDescFaciales] Respuesta de login sin campo "
+                    "token valido",
+                    true);
             } else {
-                std::cout << "[ProcDescargaDescFaciales] Respuesta de login sin campo token valido" << std::endl;
+                LOG_WARN(LOG_COMPONENT,
+                         "Respuesta de login sin campo token valido. url="
+                             << authUrl);
             }
             return;
         }
@@ -99,16 +129,25 @@ void ProcDescargaDescFaciales::iniciarSesion() {
                 respJson.contains("mensaje") && respJson["mensaje"].is_string()
                     ? respJson["mensaje"].get<std::string>()
                     : "Login realizado";
-            GLog::writeSimple("[ProcDescargaDescFaciales] Login OK. mensaje: " + mensaje, true);
+            GLog::writeSimple(
+                "[ProcDescargaDescFaciales] Login OK. mensaje: " + mensaje,
+                true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] Login OK. Token obtenido." << std::endl;
+            std::string mensaje =
+                respJson.contains("mensaje") && respJson["mensaje"].is_string()
+                    ? respJson["mensaje"].get<std::string>()
+                    : "Login realizado";
+            LOG_INFO(LOG_COMPONENT, "Login OK. mensaje=" << mensaje);
         }
     } catch (const std::exception& ex) {
         if (generarLog) {
-            GLog::writeSimple(std::string("[ProcDescargaDescFaciales] Error parseando JSON de login: ") + ex.what(),
+            GLog::writeSimple(std::string("[ProcDescargaDescFaciales] Error "
+                                          "parseando JSON de login: ") +
+                                  ex.what(),
                               true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] Error parseando JSON de login: " << ex.what() << std::endl;
+            LOG_ERROR(LOG_COMPONENT,
+                      "Error parseando JSON de login: " << ex.what());
         }
     }
 }
@@ -120,13 +159,14 @@ bool ProcDescargaDescFaciales::descargarZipRostros(
 
     std::string downloadCommand =
         scriptPath + " \"" + downloadUrl + "\" \"" + datasetDirectory + "\"";
-
     downloadCommand += " \"" + token + "\"";
 
     if (generarLog) {
-        GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando descarga: " + downloadCommand, true);
+        GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando descarga: " +
+                              downloadCommand,
+                          true);
     } else {
-        std::cout << "[ProcDescargaDescFaciales] Ejecutando descarga: " << downloadCommand << std::endl;
+        LOG_INFO(LOG_COMPONENT, "Ejecutando descarga: " << downloadCommand);
     }
 
     int downloadExitCode = std::system(downloadCommand.c_str());
@@ -134,12 +174,14 @@ bool ProcDescargaDescFaciales::descargarZipRostros(
     if (downloadExitCode != 0) {
         if (generarLog) {
             GLog::writeSimple(
-                "[ProcDescargaDescFaciales] ERROR al ejecutar descargarZipRostros.sh (codigo " +
+                "[ProcDescargaDescFaciales] ERROR al ejecutar "
+                "descargarZipRostros.sh (codigo " +
                     std::to_string(downloadExitCode) + ")",
                 true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] ERROR al ejecutar descargarZipRostros.sh (codigo "
-                      << downloadExitCode << ")" << std::endl;
+            LOG_ERROR(LOG_COMPONENT,
+                      "ERROR al ejecutar descargarZipRostros.sh (codigo "
+                          << downloadExitCode << ")");
         }
         return false;
     }
@@ -153,19 +195,22 @@ bool ProcDescargaDescFaciales::generarDescriptoresFaciales(
 
     if (generarLog) {
         GLog::writeSimple(
-            "[ProcDescargaDescFaciales] Iniciando extractor.ejecutar() para generar descriptores faciales",
+            "[ProcDescargaDescFaciales] Iniciando extractor.ejecutar() para "
+            "generar descriptores faciales",
             true);
     } else {
-        std::cout << "[ProcDescargaDescFaciales] Iniciando extractor.ejecutar() para generar descriptores faciales"
-                  << std::endl;
+        LOG_INFO(LOG_COMPONENT,
+                 "Iniciando extractor.ejecutar() para generar descriptores "
+                 "faciales");
     }
 
     extractor.ejecutar();
 
     if (generarLog) {
-        GLog::writeSimple("[ProcDescargaDescFaciales] extractor.ejecutar() finalizado", true);
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] extractor.ejecutar() finalizado", true);
     } else {
-        std::cout << "[ProcDescargaDescFaciales] extractor.ejecutar() finalizado" << std::endl;
+        LOG_INFO(LOG_COMPONENT, "extractor.ejecutar() finalizado");
     }
 
     return true;
@@ -174,32 +219,43 @@ bool ProcDescargaDescFaciales::generarDescriptoresFaciales(
 void ProcDescargaDescFaciales::crearCopiaSeguridadDescriptores(
     const std::string& datasetDirectory) {
     const std::string scriptsDirectory = "./scripts";
-    std::string scriptPath = scriptsDirectory + "/copiaDeSeguridadDescFaciales.sh";
+    std::string scriptPath =
+        scriptsDirectory + "/copiaDeSeguridadDescFaciales.sh";
 
     std::time_t currentTime = std::time(nullptr);
     std::string backupLabel =
         "rostros_" + std::to_string(static_cast<long long>(currentTime));
 
     std::string apiUrl = GStringUtils::trim(appWebUrl);
+    std::string outputName = obtenerNombreArchivoFinal();
 
-    std::string backupCommand =
-        scriptPath + " \"" + datasetDirectory + "\" \"" + apiUrl + "\" \"" + idEquipo + "\" \"" + token + "\" \"" + backupLabel + "\"";
+    // Firma:
+    // copiaDeSeguridadDescFaciales.sh <DIRECTORIO_DATASET> <API_URL>
+    // <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL] [NOMBRE_ARCHIVO_FINAL]
+    std::string backupCommand = scriptPath + " \"" + datasetDirectory +
+                                "\" \"" + apiUrl + "\" \"" + idEquipo +
+                                "\" \"" + token + "\" \"" + backupLabel +
+                                "\" \"" + outputName + "\"";
 
     if (generarLog) {
-        GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando backup: " + backupCommand, true);
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] Ejecutando backup: " + backupCommand,
+            true);
     } else {
-        std::cout << "[ProcDescargaDescFaciales] Ejecutando backup: " << backupCommand << std::endl;
+        LOG_INFO(LOG_COMPONENT, "Ejecutando backup: " << backupCommand);
     }
 
     int backupExitCode = std::system(backupCommand.c_str());
     if (backupExitCode != 0 && generarLog) {
         GLog::writeSimple(
-            "[ProcDescargaDescFaciales] AVISO: error al crear copia de seguridad (codigo " +
+            "[ProcDescargaDescFaciales] AVISO: error al crear copia de "
+            "seguridad (codigo " +
                 std::to_string(backupExitCode) + ")",
             true);
     } else if (backupExitCode != 0) {
-        std::cout << "[ProcDescargaDescFaciales] AVISO: error al crear copia de seguridad (codigo " << backupExitCode
-                  << ")" << std::endl;
+        LOG_WARN(LOG_COMPONENT,
+                 "AVISO: error al crear copia de seguridad (codigo "
+                     << backupExitCode << ")");
     }
 }
 
@@ -208,23 +264,31 @@ void ProcDescargaDescFaciales::limpiarArchivosRostros(
     const std::string scriptsDirectory = "./scripts";
     std::string scriptPath = scriptsDirectory + "/limpiarRostros.sh";
 
-    std::string cleanupCommand = scriptPath + " \"" + datasetDirectory + "\"";
+    std::string outputName = obtenerNombreArchivoFinal();
+
+    // Firma:
+    // limpiarRostros.sh <DIRECTORIO_DATASET> [NOMBRE_ARCHIVO_FINAL]
+    std::string cleanupCommand =
+        scriptPath + " \"" + datasetDirectory + "\" \"" + outputName + "\"";
 
     if (generarLog) {
-        GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando limpieza: " + cleanupCommand, true);
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] Ejecutando limpieza: " + cleanupCommand,
+            true);
     } else {
-        std::cout << "[ProcDescargaDescFaciales] Ejecutando limpieza: " << cleanupCommand << std::endl;
+        LOG_INFO(LOG_COMPONENT, "Ejecutando limpieza: " << cleanupCommand);
     }
 
     int cleanupExitCode = std::system(cleanupCommand.c_str());
     if (cleanupExitCode != 0 && generarLog) {
         GLog::writeSimple(
-            "[ProcDescargaDescFaciales] AVISO: error al limpiar rostros (codigo " +
+            "[ProcDescargaDescFaciales] AVISO: error al limpiar rostros "
+            "(codigo " +
                 std::to_string(cleanupExitCode) + ")",
             true);
     } else if (cleanupExitCode != 0) {
-        std::cout << "[ProcDescargaDescFaciales] AVISO: error al limpiar rostros (codigo " << cleanupExitCode << ")"
-                  << std::endl;
+        LOG_WARN(LOG_COMPONENT, "AVISO: error al limpiar rostros (codigo "
+                                    << cleanupExitCode << ")");
     }
 }
 
@@ -236,10 +300,11 @@ bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
         if (downloadUrl.empty()) {
             if (generarLog) {
                 GLog::open(pathLog);
-                GLog::writeSimple("[ProcDescargaDescFaciales] URL de descarga vacía", true);
+                GLog::writeSimple(
+                    "[ProcDescargaDescFaciales] URL de descarga vacía", true);
                 GLog::close();
             } else {
-                std::cout << "[ProcDescargaDescFaciales] URL de descarga vacía" << std::endl;
+                LOG_WARN(LOG_COMPONENT, "URL de descarga vacía");
             }
             return false;
         }
@@ -249,12 +314,15 @@ bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
         if (generarLog) {
             GLog::open(pathLog);
             GLog::writeSimple(
-                "[ProcDescargaDescFaciales] Iniciando flujo descarga + generación + backup + limpieza con URL: " +
+                "[ProcDescargaDescFaciales] Iniciando flujo descarga + "
+                "generación + backup + limpieza con URL: " +
                     downloadUrl,
                 true);
         } else {
-            std::cout << "[ProcDescargaDescFaciales] Iniciando flujo descarga + generación + backup + limpieza con URL: "
-                      << downloadUrl << std::endl;
+            LOG_INFO(LOG_COMPONENT,
+                     "Iniciando flujo descarga + generación + backup + "
+                     "limpieza con URL: "
+                         << downloadUrl);
         }
 
         bool isSuccessful = true;
@@ -274,19 +342,23 @@ bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
 
         if (generarLog) {
             if (isSuccessful)
-                GLog::writeSimple("[ProcDescargaDescFaciales] Flujo completado correctamente", true);
+                GLog::writeSimple(
+                    "[ProcDescargaDescFaciales] Flujo completado correctamente",
+                    true);
             else
                 GLog::writeSimple(
-                    "[ProcDescargaDescFaciales] Flujo finalizado con errores en la descarga o generacion de descriptores",
+                    "[ProcDescargaDescFaciales] Flujo finalizado con errores "
+                    "en la descarga o generacion de descriptores",
                     true);
             GLog::close();
         } else {
-            if (isSuccessful)
-                std::cout << "[ProcDescargaDescFaciales] Flujo completado correctamente" << std::endl;
-            else
-                std::cout << "[ProcDescargaDescFaciales] Flujo finalizado con errores en la descarga o generacion de "
-                             "descriptores"
-                          << std::endl;
+            if (isSuccessful) {
+                LOG_INFO(LOG_COMPONENT, "Flujo completado correctamente");
+            } else {
+                LOG_WARN(LOG_COMPONENT,
+                         "Flujo finalizado con errores en la descarga o "
+                         "generacion de descriptores");
+            }
         }
 
         notificarTareaCompletada();
@@ -302,22 +374,28 @@ bool ProcDescargaDescFaciales::ejecutarDescargaYGeneracion() {
         if (generarLog) {
             GLog::open(pathLog);
             GLog::writeSimple(
-                std::string("[ProcDescargaDescFaciales] Excepción en ejecutarDescargaYGeneracion: ") + ex.what(),
+                std::string("[ProcDescargaDescFaciales] Excepción en "
+                            "ejecutarDescargaYGeneracion: ") +
+                    ex.what(),
                 true);
             GLog::close();
         } else {
-            std::cout << "[ProcDescargaDescFaciales] Excepción en ejecutarDescargaYGeneracion: " << ex.what()
-                      << std::endl;
+            LOG_ERROR(
+                LOG_COMPONENT,
+                "Excepción en ejecutarDescargaYGeneracion: " << ex.what());
         }
         return false;
     } catch (...) {
         if (generarLog) {
             GLog::open(pathLog);
             GLog::writeSimple(
-                "[ProcDescargaDescFaciales] Excepción desconocida en ejecutarDescargaYGeneracion", true);
+                "[ProcDescargaDescFaciales] Excepción desconocida en "
+                "ejecutarDescargaYGeneracion",
+                true);
             GLog::close();
         } else {
-            std::cout << "[ProcDescargaDescFaciales] Excepción desconocida en ejecutarDescargaYGeneracion" << std::endl;
+            LOG_ERROR(LOG_COMPONENT,
+                      "Excepción desconocida en ejecutarDescargaYGeneracion");
         }
         return false;
     }
@@ -353,32 +431,32 @@ std::string ProcDescargaDescFaciales::construirUrlDescarga() const {
 bool ProcDescargaDescFaciales::ejecutarScriptShell(
     const std::string& urlDescarga) const {
     if (rutaScriptGenerar.empty()) {
-        std::cout << "[ProcDescargaDescFaciales] rutaScriptGenerar vacía. No se ejecutará ningún script." << std::endl;
+        LOG_WARN(LOG_COMPONENT,
+                 "rutaScriptGenerar vacía. No se ejecutará ningún script.");
         return false;
     }
 
     std::string comando = rutaScriptGenerar + " \"" + urlDescarga + "\"";
 
     if (generarLog) {
-        GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando comando: " + comando, true);
+        GLog::writeSimple(
+            "[ProcDescargaDescFaciales] Ejecutando comando: " + comando, true);
     } else {
-        std::cout << "[ProcDescargaDescFaciales] Ejecutando comando: " << comando << std::endl;
+        LOG_INFO(LOG_COMPONENT, "Ejecutando comando: " << comando);
     }
 
     int resultado = std::system(comando.c_str());
     return (resultado == 0);
 }
 
-void ProcDescargaDescFaciales::notificarTareaCompletada()
-{
+void ProcDescargaDescFaciales::notificarTareaCompletada() {
     try {
-        std::string baseTrim     = GStringUtils::trim(dotnetUrl);
+        std::string baseTrim = GStringUtils::trim(dotnetUrl);
         std::string endpointTrim = GStringUtils::trim(endpointCompletado);
         std::string urlCompleta;
 
-        if (!endpointTrim.empty() &&
-            (endpointTrim.rfind("http://", 0) == 0 ||
-             endpointTrim.rfind("https://", 0) == 0)) {
+        if (!endpointTrim.empty() && (endpointTrim.rfind("http://", 0) == 0 ||
+                                      endpointTrim.rfind("https://", 0) == 0)) {
             urlCompleta = endpointTrim;
         } else if (endpointTrim.empty()) {
             urlCompleta = baseTrim;
@@ -394,18 +472,16 @@ void ProcDescargaDescFaciales::notificarTareaCompletada()
         }
 
         if (urlCompleta.empty()) {
-            std::cout
-                << "[ProcDescargaDescFaciales] URL de completado vacía, no se envía POST"
-                << std::endl;
+            LOG_WARN(LOG_COMPONENT,
+                     "URL de completado vacía, no se envía POST");
             return;
         }
 
-        if (urlCompleta.back() != '/')
-            urlCompleta += "/";
+        if (urlCompleta.back() != '/') urlCompleta += "/";
         urlCompleta += std::to_string(idTareaProgramada);
 
-        std::cout << "[ProcDescargaDescFaciales] Notificando tarea completada en: "
-                  << urlCompleta << std::endl;
+        LOG_INFO(LOG_COMPONENT,
+                 "Notificando tarea completada en: " << urlCompleta);
 
         json bodyJson;
         bodyJson["nroDeSerie"] = idEquipo;
@@ -415,45 +491,42 @@ void ProcDescargaDescFaciales::notificarTareaCompletada()
         GHttpClient httpClient;
         httpClient.setHeader("Content-Type", "application/json");
 
-        int rc = httpClient.doHttp(
-            urlCompleta,
-            "POST",
-            bodyPtr,
-            static_cast<int>(body.size())
-        );
+        int rc = httpClient.doHttp(urlCompleta, "POST", bodyPtr,
+                                   static_cast<int>(body.size()));
 
         if (rc != 0) {
-            std::cout
-                << "[ProcDescargaDescFaciales] ERROR en notificarTareaCompletada. rc="
-                << rc << std::endl;
+            LOG_ERROR(LOG_COMPONENT, "ERROR en notificarTareaCompletada. rc="
+                                         << rc << " url=" << urlCompleta);
             return;
         }
 
         std::string responseBody = httpClient.responseToStr();
         if (responseBody.empty()) {
-            std::cout
-                << "[ProcDescargaDescFaciales] Respuesta vacía en notificarTareaCompletada"
-                << std::endl;
+            LOG_WARN(LOG_COMPONENT,
+                     "Respuesta vacía en notificarTareaCompletada. url="
+                         << urlCompleta);
             return;
         }
 
         try {
             json respJson = json::parse(responseBody);
             bool success = respJson.value("success", false);
-            std::cout
-                << "[ProcDescargaDescFaciales] POST /ping/completo "
-                << (success ? "OK" : "NO OK")
-                << ". Respuesta: " << responseBody << std::endl;
+
+            LOG_INFO(LOG_COMPONENT,
+                     "POST completado -> url=" << urlCompleta << " rc=" << rc
+                                               << " success="
+                                               << (success ? "true" : "false")
+                                               << " response=" << responseBody);
+        } catch (const std::exception& ex) {
+            LOG_ERROR(LOG_COMPONENT,
+                      "Error parseando JSON en notificarTareaCompletada: "
+                          << ex.what());
         }
-        catch (const std::exception& ex) {
-            std::cout
-                << "[ProcDescargaDescFaciales] Error parseando JSON en notificarTareaCompletada: "
-                << ex.what() << std::endl;
-        }
-    }
-    catch (const std::exception& ex) {
-        std::cout
-            << "[ProcDescargaDescFaciales] Excepción en notificarTareaCompletada: "
-            << ex.what() << std::endl;
+    } catch (const std::exception& ex) {
+        LOG_ERROR(LOG_COMPONENT,
+                  "Excepción en notificarTareaCompletada: " << ex.what());
+    } catch (...) {
+        LOG_ERROR(LOG_COMPONENT,
+                  "Excepción desconocida en notificarTareaCompletada");
     }
 }
