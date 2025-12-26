@@ -216,9 +216,9 @@ urlBaseServidorUnificado_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canad
 _urlBaseServidorIden=http://iawks02.local/clientes/fractal/registra_data.php
 _urlBaseServidorNoIden=http://iawks02.local/clientes/fractal/registra_data.php
 _urlBaseServidorUnificado=http://iawks02.local/clientes/fractal/registra_data.php
-urlBaseServidorIden=http://lap01.local/clientes/fractal/registra_data.php
-urlBaseServidorNoIden=http://lap01.local/clientes/fractal/registra_data.php
-urlBaseServidorUnificado=http://lap01.local/clientes/fractal/registra_data.php
+urlBaseServidorIden=http://192.168.3.103:8080/api/sensor/eventoSensor
+urlBaseServidorNoIden=http://192.168.3.103:8080/api/sensor/eventoDesconocidoSensor
+urlBaseServidorUnificado=http://192.168.3.103:8080/api/sensor/eventoDesconocidoSensor
 
 
 # nivel de calidad JPEG
@@ -316,7 +316,7 @@ pixelSuavizado=0
 resizeSuavizado=0
 
 # Suavizado del JPEG que genera artefactos de compresion
-jpegSuavizado=100
+jpegSuavizado=50
 
 # Paramtro del nivel de contraste que se genera
 paramContraste=0
@@ -329,7 +329,7 @@ paramContraste=0
 encuadrarRostros=S
 
 # Altura a la que se escalan las imagenes antes de detectar rostros, esto tambien elimina detalles
-alturaImagenBase=1080
+alturaImagenBase=800
 
 # Ping Configuracion
 
@@ -337,7 +337,6 @@ appWebUrl=https://configsrfbackendstaging-b3ehbheceabrbubp.canadacentral-01.azur
 generarLogPingAppWeb=true
 pathLogPingAppWeb=./pings_app_web.log
 pingIntervalMsAppWeb=3000000
-/==
 
 dotnetUrl=http://192.168.3.103:8080/api
 dotnetEndpointMonitoreo=/ping/log/
@@ -345,15 +344,14 @@ dotnetEndpointCompletado=/ping/completo/
 
 generarLogPingMonitoreo=false
 pathLogPingMonitoreo=./pings_app_monitoreo.log
-pingIntervalMsMonitoreo=1000
+pingIntervalMsMonitoreo=30000
 
-zipUrl=https://configsrfbackendstaging-b3ehbheceabrbubp.canadacentral-01.azurewebsites.net
-zipEndpoint=/srf/sensor/descargarZip?idEmpresa=2
+zipEndpoint=/srf/sensor/descargarZip
 authEndpoint=/srf/auth/login
 
 # Credenciales
-username=dalcantara
-password=kirukato
+username=rpi-1
+password=Fr4ktal01$
 
 # Extractor Config
 directorioExtraccion=./descriptores_faciales/

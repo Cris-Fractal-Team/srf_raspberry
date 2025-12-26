@@ -759,7 +759,7 @@ void ProcesoRecFacial::leeParametros(string path) {
     procDescargaDescFaciales.dotnetUrl = lstParamsApp->getString("dotnetUrl");
     procDescargaDescFaciales.endpointCompletado = lstParamsApp->getString("dotnetEndpointCompletado");
 
-    procDescargaDescFaciales.appWebUrl = lstParamsApp->getString("zipUrl");
+    procDescargaDescFaciales.appWebUrl = lstParamsApp->getString("appWebUrl");
     procDescargaDescFaciales.generarLog =
         lstParamsApp->getStringBool("generarLogPingMonitoreo", false);
     procDescargaDescFaciales.pathLog =
@@ -770,14 +770,16 @@ void ProcesoRecFacial::leeParametros(string path) {
         lstParamsApp->getString("authEndpoint");
     procDescargaDescFaciales.username = lstParamsApp->getString("username");
     procDescargaDescFaciales.password = lstParamsApp->getString("password");
+    procDescargaDescFaciales.archivoFinal =  lstParamsApp->getString("archivoFinal");
 
     // -------------------------------------------------------
     procDescargaDescFaciales.extractor.pathArchivoDatos =
         lstParamsApp->getString("directorioExtraccion") + "/" +
         lstParamsApp->getString("archivoIndice");
-    ;
+
     procDescargaDescFaciales.extractor.pathFotos =
         lstParamsApp->getString("directorioExtraccion");
+        
     procDescargaDescFaciales.extractor.pathArchivoBD =
         lstParamsApp->getString("directorioExtraccion") + "/" +
         lstParamsApp->getString("archivoFinal");

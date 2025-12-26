@@ -60,6 +60,11 @@ class ProcDescargaDescFaciales {
      */
     std::string archivoIndice;
 
+    /*
+     *Archivo final de la generacion de descriptores faciales
+     */
+    std::string archivoFinal;
+
     /**
      * Ruta al script de shell que hará la descarga y generación.
      * Por defecto: ./descargarRostros.sh
