@@ -1,12 +1,13 @@
-
 #include "app/ExtractorFacialArchivo.h"
 #include "lib/utils/fileutils.h"
 #include "lib/utils/GStringUtils.h"
 #include "lib/hailolib/DetectionTrackerHailo.h"
+#include "lib/utils/Logger.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 
+static constexpr const char* LOG_COMPONENT = "ExtractorFacialArchivo";
 
 /**
  * Constructor
@@ -24,209 +25,313 @@ ExtractorFacialArchivo::ExtractorFacialArchivo()
  */
 void ExtractorFacialArchivo::ejecutar()
 {
-    int i,n;
+    vector<DeteccionCaraHailo> deteccionesRostro;
+    string lineaCsv;
+    string idPersona;
+    string pathFoto;
+    string nombre;
 
-    vector<DeteccionCaraHailo> lstDet;
-    string fila,idPersona,pathFoto,nombre;
     string datosArchivo = leeArchivoTexto(pathArchivoDatos);
-    GVector lstFilas = GStringUtils::split(datosArchivo, "\n");
-    hailort::Expected<std::unique_ptr<hailort::VDevice>> *devicePtr;
-    DetectorCarasHailoSCRFD detector;        
+    GVector lineasArchivo = GStringUtils::split(datosArchivo, "\n");
+
+    DetectorCarasHailoSCRFD detector;
     FaceRecHailo generadorDesc;
+
     std::ofstream archivoBd(pathArchivoBD, std::ios::out);
-    
+
+    long long totalLineasProcesadas = 0;
+    long long lineasInvalidas = 0;
+    long long erroresLecturaImagen = 0;
+    long long erroresDeteccion = 0;
+    long long sinRostroDetectado = 0;
+    long long erroresDescriptor = 0;
+    long long aciertos = 0;
+
     if ( !archivoBd.is_open() )
     {
-        cerr << "Error: no se pudo abrir/crear el archivo de BD" << endl;
+        LOG_ERROR(LOG_COMPONENT, "Error: no se pudo abrir/crear el archivo de BD. path=" << pathArchivoBD);
         return;
     }
 
-    // inicializa el dispositivo
-    // hailort::Expected<std::unique_ptr<hailort::VDevice>> device = hailort::VDevice::create();    
-    if (vdevice == nullptr || !(*vdevice)) {
-        cerr << "Error: VDevice no inicializado en ExtractorFacialArchivo." << endl;
+    if (vdevice == nullptr || !(*vdevice))
+    {
+        LOG_ERROR(LOG_COMPONENT, "Error: VDevice no inicializado en ExtractorFacialArchivo.");
         return;
     }
 
-    // configura el detector
-    detector.setDimImagenes(640,640);
-    detector.runner.device = vdevice;
-    if ( detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0 )
+    try
     {
-        cout << "Error al cargar el modelo detector" << endl;        
-        return;
-    }           
-    cout << "Detector de rostros iniciado" << endl;
+        // configura el detector
+        detector.setDimImagenes(640,640);
+        detector.runner.device = vdevice;
 
-    // crea el generador de descriptores faciales
-    generadorDesc.runner.device = vdevice;
-    generadorDesc.paramContraste = paramContraste;
-    // if ( generadorDesc.cargarModelo("./models/arcface_mobilefacenet.hef") != 0 )
-    generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
-    generadorDesc.guardarCarasFrontalesAlineadas = guardarCarasFrontalesAlineadas;
-    generadorDesc.previsualizaImgReconocimiento = previsualizaImgReconocimiento;
-    generadorDesc.esperarPrevImgReconocimiento = esperarPrevImgReconocimiento;
+        if ( detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0 )
+        {
+            LOG_ERROR(LOG_COMPONENT, "Error al cargar el modelo detector. path=./models/scrfd_2.5ga.hef");
+            return;
+        }
 
+        LOG_INFO(LOG_COMPONENT, "Detector de rostros iniciado");
 
-    if ( generadorDesc.cargarModelo(pathModeloDescFacial) != 0 )
-    {
-        cout << "Error al cargar modelo generador de descriptores" << endl;
-        return;
+        // crea el generador de descriptores faciales
+        generadorDesc.runner.device = vdevice;
+        generadorDesc.paramContraste = paramContraste;
+        generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
+        generadorDesc.guardarCarasFrontalesAlineadas = guardarCarasFrontalesAlineadas;
+        generadorDesc.previsualizaImgReconocimiento = previsualizaImgReconocimiento;
+        generadorDesc.esperarPrevImgReconocimiento = esperarPrevImgReconocimiento;
+
+        if ( generadorDesc.cargarModelo(pathModeloDescFacial) != 0 )
+        {
+            LOG_ERROR(LOG_COMPONENT, "Error al cargar modelo generador de descriptores. path=" << pathModeloDescFacial);
+            return;
+        }
+
+        LOG_INFO(LOG_COMPONENT, "Generador de descriptores iniciado");
+
+        int cantidadLineas = lineasArchivo.size();
+        for(int indiceLinea = 0; indiceLinea < cantidadLineas; indiceLinea++)
+        {
+            lineaCsv = lineasArchivo.getString(indiceLinea);
+            lineaCsv = GStringUtils::trim(lineaCsv);
+
+            if ( lineaCsv.empty() )
+            {
+                continue;
+            }
+
+            totalLineasProcesadas++;
+
+            try
+            {
+                GVector columnasCsv = GStringUtils::split(lineaCsv, ",");
+                if ( columnasCsv.size() != 3 )
+                {
+                    lineasInvalidas++;
+                    LOG_WARN(LOG_COMPONENT, "Fila inválida (se esperan 3 columnas). fila=" << lineaCsv);
+                    continue;
+                }
+
+                idPersona = columnasCsv.getString(0);
+                nombre = columnasCsv.getString(1);
+                pathFoto = columnasCsv.getString(2);
+
+                string pathCompletoFoto = pathFotos + pathFoto;
+
+                LOG_INFO(LOG_COMPONENT,
+                         "Procesando -> ID=" << idPersona
+                                             << " Nombre=" << nombre
+                                             << " PATH=" << pathCompletoFoto);
+
+                GImage imagenRostro;
+                try
+                {
+                    imagenRostro = GDibujo::read(pathCompletoFoto);
+                }
+                catch (const std::exception& ex)
+                {
+                    erroresLecturaImagen++;
+                    LOG_ERROR(LOG_COMPONENT,
+                              "Error leyendo imagen -> idPersona=" << idPersona
+                                                                   << " path=" << pathCompletoFoto
+                                                                   << " ex=" << ex.what());
+                    continue;
+                }
+                catch (...)
+                {
+                    erroresLecturaImagen++;
+                    LOG_ERROR(LOG_COMPONENT,
+                              "Error desconocido leyendo imagen -> idPersona=" << idPersona
+                                                                               << " path=" << pathCompletoFoto);
+                    continue;
+                }
+
+                if ( alturaImagenBase > 0 )
+                {
+                    long long anchoEscalado;
+                    float factorEscala = ((float)alturaImagenBase) / (float)imagenRostro.altura;
+
+                    anchoEscalado = (int)(((float)imagenRostro.ancho) * factorEscala);
+                    imagenRostro = imagenRostro.cloneResize(anchoEscalado, alturaImagenBase);
+                }
+
+                LOG_DEBUG(LOG_COMPONENT,
+                          "Imagen -> ancho=" << imagenRostro.ancho
+                                             << " alto=" << imagenRostro.altura
+                                             << " suavizado=" << pixelSuavizado
+                                             << " resizeSuavizado=" << resizeSuavizado
+                                             << " jpegSuavizado=" << jpegSuavizado);
+
+                deteccionesRostro = detector.detectar_2_5g(imagenRostro, toleranciaDetec);
+                if ( detector.errorDeteccion == true )
+                {
+                    erroresDeteccion++;
+                    LOG_ERROR(LOG_COMPONENT,
+                              "Error al detectar rostros -> idPersona=" << idPersona
+                                                                        << " path=" << pathCompletoFoto);
+                    continue;
+                }
+
+                if ( deteccionesRostro.size() <= 0 )
+                {
+                    sinRostroDetectado++;
+                    LOG_ERROR(LOG_COMPONENT,
+                              "Falta rostro detectado -> idPersona=" << idPersona
+                                                                     << " path=" << pathCompletoFoto);
+                    continue;
+                }
+
+                DeteccionCaraHailo deteccionPrincipal = deteccionesRostro.at(0);
+
+                if ( encuadrarRostros.compare("S") == 0 )
+                {
+                    deteccionPrincipal.ajustarCuadrado(imagenRostro.ancho, imagenRostro.altura);
+                }
+                else
+                if ( encuadrarRostros.compare("M") == 0 )
+                {
+                    deteccionPrincipal.ajustarMiniCuadrado(imagenRostro.ancho, imagenRostro.altura);
+                }
+
+                cv::Mat imagenBlur;
+                cv::Mat imagenTmpResize;
+
+                if ( pixelSuavizado > 0 )
+                {
+                    cv::GaussianBlur(imagenRostro.imagenOpencv,
+                                     imagenBlur,
+                                     cv::Size(pixelSuavizado,pixelSuavizado),
+                                     0);
+
+                    imagenRostro.imagenOpencv = imagenBlur;
+                }
+
+                if ( resizeSuavizado > 1 )
+                {
+                    cv::resize(imagenRostro.imagenOpencv,
+                               imagenTmpResize,
+                               cv::Size(resizeSuavizado,resizeSuavizado),
+                               0, 0, cv::INTER_AREA);
+
+                    cv::resize(imagenTmpResize,
+                               imagenRostro.imagenOpencv,
+                               imagenRostro.imagenOpencv.size(),
+                               0, 0, cv::INTER_LINEAR);
+                }
+                else
+                if ( ( resizeSuavizado > 0.0 ) && ( resizeSuavizado < 1 ) )
+                {
+                    cv::resize(imagenRostro.imagenOpencv,
+                               imagenTmpResize,
+                               cv::Size(),
+                               resizeSuavizado, resizeSuavizado,
+                               cv::INTER_AREA);
+
+                    cv::resize(imagenTmpResize,
+                               imagenRostro.imagenOpencv,
+                               imagenRostro.imagenOpencv.size(),
+                               0, 0, cv::INTER_LINEAR);
+                }
+
+                if ( jpegSuavizado < 100 )
+                {
+                    std::vector<uchar> jpegBuffer;
+                    std::vector<int> jpegParams = { cv::IMWRITE_JPEG_QUALITY, 40 };
+
+                    cv::imencode(".jpg", imagenRostro.imagenOpencv, jpegBuffer, jpegParams);
+                    imagenRostro.imagenOpencv = cv::imdecode(jpegBuffer, cv::IMREAD_COLOR);
+                }
+
+                GImage rostroExtraido = imagenRostro.getRect(deteccionPrincipal.ptoSupIzq.x,
+                                                            deteccionPrincipal.ptoSupIzq.y,
+                                                            deteccionPrincipal.ptoInfDer.x,
+                                                            deteccionPrincipal.ptoInfDer.y);
+
+                GImage rostroInvertido = GDibujo::flip(rostroExtraido, GDIBUJO_FLIP_VER);
+
+                deteccionPrincipal.desplazaPtosCara(-deteccionPrincipal.ptoSupIzq.x,
+                                                   -deteccionPrincipal.ptoSupIzq.y);
+
+                deteccionPrincipal.desplazaRegion(-deteccionPrincipal.ptoSupIzq.x,
+                                                  -deteccionPrincipal.ptoSupIzq.y);
+
+                SIMD_TYPE descriptorOriginal[NUM_ELEMS_DESC_FACIAL];
+                SIMD_TYPE descriptorFlip[NUM_ELEMS_DESC_FACIAL];
+                SIMD_TYPE descriptorUnificado[NUM_ELEMS_DESC_FACIAL];
+
+                try
+                {
+                    generadorDesc.calculaDescriptor(rostroExtraido, deteccionPrincipal, descriptorOriginal);
+                    generadorDesc.calculaDescriptor(rostroInvertido, deteccionPrincipal, descriptorFlip);
+                    fuse_flip_embeddings(descriptorOriginal, descriptorFlip, descriptorUnificado);
+                }
+                catch (const std::exception& ex)
+                {
+                    erroresDescriptor++;
+                    LOG_ERROR(LOG_COMPONENT,
+                              "Error calculando descriptor -> idPersona=" << idPersona
+                                                                          << " path=" << pathCompletoFoto
+                                                                          << " ex=" << ex.what());
+                    continue;
+                }
+                catch (...)
+                {
+                    erroresDescriptor++;
+                    LOG_ERROR(LOG_COMPONENT,
+                              "Error desconocido calculando descriptor -> idPersona=" << idPersona
+                                                                                      << " path=" << pathCompletoFoto);
+                    continue;
+                }
+
+                string filaSalida = nombre;
+                filaSalida.append(",");
+                filaSalida.append(idPersona);
+                filaSalida.append(",");
+
+                for(int indiceElem = 0; indiceElem < NUM_ELEMS_DESC_FACIAL; indiceElem++)
+                {
+                    filaSalida.append(to_string(descriptorUnificado[indiceElem]));
+                    filaSalida.append(",");
+                }
+
+                filaSalida.append("\n");
+                archivoBd << filaSalida;
+
+                aciertos++;
+            }
+            catch (const std::exception& ex)
+            {
+                erroresDescriptor++;
+                LOG_ERROR(LOG_COMPONENT, "Excepción por fila. fila=" << lineaCsv << " ex=" << ex.what());
+                continue;
+            }
+            catch (...)
+            {
+                erroresDescriptor++;
+                LOG_ERROR(LOG_COMPONENT, "Excepción desconocida por fila. fila=" << lineaCsv);
+                continue;
+            }
+        }
+
+        LOG_INFO(LOG_COMPONENT,
+                 "Resumen -> totalFilas=" << totalLineasProcesadas
+                                          << " aciertos=" << aciertos
+                                          << " sinRostro=" << sinRostroDetectado
+                                          << " errLecturaImg=" << erroresLecturaImagen
+                                          << " errDeteccion=" << erroresDeteccion
+                                          << " errDescriptor=" << erroresDescriptor
+                                          << " filasInvalidas=" << lineasInvalidas);
     }
-    cout << "Generador de descriptores iniciado" << endl;
-     
-    n = lstFilas.size();
-    for(i=0;i<n;i++)
+    catch (const std::exception& ex)
     {
-        fila = lstFilas.getString(i);
-        fila = GStringUtils::trim(fila);
-        GVector lstValores = GStringUtils::split(fila,",");
-        if ( lstValores.size() != 3 )
-            continue;
-
-        idPersona = lstValores.getString(0);
-        nombre = lstValores.getString(1);
-        pathFoto = lstValores.getString(2);
-
-        cout << "Suavizado " << pixelSuavizado << endl; 
-        cout << "ID:" << idPersona << " Nombre:" << nombre << " PATH:" << pathFoto << endl;
-        
-        GImage rostro = GDibujo::read(pathFotos + pathFoto);   
-        if ( alturaImagenBase > 0 )
-        {
-            long long ancho;
-            float factor = ((float)alturaImagenBase) / (float)rostro.altura;
-
-            ancho = (int)(((float)rostro.ancho)*factor);
-            rostro = rostro.cloneResize(ancho,alturaImagenBase);
-        }
-        GImage rostroOrig = rostro.clone();
-        
-        // cv::imshow("Original Escalada", rostro.imagenOpencv);
-
-        // Simular compresión JPEG en memoria
-        // std::vector<uchar> buf;
-        // std::vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 30}; // Ajusta el nivel de calidad (ej. 40-60)
-        // cv::imencode(".jpg", rostro.imagenOpencv, buf, params);
-        // rostro.imagenOpencv = cv::imdecode(buf, cv::IMREAD_COLOR);
-        
-        cout << "Ancho del rostro " << rostro.ancho << " Altura " << rostro.altura << endl;
-        lstDet = detector.detectar_2_5g(rostro, toleranciaDetec);        
-        if ( detector.errorDeteccion == true )
-        {
-            cout << "Error al detectar rostros" << endl;
-            break;
-        }
-
-        if ( lstDet.size() > 0 )
-        {            
-            DeteccionCaraHailo det = lstDet.at(0);
-            DeteccionCaraHailo det1 = lstDet.at(0);
-            cv::Mat blurred, tmp;  
-
-            // cout << "Cara detectada" << endl;
-                        
-            if ( encuadrarRostros.compare("S") == 0 ) 
-                det.ajustarCuadrado(rostro.ancho, rostro.altura);
-            else
-            if ( encuadrarRostros.compare("M") == 0 ) 
-                det.ajustarMiniCuadrado(rostro.ancho, rostro.altura);
-            
-
-            rostroOrig = rostro.clone();
-
-            // GDibujo::drawRect(rostroOrig, GRect(det.ptoSupIzq.x, det.ptoSupIzq.y, det.ptoInfDer.x, det.ptoInfDer.y), GColor(255,0,0), 2);
-            // GDibujo::drawRect(rostroOrig, GRect(det1.ptoSupIzq.x, det1.ptoSupIzq.y, det1.ptoInfDer.x, det1.ptoInfDer.y), GColor(0,0,255), 2);
-            
-            // cv::imshow("Deteccion", rostro.imagenOpencv); 
-            
-            if ( pixelSuavizado > 0 )
-            {
-                          
-                cv::GaussianBlur(rostro.imagenOpencv, blurred, cv::Size(pixelSuavizado,pixelSuavizado), 0);
-                                
-                // cv::imshow("Blured", rostro.imagenOpencv);
-                // cv::waitKey(0);
-
-                rostro.imagenOpencv = blurred;          
-            }
-
-            
-            
-            if ( resizeSuavizado > 1 )
-            {   
-                cv::resize(rostro.imagenOpencv , tmp, cv::Size(resizeSuavizado,resizeSuavizado), 0, 0, cv::INTER_AREA);
-                cv::resize(tmp, rostro.imagenOpencv, rostro.imagenOpencv.size(), 0, 0, cv::INTER_LINEAR);
-
-                // cv::imshow("Suavizado", rostro.imagenOpencv);
-                // cv::waitKey(0);
-            }
-            else
-            if ( ( resizeSuavizado > 0.0 ) && ( resizeSuavizado < 1 ))
-            {   
-                cv::resize(rostro.imagenOpencv , tmp, cv::Size(), resizeSuavizado, resizeSuavizado, cv::INTER_AREA);
-                cv::resize(tmp, rostro.imagenOpencv, rostro.imagenOpencv.size(), 0, 0, cv::INTER_LINEAR);
-
-                // cv::imshow("Suavizado", rostro.imagenOpencv);
-                // cv::waitKey(0);
-            }
-                        
-            if ( jpegSuavizado < 100 )
-            {
-                std::vector<uchar> buf;
-                std::vector<int> p = { cv::IMWRITE_JPEG_QUALITY, 40 };
-                cv::imencode(".jpg", rostro.imagenOpencv, buf, p);
-                rostro.imagenOpencv = cv::imdecode(buf, cv::IMREAD_COLOR);
-
-                // cv::imshow("JPEG", rostro.imagenOpencv);
-                // cv::waitKey(0);
-            }            
-
-            GImage rostroExtraido = rostro.getRect(det.ptoSupIzq.x, det.ptoSupIzq.y, det.ptoInfDer.x, det.ptoInfDer.y);
-            GImage rostroInvertido = GDibujo::flip(rostroExtraido, GDIBUJO_FLIP_VER);
-
-            // cv::imshow("Extraido", rostroExtraido.imagenOpencv);
-            // cv::imshow("Invertido", rostroInvertido.imagenOpencv);
-            // cv::waitKey(0);
-
-            det.desplazaPtosCara(-det.ptoSupIzq.x, -det.ptoSupIzq.y);
-            det.desplazaRegion(-det.ptoSupIzq.x, -det.ptoSupIzq.y);
-            
-            SIMD_TYPE descriptorOrig[NUM_ELEMS_DESC_FACIAL];
-            SIMD_TYPE descriptorFlip[NUM_ELEMS_DESC_FACIAL];
-            SIMD_TYPE descriptorUnif[NUM_ELEMS_DESC_FACIAL];       
-            // cout << "Calculando descriptor: " << rostroOrig.ancho << " x " << rostroOrig.altura << " Det: " << 
-            //     det.ptoSupIzq.x << " , " << det.ptoSupIzq.y << " , " <<  
-            //     det.ptoInfDer.x << " , " << det.ptoInfDer.y << endl;     
-                        
-            // cv::waitKey(0);
-            generadorDesc.calculaDescriptor(rostroExtraido, det, descriptorOrig);     
-            generadorDesc.calculaDescriptor(rostroInvertido, det, descriptorFlip);
-            fuse_flip_embeddings(descriptorOrig, descriptorFlip, descriptorUnif);
-            
-            string fila = nombre;
-            fila.append(",");
-            fila.append(idPersona);
-            fila.append(",");
-
-            for(int j=0; j<NUM_ELEMS_DESC_FACIAL; j++)
-            {
-                fila.append(to_string(descriptorUnif[j]));
-                fila.append(",");
-            }
-            fila.append("\n");
-            archivoBd << fila;
-
-            // cout << fila << endl;
-        }
-        else
-        {
-            cout << "!!! NO se detecto un rostro" << endl;
-        }
+        LOG_ERROR(LOG_COMPONENT, "Excepción en ejecutar: " << ex.what());
+    }
+    catch (...)
+    {
+        LOG_ERROR(LOG_COMPONENT, "Excepción desconocida en ejecutar");
     }
 
     archivoBd.close();
-
 }
 
 

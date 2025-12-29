@@ -161,12 +161,16 @@ bool ProcDescargaDescFaciales::descargarZipRostros(
         scriptPath + " \"" + downloadUrl + "\" \"" + datasetDirectory + "\"";
     downloadCommand += " \"" + token + "\"";
 
+    std::string downloadCommandLog =
+        scriptPath + " \"" + downloadUrl + "\" \"" + datasetDirectory + "\"";
+    downloadCommand += " \"" + token.substr(0, 8) + "***SECRET***" + "\"";
+
     if (generarLog) {
         GLog::writeSimple("[ProcDescargaDescFaciales] Ejecutando descarga: " +
-                              downloadCommand,
+                          downloadCommandLog,
                           true);
     } else {
-        LOG_INFO(LOG_COMPONENT, "Ejecutando descarga: " << downloadCommand);
+        LOG_INFO(LOG_COMPONENT, "Ejecutando descarga: " << downloadCommandLog);
     }
 
     int downloadExitCode = std::system(downloadCommand.c_str());
@@ -237,12 +241,16 @@ void ProcDescargaDescFaciales::crearCopiaSeguridadDescriptores(
                                 "\" \"" + token + "\" \"" + backupLabel +
                                 "\" \"" + outputName + "\"";
 
+    std::string backupCommandLog = scriptPath + " \"" + datasetDirectory +
+                                "\" \"" + apiUrl + "\" \"" + idEquipo +
+                                "\" \"" + token.substr(0, 8) + "***SECRET***" + "\" \"" + backupLabel +
+                                "\" \"" + outputName + "\"";
     if (generarLog) {
         GLog::writeSimple(
-            "[ProcDescargaDescFaciales] Ejecutando backup: " + backupCommand,
+            "[ProcDescargaDescFaciales] Ejecutando backup: " + backupCommandLog,
             true);
     } else {
-        LOG_INFO(LOG_COMPONENT, "Ejecutando backup: " << backupCommand);
+        LOG_INFO(LOG_COMPONENT, "Ejecutando backup: " << backupCommandLog);
     }
 
     int backupExitCode = std::system(backupCommand.c_str());
