@@ -40,11 +40,10 @@ fi
 mkdir -p "${PROJECT_ROOT}/data"
 
 echo "[limpiarRostros] PROJECT_ROOT: ${PROJECT_ROOT}"
-echo "[limpiarRostros] Limpiando directorio ${TARGET_DATASET_DIR}, conservando solo ${DESCRIPTORS_NAME}"
-
-find "${TARGET_DATASET_DIR}" -type f ! -name "${DESCRIPTORS_NAME}" -delete
-find "${TARGET_DATASET_DIR}" -type d ! -path "${TARGET_DATASET_DIR}" -empty -delete
+echo "[limpiarRostros] Limpiando directorio ${TARGET_DATASET_DIR}"
 
 cp "${DESCRIPTORS_FILE}" "${PROJECT_ROOT}/data/"
+
+rm -rf "${TARGET_DATASET_DIR}"
 
 echo "[limpiarRostros] Limpieza completada."

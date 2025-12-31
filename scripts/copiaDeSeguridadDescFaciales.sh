@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Uso:
-#   ./scripts/copiaDeSeguridadDescFaciales.sh <DIRECTORIO_DATASET> <API_URL> <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL] [NOMBRE_ARCHIVO_FINAL]
-#
-# - Si no se pasa NOMBRE_ARCHIVO_FINAL => usa: rostros_conocidos.txt
-# - Si existe un ZIP reciente en PROJECT_ROOT, usa el nombre del ZIP como etiqueta base
-# - Si no existe ZIP, usa ETIQUETA_OPCIONAL o default "rostros_YYYYmmdd_HHMMSS"
-# - Copia a: <PROJECT_ROOT>/desc_faciales_versiones/<ETIQUETA>.txt
-# - Luego intenta subirlo al endpoint: /srf/backup/desc-facial/<SERIE_EQUIPO>
-
 if [[ $# -lt 4 ]]; then
   echo "[copiaDeSeguridadDescFaciales] Uso: $0 <DIRECTORIO_DATASET> <API_URL> <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL] [NOMBRE_ARCHIVO_FINAL]"
   exit 1
@@ -31,9 +22,6 @@ else
 fi
 
 DESCRIPTORS_FILE="${TARGET_DATASET_DIR}/${DESCRIPTORS_NAME}"
-BACKUP_DIR="${PROJECT_ROOT}/desc_faciales_versiones"
-
-mkdir -p "${BACKUP_DIR}"
 
 if [[ ! -f "${DESCRIPTORS_FILE}" ]]; then
   echo "[copiaDeSeguridadDescFaciales] ERROR: no se encontró ${DESCRIPTORS_FILE}"
@@ -54,7 +42,7 @@ else
   echo "[copiaDeSeguridadDescFaciales] No se encontró ZIP ni etiqueta, usando etiqueta por defecto: ${BASE_LABEL}"
 fi
 
-BACKUP_FILE="${BACKUP_DIR}/${BASE_LABEL}.txt"
+BACKUP_FILE="${TARGET_DATASET_DIR}/${BASE_LABEL}.txt"
 
 echo "[copiaDeSeguridadDescFaciales] PROJECT_ROOT: ${PROJECT_ROOT}"
 echo "[copiaDeSeguridadDescFaciales] Dataset: ${TARGET_DATASET_DIR}"
@@ -87,11 +75,17 @@ BACKUP_ENDPOINT="${API_URL%/}/srf/backup/desc-facial/${SERIE_EQUIPO}"
 echo "[copiaDeSeguridadDescFaciales] Subiendo backup a: ${BACKUP_ENDPOINT}"
 echo "[copiaDeSeguridadDescFaciales] Archivo: ${BACKUP_FILE}"
 
-FILE_B64="$(base64 -w0 "${BACKUP_FILE}")"
-
-JSON_PAYLOAD=$(printf '{"nombreArchivo":"%s","archivoBase64":"%s"}' "${BASE_LABEL}" "${FILE_B64}")
-
 RESPONSE_FILE="$(mktemp)"
+PAYLOAD_FILE="$(mktemp)"
+B64_FILE="$(mktemp)"
+
+# Genera base64 en archivo (no en variable)
+base64 -w0 "${BACKUP_FILE}" > "${B64_FILE}"
+
+# Construye JSON en archivo para que NO vaya como argumento gigantesco a curl
+printf '{"nombreArchivo":"%s","archivoBase64":"' "${BASE_LABEL}" > "${PAYLOAD_FILE}"
+cat "${B64_FILE}" >> "${PAYLOAD_FILE}"
+printf '"}' >> "${PAYLOAD_FILE}"
 
 set +e
 HTTP_CODE=$(
@@ -99,10 +93,12 @@ HTTP_CODE=$(
     -X POST "${BACKUP_ENDPOINT}" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${TOKEN}" \
-    -d "${JSON_PAYLOAD}"
+    --data-binary @"${PAYLOAD_FILE}"
 )
 CURL_EXIT=$?
 set -e
+
+rm -f "${PAYLOAD_FILE}" "${B64_FILE}"
 
 if [[ "${CURL_EXIT}" -ne 0 ]]; then
   echo "[copiaDeSeguridadDescFaciales] ERROR al invocar API (curl exit code ${CURL_EXIT})"
