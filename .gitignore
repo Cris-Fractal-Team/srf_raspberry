@@ -1,0 +1,5 @@
+/obj
+/config/config.txt
+*.log
+myapp
+models

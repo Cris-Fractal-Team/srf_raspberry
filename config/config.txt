@@ -203,7 +203,7 @@ girar=N
 
 # Indica si se debe reflejar verticalmente la imagen, esto es util para casos
 # donde la camara esta de cabeza, generalmente porque se ancla desde el techo
-reflejarVerticalmente=S
+reflejarVerticalmente=N
 
 
 # ***************************************************************************************
@@ -356,7 +356,7 @@ password=Fr4ktal01$
 # Extractor Config
 directorioExtraccion=./descriptores_faciales/
 archivoIndice=datos.txt
-archivoFinal=rostros_conocidos.txt
+archivoFinal=rostros_conocidos_blablabla.txt
 
 #Logger
 logLevel=INFO

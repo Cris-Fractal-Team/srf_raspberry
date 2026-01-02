@@ -1,368 +1,463 @@
-
+#include <cstring>
 #include <iostream>
+#include <memory>
+#include <string>
+
 #include <opencv2/opencv.hpp>
 
 #include "app/ComparadorFacial.h"
 #include "app/ExtractorFacialArchivo.h"
+#include "app/LectorConfig.h"
 #include "app/PreProcesadorDataSet.h"
 #include "app/ProcRecFacial.h"
 #include "lib/graphics/ImageSource.h"
 #include "lib/utils/GStringUtils.h"
 #include "lib/utils/Logger.h"
-#include "lib/utils/fileutils.h"
 #include "lib/utils/systemUtils.h"
 
-static LogLevel parseLogLevel(const std::string& value) {
-    std::string upper;
-    upper.reserve(value.size());
-    for (char c : value) {
-        upper.push_back(
-            static_cast<char>(std::toupper(static_cast<unsigned char>(c))));
+#include "lib/hailolib/hailo8l.h"
+
+namespace
+{
+    constexpr const char* LOG_COMP = "MAIN";
+
+    LogLevel parsearNivelLog(const std::string& valor)
+    {
+        std::string upper;
+        upper.reserve(valor.size());
+        for (char caracter : valor)
+        {
+            upper.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(caracter))));
+        }
+
+        if (upper == "DEBUG") return LogLevel::DEBUG;
+        if (upper == "INFO") return LogLevel::INFO;
+        if (upper == "WARN" || upper == "WARNING") return LogLevel::WARNING;
+        if (upper == "ERROR") return LogLevel::ERROR;
+        if (upper == "CRITICAL") return LogLevel::CRITICAL;
+
+        return LogLevel::INFO;
     }
 
-    if (upper == "DEBUG") return LogLevel::DEBUG;
-    if (upper == "INFO") return LogLevel::INFO;
-    if (upper == "WARN" || upper == "WARNING") return LogLevel::WARNING;
-    if (upper == "ERROR") return LogLevel::ERROR;
-    if (upper == "CRITICAL") return LogLevel::CRITICAL;
+    void configurarLoggerDesdeConfig(const std::shared_ptr<GHashMap>& config)
+    {
+        std::string nivelLogStr = config->getString("logLevel");
+        if (nivelLogStr.empty())
+        {
+            nivelLogStr = "INFO";
+        }
 
-    return LogLevel::INFO;
+        const LogLevel nivelMinimo = parsearNivelLog(nivelLogStr);
+
+        // Si quieres log a archivo, léelo de config:
+        // std::string rutaLog = config->getString("logFile");
+        // Si no usas archivo, deja vacío.
+        const std::string rutaLog = "";
+
+        Logger::init(rutaLog, nivelMinimo, true);
+        LOG_INFO(LOG_COMP, "Logger inicializado. Nivel: " << nivelLogStr);
+    }
+
+    void imprimirAyuda()
+    {
+        std::cout
+            << "\n"
+            << "Ejecución sin parámetros: modo detector (tiempo real)\n\n"
+            << "Parámetros disponibles:\n\n"
+            << "  -procesa [archivoDatos] [directorioFotos] [archivoSalida]\n"
+            << "     Genera un [archivoSalida] usando los datos del [archivoDatos].\n"
+            << "     [archivoDatos] es un CSV con: idPersona,nombre,foto\n"
+            << "     'foto' es el nombre del archivo dentro de [directorioFotos].\n\n"
+            << "  -compara-simple [path_cara1] [path_cara2]\n"
+            << "     Compara dos caras centradas (misma resolución del modelo).\n\n"
+            << "  -compara-busca [path_foto1] [path_foto2]\n"
+            << "     Busca una cara en cada foto y luego las compara.\n\n"
+            << "  -preprocesa-dataset [path_dirfotos] [path_dircaras] [similaridad]\n"
+            << "     Borra fotos sin caras y agrupa las restantes por similaridad,\n"
+            << "     creando subdirectorios en [path_dircaras].\n\n"
+            << "  --help\n"
+            << "     Muestra esta ayuda.\n\n";
+    }
+
+    int ejecutarModoPreprocesaDataset(
+        const char* directorioFotos,
+        const char* directorioSalidaCaras,
+        const char* similaridadStr,
+        const std::shared_ptr<GHashMap>& config)
+    {
+        PreProcesadorDataSet preprocesador;
+        float similaridad = 0.0f;
+
+        try
+        {
+            similaridad = std::stof(similaridadStr);
+        }
+        catch (...)
+        {
+            LOG_ERROR(LOG_COMP, "Parámetro 'similaridad' no es numérico: " << similaridadStr);
+            return -1;
+        }
+
+        LOG_INFO(LOG_COMP, "Inicializando dispositivo Hailo (preprocesa-dataset)...");
+        hailort::Expected<std::unique_ptr<hailort::VDevice>> dispositivo = hailort::VDevice::create();
+        if (!dispositivo)
+        {
+            LOG_CRITICAL(LOG_COMP, "No se pudo inicializar el dispositivo Hailo.");
+            return -1;
+        }
+
+        auto* punteroDispositivo = &dispositivo;
+
+        LOG_INFO(LOG_COMP, "Eliminando fotos sin caras. Dir: " << directorioFotos);
+        preprocesador.eliminaNoCaras(punteroDispositivo, directorioFotos);
+
+        LOG_INFO(LOG_COMP, "Agrupando caras. Entrada: " << directorioFotos
+                           << " | Salida: " << directorioSalidaCaras
+                           << " | Similaridad: " << similaridad);
+        preprocesador.agrupaCaras(punteroDispositivo, directorioFotos, directorioSalidaCaras, similaridad, config);
+
+        LOG_INFO(LOG_COMP, "Preprocesamiento finalizado.");
+        return 0;
+    }
+
+    int ejecutarModoComparaSimple(
+        const char* pathCara1,
+        const char* pathCara2,
+        const std::shared_ptr<GHashMap>& config)
+    {
+        LOG_INFO(LOG_COMP, "Comparación simple. Cara1: " << pathCara1 << " | Cara2: " << pathCara2);
+
+        ComparadorFacial comparador;
+        const float comparacion = comparador.comparaSimple(pathCara1, pathCara2, config);
+
+        LOG_INFO(LOG_COMP, "Resultado comparación (simple): " << comparacion);
+        std::cout << "Resultado de la comparación: " << comparacion << "\n\n";
+        return 0;
+    }
+
+    int ejecutarModoComparaBusca(
+        const char* pathFoto1,
+        const char* pathFoto2,
+        const std::shared_ptr<GHashMap>& config)
+    {
+        LOG_INFO(LOG_COMP, "Comparación con búsqueda. Foto1: " << pathFoto1 << " | Foto2: " << pathFoto2);
+
+        ComparadorFacial comparador;
+        const float comparacion = comparador.comparaBusca(pathFoto1, pathFoto2, config);
+
+        LOG_INFO(LOG_COMP, "Resultado comparación (busca): " << comparacion);
+        std::cout << "Resultado de la comparación: " << comparacion << "\n\n";
+        return 0;
+    }
+
+    int ejecutarModoProcesaArchivo(
+        const char* archivoDatos,
+        const char* directorioFotos,
+        const char* archivoSalida,
+        const std::shared_ptr<GHashMap>& config)
+    {
+        LOG_INFO(LOG_COMP, "Modo -procesa: generando identificadores faciales.");
+        LOG_INFO(LOG_COMP, "Archivo con datos: " << archivoDatos);
+        LOG_INFO(LOG_COMP, "Directorio con fotos: " << directorioFotos);
+        LOG_INFO(LOG_COMP, "Archivo con descriptores: " << archivoSalida);
+
+        std::cout << "Se deben generar identificadores faciales\n";
+        std::cout << "Archivo con datos: " << archivoDatos << "\n";
+        std::cout << "Directorio con fotos: " << directorioFotos << "\n";
+        std::cout << "Archivo con descriptores: " << archivoSalida << "\n\n";
+
+        ExtractorFacialArchivo extractor;
+        extractor.pathArchivoDatos = archivoDatos;
+        extractor.pathFotos = directorioFotos;
+        extractor.pathArchivoBD = archivoSalida;
+
+        extractor.alturaRostroMinima = config->getStringLong("anchoMinCaraRec", 90);
+        extractor.anchoRostroMinimo  = config->getStringLong("alturaMinCaraRec", 90);
+        extractor.toleranciaDetec    = config->getStringDouble("presicionDeteccion", 0.40);
+        extractor.toleranciaIden     = config->getStringDouble("deltaRostroMax", 0.60);
+
+        extractor.paramContraste     = config->getStringDouble("paramContraste", 0);
+        extractor.pixelSuavizado     = config->getStringLong("pixelSuavizado", 5);
+        extractor.alturaImagenBase   = config->getStringLong("alturaImagenBase", 0);
+        extractor.jpegSuavizado      = config->getStringLong("jpegSuavizado", 100);
+        extractor.resizeSuavizado    = config->getStringDouble("resizeSuavizado", 1);
+
+        extractor.guardarCarasFrontalesAlineadas =
+            config->getStringBool("guardarCarasFrontalesAlineadas", false);
+
+        extractor.encuadrarRostros = config->getString("encuadrarRostros");
+
+        extractor.pathModeloDescFacial = config->getString("pathModeloDescFacial");
+        extractor.nombreCapaSalidaRedFacial = config->getString("nombreUltimaCapaRedNeuronal");
+
+        extractor.previsualizaImgReconocimiento =
+            config->getStringBool("previsualizaImgReconocimiento", false);
+
+        extractor.esperarPrevImgReconocimiento =
+            config->getStringBool("esperarPrevImgReconocimiento", false);
+
+        LOG_INFO(LOG_COMP, "Ejecutando extractor facial...");
+        extractor.ejecutar();
+        LOG_INFO(LOG_COMP, "Extractor facial finalizado.");
+
+        return 0;
+    }
+
+    int procesarArgumentosLineaComandos(
+        int argc,
+        char* argv[],
+        const std::shared_ptr<GHashMap>& config)
+    {
+        for (int indiceArgumento = 1; indiceArgumento < argc; indiceArgumento++)
+        {
+            const char* arg = argv[indiceArgumento];
+
+            if (std::strcmp(arg, "--help") == 0)
+            {
+                imprimirAyuda();
+                return 0;
+            }
+
+            if (std::strcmp(arg, "-preprocesa-dataset") == 0)
+            {
+                if ((indiceArgumento + 3) >= argc)
+                {
+                    LOG_ERROR(LOG_COMP, "Faltan parámetros para -preprocesa-dataset.");
+                    imprimirAyuda();
+                    return -1;
+                }
+
+                return ejecutarModoPreprocesaDataset(
+                    argv[indiceArgumento + 1],
+                    argv[indiceArgumento + 2],
+                    argv[indiceArgumento + 3],
+                    config);
+            }
+
+            if (std::strcmp(arg, "-compara-simple") == 0)
+            {
+                if ((indiceArgumento + 2) >= argc)
+                {
+                    LOG_ERROR(LOG_COMP, "Faltan parámetros para -compara-simple.");
+                    imprimirAyuda();
+                    return -1;
+                }
+
+                return ejecutarModoComparaSimple(
+                    argv[indiceArgumento + 1],
+                    argv[indiceArgumento + 2],
+                    config);
+            }
+
+            if (std::strcmp(arg, "-compara-busca") == 0)
+            {
+                if ((indiceArgumento + 2) >= argc)
+                {
+                    LOG_ERROR(LOG_COMP, "Faltan parámetros para -compara-busca.");
+                    imprimirAyuda();
+                    return -1;
+                }
+
+                return ejecutarModoComparaBusca(
+                    argv[indiceArgumento + 1],
+                    argv[indiceArgumento + 2],
+                    config);
+            }
+
+            if (std::strcmp(arg, "-procesa") == 0)
+            {
+                if ((indiceArgumento + 3) >= argc)
+                {
+                    LOG_ERROR(LOG_COMP, "Faltan parámetros para -procesa.");
+                    imprimirAyuda();
+                    return -1;
+                }
+
+                return ejecutarModoProcesaArchivo(
+                    argv[indiceArgumento + 1],
+                    argv[indiceArgumento + 2],
+                    argv[indiceArgumento + 3],
+                    config);
+            }
+        }
+
+        return 1;
+    }
+
+    void cargarParametrosDeProcesoDesdeConfig(ProcesoRecFacial& proceso, const std::shared_ptr<GHashMap>& config)
+    {
+        proceso.idEquipo = SystemUtils::getRaspberryPiSerial();
+        LOG_INFO(LOG_COMP, "Serie del equipo: " << proceso.idEquipo);
+
+        proceso.alturaRostroMinima = config->getStringLong("anchoMinCaraRec", 90);
+        proceso.anchoRostroMinimo  = config->getStringLong("alturaMinCaraRec", 90);
+
+        proceso.anchoRostroMinVis  = config->getStringLong("anchoMinCaraVis", 70);
+        proceso.alturaRostroMinVis = config->getStringLong("alturaMinCaraVis", 70);
+
+        proceso.anchoCamara  = config->getStringLong("anchoImgFuente", 1920);
+        proceso.alturaCamara = config->getStringLong("alturaImgFuente", 1080);
+
+        proceso.anchoRostroDet  = config->getStringLong("anchoCaraRec", 112);
+        proceso.alturaRostroDet = config->getStringLong("alturaCaraRec", 112);
+
+        proceso.anchoVisualiza  = config->getStringLong("anchoImgVisualizacion", 1280);
+        proceso.alturaVisualiza = config->getStringLong("alturaImgVisualizacion", 720);
+
+        proceso.compresionJpeg = config->getStringLong("compresionJpeg", 70);
+
+        proceso.toleranciaDetec = config->getStringDouble("presicionDeteccion", 0.40);
+        proceso.toleranciaIden  = config->getStringDouble("deltaRostroMax", 0.60);
+
+        proceso.regionInteresInicioX = config->getStringDouble("regionInteresInicioX", 0);
+        proceso.regionInteresFinX    = config->getStringDouble("regionInteresFinX", proceso.anchoCamara);
+
+        proceso.usarDistEuclideana = config->getStringBool("usarDistEcuclideana", true);
+
+        proceso.universoPersonas.setNumThreadsIdentificacion(
+            config->getStringLong("numThreadsIdentificacion", 1));
+
+        proceso.tiempoReEvento =
+            config->getStringLong("tiempoReEvento", 30) * 1000;
+
+        proceso.tiempoMaxNoReconocido =
+            config->getStringLong("tiempoMaxNoReconocido", 30);
+
+        proceso.reportarDesconocidos =
+            config->getStringBool("reportarDesconocidos", false);
+
+        proceso.pathModeloDescFacial =
+            config->getString("pathModeloDescFacial");
+
+        proceso.nombreCapaSalidaRedFacial =
+            config->getString("nombreUltimaCapaRedNeuronal");
+
+        proceso.paramContraste =
+            config->getStringDouble("paramContraste", 2.0);
+
+        proceso.encuadrarRostros =
+            config->getString("encuadrarRostros");
+
+        const std::string reflejarVerticalmente = config->getString("reflejarVerticalmente");
+        proceso.invertirVertical = (reflejarVerticalmente.compare("S") == 0);
+
+        LOG_DEBUG(LOG_COMP, "Parámetros de proceso cargados desde config.");
+    }
+
+    std::shared_ptr<ImageSourceFactory> crearFuenteImagenesDesdeConfig(const std::shared_ptr<GHashMap>& config)
+    {
+        const std::string fuenteImagenes = config->getString("source");
+        LOG_INFO(LOG_COMP, "Fuente de imágenes: " << fuenteImagenes);
+
+        std::shared_ptr<ImageSourceFactory> fabrica;
+
+        if (fuenteImagenes.compare("onvif") == 0)
+        {
+            auto fabricaOnvif = std::make_shared<OnvifCameraFactory>();
+            fabrica = std::dynamic_pointer_cast<ImageSourceFactory>(fabricaOnvif);
+
+            fabrica->lstParams.putString(OnvifCamera::PARAM_IP_SERVIDOR, config->getString(OnvifCamera::PARAM_IP_SERVIDOR));
+            fabrica->lstParams.putString(OnvifCamera::PARAM_PUERTO_SERVIDOR, config->getString(OnvifCamera::PARAM_PUERTO_SERVIDOR));
+            fabrica->lstParams.putString(OnvifCamera::PARAM_USUARIO_SERVIDOR, config->getString(OnvifCamera::PARAM_USUARIO_SERVIDOR));
+            fabrica->lstParams.putString(OnvifCamera::PARAM_PASSWORD_SERVIDOR, config->getString(OnvifCamera::PARAM_PASSWORD_SERVIDOR));
+            fabrica->lstParams.putString(OnvifCamera::PARAM_URL_SERVIDOR, config->getString(OnvifCamera::PARAM_URL_SERVIDOR));
+
+            LOG_INFO(LOG_COMP, "Fuente ONVIF configurada.");
+        }
+        else if (fuenteImagenes.compare("video") == 0)
+        {
+            auto fabricaVideo = std::make_shared<VideoCameraFactory>();
+            fabrica = std::dynamic_pointer_cast<ImageSourceFactory>(fabricaVideo);
+
+            fabrica->lstParams.putString(VideoCamera::PARAM_PATH_VIDEO, config->getString(VideoCamera::PARAM_PATH_VIDEO));
+            fabrica->lstParams.putString(VideoCamera::PARAM_VELOCIDAD_VIDEO, config->getString(VideoCamera::PARAM_VELOCIDAD_VIDEO));
+            fabrica->lstParams.putString(VideoCamera::PARAM_CUADRO_INICIAL, config->getString(VideoCamera::PARAM_CUADRO_INICIAL));
+            fabrica->lstParams.putString(VideoCamera::PARAM_INFINITO, config->getString(VideoCamera::PARAM_INFINITO));
+
+            LOG_INFO(LOG_COMP, "Fuente VIDEO configurada.");
+        }
+        else
+        {
+            auto fabricaInterna = std::make_shared<InterImgSourceFactory>();
+            fabrica = std::dynamic_pointer_cast<ImageSourceFactory>(fabricaInterna);
+
+            LOG_INFO(LOG_COMP, "Fuente interna configurada.");
+        }
+
+        return fabrica;
+    }
+
+    void cargarUniversoPersonasYEndpoints(ProcesoRecFacial& proceso, const std::shared_ptr<GHashMap>& config)
+    {
+        const std::string unificar = config->getString("unificarDescriptores");
+        const bool unificarDescriptores = (unificar.compare("S") == 0);
+
+        LOG_INFO(LOG_COMP, "Cargando universo de personas. Unificar: " << (unificarDescriptores ? "S" : "N"));
+
+        proceso.universoPersonas.cargarpPerConocidas(
+            config->getString("pathBDPersonas"),
+            unificarDescriptores);
+
+        proceso.generadorEventos.urlServidorIden =
+            config->getString("urlBaseServidorIden");
+
+        proceso.generadorEventos.urlServidorNoIden =
+            config->getString("urlBaseServidorNoIden");
+
+        proceso.generadorEventos.urlServidorUnificado =
+            config->getString("urlServidorUnificado");
+
+        proceso.generadorEventos.pathLogEventos =
+            config->getString("logEventos");
+
+        proceso.generadorEventos.generarLogEventos =
+            config->getStringBool("generarLogEventos", false);
+
+        proceso.generadorEventos.usarEndpointUnificado =
+            config->getStringBool("usarEndPointUnificado", false);
+
+        LOG_DEBUG(LOG_COMP, "Endpoints y configuración de eventos cargados.");
+    }
 }
 
 /**
- * Punto de inicio de ejecucion de la aplicacion
+ * Punto de inicio de ejecución de la aplicación
  */
-int main(int argc, char* argv[]) {
-    ProcesoRecFacial proc;
+int main(int argc, char* argv[])
+{
+    // 1) Cargar configuración desde el singleton LectorConfig
+    LectorConfig::getInstance().initFromFile("./config/config.txt");
+    const std::shared_ptr<GHashMap> config = LectorConfig::getInstance().getParams();
 
-    // lee la configuracion
-    // proc.leeParametros("./config/params.txt");
-    // shared_ptr<GHashMap> proc.lstParamsApp =
-    // leeArchivoConfig("./config/config.txt");
-    proc.leeParametros("./config/config.txt");
+    // 2) Configurar logger usando config
+    configurarLoggerDesdeConfig(config);
 
-    // Configurar logger a partir de config.txt
-    // (logLevel=DEBUG/INFO/WARN/ERROR/CRITICAL)
-    std::string logLevelStr = proc.lstParamsApp->getString("logLevel");
-    if (logLevelStr.empty()) {
-        logLevelStr = "INFO";
+    // 3) Si hay modo CLI (procesa / compara / dataset), ejecútalo y termina
+    const int resultadoCli = procesarArgumentosLineaComandos(argc, argv, config);
+    if (resultadoCli <= 0)
+    {
+        LOG_INFO(LOG_COMP, "Ejecución finalizada en modo CLI.");
+        return resultadoCli;
     }
 
-    LogLevel minLevel = parseLogLevel(logLevelStr);
+    // 4) Modo detector: iniciar el proceso principal
+    LOG_INFO(LOG_COMP, "Iniciando modo detector (tiempo real).");
 
-    // Si quieres archivo de log, pon la ruta aquí. Si no, deja "".
-    // Ejemplo: auto logFilePath = proc.lstParamsApp->getString("logFile", "");
-    std::string logFilePath = "";
+    ProcesoRecFacial proceso;
 
-    Logger::init(logFilePath, minLevel, true);
+    proceso.lstParamsApp = config;
+    proceso.leeParametros("./config/config.txt");
 
-    // analiza parametros de linea de comandos
-    for (int i = 0; i < argc; i++) {
-        cout << "Parametro " << i << " : " << argv[i] << endl;
+    cargarParametrosDeProcesoDesdeConfig(proceso, config);
 
-        if ((strcmp(argv[i], "-preprocesa-dataset") == 0) && ((i + 3) < argc)) {
-            // Preprocesa un dataset
-            PreProcesadorDataSet preprocesador;
-            hailort::Expected<std::unique_ptr<hailort::VDevice>>* devicePtr;
-            float similaridad;
+    const std::shared_ptr<ImageSourceFactory> fuenteImagenes = crearFuenteImagenesDesdeConfig(config);
+    proceso.setImageFactory(fuenteImagenes);
 
-            // inicializa el dispositivo
-            hailort::Expected<std::unique_ptr<hailort::VDevice>> device =
-                hailort::VDevice::create();
-            if (!device) {
-                cerr << "Error: No se pudo inicializar el dispositivo Hailo."
-                     << endl;
-                return -1;
-            }
-            devicePtr = &device;
+    cargarUniversoPersonasYEndpoints(proceso, config);
 
-            similaridad = std::stof(argv[i + 3]);
-            preprocesador.eliminaNoCaras(devicePtr, argv[i + 1]);
-            preprocesador.agrupaCaras(devicePtr, argv[i + 1], argv[i + 2],
-                                      similaridad, proc.lstParamsApp);
+    LOG_INFO(LOG_COMP, "Iniciando proceso de reconocimiento facial...");
+    proceso.iniciar();
 
-            return 0;
-        } else if ((strcmp(argv[i], "-compara-simple") == 0) &&
-                   ((i + 2) < argc)) {
-            // compara dos rostros a la resolucion del modelo
-            ComparadorFacial comparador;
-
-            float comparacion = comparador.comparaSimple(
-                argv[i + 1], argv[i + 2], proc.lstParamsApp);
-            cout << "Resultado de la comparacion: " << comparacion << endl
-                 << endl;
-            return 0;
-        } else if ((strcmp(argv[i], "-compara-busca") == 0) &&
-                   ((i + 2) < argc)) {
-            // compara dos rostros a la resolucion del modelo
-            ComparadorFacial comparador;
-
-            float comparacion = comparador.comparaBusca(
-                argv[i + 1], argv[i + 2], proc.lstParamsApp);
-            cout << "Resultado de la comparacion: " << comparacion << endl
-                 << endl;
-            return 0;
-        } else if ((strcmp(argv[i], "-procesa") == 0) && ((i + 3) < argc)) {
-            cout << "Se debe generar identificadores faciales" << endl;
-            cout << "Archivo con datos: " << argv[i + 1] << endl;
-            cout << "Directorio con fotos: " << argv[i + 2] << endl;
-            cout << "Archivo con descriptores: " << argv[i + 3] << endl;
-            cout << endl;
-
-            ExtractorFacialArchivo extractor;
-
-            extractor.pathArchivoDatos = argv[i + 1];
-            extractor.pathFotos = argv[i + 2];
-            extractor.pathArchivoBD = argv[i + 3];
-
-            extractor.alturaRostroMinima =
-                proc.lstParamsApp->getStringLong("anchoMinCaraRec", 90);
-            extractor.anchoRostroMinimo =
-                proc.lstParamsApp->getStringLong("alturaMinCaraRec", 90);
-            extractor.toleranciaDetec =
-                proc.lstParamsApp->getStringDouble("presicionDeteccion", 0.40);
-            extractor.toleranciaIden =
-                proc.lstParamsApp->getStringDouble("deltaRostroMax", 0.60);
-
-            extractor.paramContraste =
-                proc.lstParamsApp->getStringDouble("paramContraste", 0);
-            extractor.pixelSuavizado =
-                proc.lstParamsApp->getStringLong("pixelSuavizado", 5);
-            extractor.alturaImagenBase =
-                proc.lstParamsApp->getStringLong("alturaImagenBase", 0);
-            extractor.jpegSuavizado =
-                proc.lstParamsApp->getStringLong("jpegSuavizado", 100);
-            extractor.resizeSuavizado =
-                proc.lstParamsApp->getStringDouble("resizeSuavizado", 1);
-            extractor.guardarCarasFrontalesAlineadas =
-                proc.lstParamsApp->getStringBool(
-                    "guardarCarasFrontalesAlineadas", false);
-            extractor.encuadrarRostros =
-                proc.lstParamsApp->getString("encuadrarRostros");
-
-            cout << "Pixel Suavizado Main : " << extractor.pixelSuavizado
-                 << endl;
-
-            extractor.pathModeloDescFacial =
-                proc.lstParamsApp->getString("pathModeloDescFacial");
-            extractor.nombreCapaSalidaRedFacial =
-                proc.lstParamsApp->getString("nombreUltimaCapaRedNeuronal");
-
-            extractor.previsualizaImgReconocimiento =
-                proc.lstParamsApp->getStringBool(
-                    "previsualizaImgReconocimiento", false);
-            extractor.esperarPrevImgReconocimiento =
-                proc.lstParamsApp->getStringBool("esperarPrevImgReconocimiento",
-                                                 false);
-
-            extractor.ejecutar();
-
-            return 0;
-        } else if (strcmp(argv[i], "--help") == 0) {
-            cout << endl
-                 << "Ejecutar el programa sin parametros para funcionar como "
-                    "detector"
-                 << endl
-                 << endl;
-
-            cout << endl
-                 << "Pasar el parametro: -procesa [archivoDatos] "
-                    "[directorioFotos] [archivoSalida]"
-                 << endl
-                 << endl;
-            cout << "Para que se genere un [archivoSalida] usando los datos "
-                    "del [archivoDatos] "
-                 << endl;
-            cout << "[archivoDatos] es un CSV con datos: idPersona,nombre,foto"
-                 << endl;
-            cout << "Foto en el archivo CSV es el nombre de un archivo dentro "
-                    "del [directorioFotos]"
-                 << endl
-                 << endl;
-
-            cout << endl
-                 << "Pasar el parametro: -compara-simple [path_cara1] "
-                    "[path_cara2]"
-                 << endl
-                 << endl;
-            cout << "Para que comparar y ver la similitud entre la foto de dos "
-                    "caras centradas frontalmente"
-                 << endl;
-            cout << "con la misma resolucion que espera la red neuronal "
-                    "especificada en config.txt"
-                 << endl
-                 << endl;
-
-            cout << endl
-                 << "Pasar el parametro: -compara-busca [path_foto1] "
-                    "[path_foto2]"
-                 << endl
-                 << endl;
-            cout << "Para buscar una cara en cada foto y luego compararlas"
-                 << endl;
-            cout << "con la misma resolucion que espera la red neuronal "
-                    "especificada en config.txt"
-                 << endl
-                 << endl;
-
-            cout << endl
-                 << "Pasar el parametro: -preprocesa-dataset [path_dirfotos] "
-                    "[path_dircaras] [silimaridad_caras]"
-                 << endl
-                 << endl;
-            cout << "Busca un directorio con fotos (path_dirfotos) y borra "
-                    "todos los archivos que no tienen caras"
-                 << endl;
-            cout << "Agrupa todas las fotos restantes del archivo de fotos por "
-                    "cara en base a similaridad entre ellas "
-                 << endl;
-            cout << "crea un subdirectorio de la carpeta path_caras por cada "
-                    "grupo de caras y las copia en ellos"
-                 << endl;
-
-            return 0;
-        }
-    }
-
-    // parametros que se pueden cambiar desde el app web
-    proc.idEquipo = SystemUtils::getRaspberryPiSerial();
-    cout << "Serie del equipo: " << proc.idEquipo << endl;
-
-    // inicializa en base a parametros de configurarion
-    proc.alturaRostroMinima =
-        proc.lstParamsApp->getStringLong("anchoMinCaraRec", 90);
-    proc.anchoRostroMinimo =
-        proc.lstParamsApp->getStringLong("alturaMinCaraRec", 90);
-
-    proc.anchoRostroMinVis =
-        proc.lstParamsApp->getStringLong("anchoMinCaraVis", 70);
-    proc.alturaRostroMinVis =
-        proc.lstParamsApp->getStringLong("alturaMinCaraVis", 70);
-
-    proc.anchoCamara = proc.lstParamsApp->getStringLong("anchoImgFuente", 1920);
-    proc.alturaCamara =
-        proc.lstParamsApp->getStringLong("alturaImgFuente", 1080);
-
-    proc.anchoRostroDet = proc.lstParamsApp->getStringLong("anchoCaraRec", 112);
-    proc.alturaRostroDet =
-        proc.lstParamsApp->getStringLong("alturaCaraRec", 112);
-
-    proc.anchoVisualiza =
-        proc.lstParamsApp->getStringLong("anchoImgVisualizacion", 1280);
-    proc.alturaVisualiza =
-        proc.lstParamsApp->getStringLong("alturaImgVisualizacion", 720);
-    proc.compresionJpeg =
-        proc.lstParamsApp->getStringLong("compresionJpeg", 70);
-
-    proc.toleranciaDetec =
-        proc.lstParamsApp->getStringDouble("presicionDeteccion", 0.40);
-    proc.toleranciaIden =
-        proc.lstParamsApp->getStringDouble("deltaRostroMax", 0.60);
-
-    proc.regionInteresInicioX =
-        proc.lstParamsApp->getStringDouble("regionInteresInicioX", 0);
-    proc.regionInteresFinX = proc.lstParamsApp->getStringDouble(
-        "regionInteresFinX", proc.anchoCamara);
-
-    proc.usarDistEuclideana =
-        proc.lstParamsApp->getStringBool("usarDistEcuclideana", true);
-    proc.universoPersonas.setNumThreadsIdentificacion(
-        proc.lstParamsApp->getStringLong("numThreadsIdentificacion", 1));
-    proc.tiempoReEvento =
-        proc.lstParamsApp->getStringLong("tiempoReEvento", 30) * 1000;
-    proc.tiempoMaxNoReconocido =
-        proc.lstParamsApp->getStringLong("tiempoMaxNoReconocido", 30);
-    proc.reportarDesconocidos =
-        proc.lstParamsApp->getStringBool("reportarDesconocidos", false);
-    proc.pathModeloDescFacial =
-        proc.lstParamsApp->getString("pathModeloDescFacial");
-    proc.nombreCapaSalidaRedFacial =
-        proc.lstParamsApp->getString("nombreUltimaCapaRedNeuronal");
-    proc.paramContraste =
-        proc.lstParamsApp->getStringDouble("paramContraste", 2.0);
-    proc.encuadrarRostros = proc.lstParamsApp->getString("encuadrarRostros");
-
-    // COnfigura la fuente de imagenes del sensor
-    shared_ptr<ImageSourceFactory> imageSource;
-    string fuenteImages = proc.lstParamsApp->getString("source");
-
-    cout << "Fuente de imagenes: " << fuenteImages << endl;
-
-    if (fuenteImages.compare("onvif") == 0) {
-        shared_ptr<OnvifCameraFactory> onvifFactory =
-            make_shared<OnvifCameraFactory>();
-        imageSource = dynamic_pointer_cast<ImageSourceFactory>(onvifFactory);
-
-        imageSource->lstParams.putString(
-            OnvifCamera::PARAM_IP_SERVIDOR,
-            proc.lstParamsApp->getString(OnvifCamera::PARAM_IP_SERVIDOR));
-        imageSource->lstParams.putString(
-            OnvifCamera::PARAM_PUERTO_SERVIDOR,
-            proc.lstParamsApp->getString(OnvifCamera::PARAM_PUERTO_SERVIDOR));
-        imageSource->lstParams.putString(
-            OnvifCamera::PARAM_USUARIO_SERVIDOR,
-            proc.lstParamsApp->getString(OnvifCamera::PARAM_USUARIO_SERVIDOR));
-        imageSource->lstParams.putString(
-            OnvifCamera::PARAM_PASSWORD_SERVIDOR,
-            proc.lstParamsApp->getString(OnvifCamera::PARAM_PASSWORD_SERVIDOR));
-
-        imageSource->lstParams.putString(
-            OnvifCamera::PARAM_URL_SERVIDOR,
-            proc.lstParamsApp->getString(OnvifCamera::PARAM_URL_SERVIDOR));
-    } else if (fuenteImages.compare("video") == 0) {
-        shared_ptr<VideoCameraFactory> videoImgFac =
-            make_shared<VideoCameraFactory>();
-        imageSource = dynamic_pointer_cast<ImageSourceFactory>(videoImgFac);
-        imageSource->lstParams.putString(
-            VideoCamera::PARAM_PATH_VIDEO,
-            proc.lstParamsApp->getString(VideoCamera::PARAM_PATH_VIDEO));
-        imageSource->lstParams.putString(
-            VideoCamera::PARAM_VELOCIDAD_VIDEO,
-            proc.lstParamsApp->getString(VideoCamera::PARAM_VELOCIDAD_VIDEO));
-        imageSource->lstParams.putString(
-            VideoCamera::PARAM_CUADRO_INICIAL,
-            proc.lstParamsApp->getString(VideoCamera::PARAM_CUADRO_INICIAL));
-        imageSource->lstParams.putString(
-            VideoCamera::PARAM_INFINITO,
-            proc.lstParamsApp->getString(VideoCamera::PARAM_INFINITO));
-    } else {
-        shared_ptr<InterImgSourceFactory> intImgFac =
-            make_shared<InterImgSourceFactory>();
-        imageSource = dynamic_pointer_cast<ImageSourceFactory>(intImgFac);
-    }
-
-    // valida si s debe o no invertir verticalmente la imagen de la camara
-    string invVertical = proc.lstParamsApp->getString("reflejarVerticalmente");
-    if (invVertical.compare("S"))
-        proc.invertirVertical = true;
-    else
-        proc.invertirVertical = false;
-
-    // configura la fuente de imagenes y carga las persona conocidas
-    proc.setImageFactory(imageSource);
-
-    string paramUnificarDescr =
-        proc.lstParamsApp->getString("unificarDescriptores");
-    bool unifidarDescr = false;
-    if (paramUnificarDescr.compare("S") == 0) unifidarDescr = true;
-
-    proc.universoPersonas.cargarpPerConocidas(
-        proc.lstParamsApp->getString("pathBDPersonas"), unifidarDescr);
-    proc.generadorEventos.urlServidorIden =
-        proc.lstParamsApp->getString("urlBaseServidorIden");
-    proc.generadorEventos.urlServidorNoIden =
-        proc.lstParamsApp->getString("urlBaseServidorNoIden");
-    proc.generadorEventos.urlServidorUnificado =
-        proc.lstParamsApp->getString("urlServidorUnificado");
-    proc.generadorEventos.pathLogEventos =
-        proc.lstParamsApp->getString("logEventos");
-    proc.generadorEventos.generarLogEventos =
-        proc.lstParamsApp->getStringBool("generarLogEventos", false);
-    proc.generadorEventos.usarEndpointUnificado =
-        proc.lstParamsApp->getStringBool("usarEndPointUnificado", false);
-
-    proc.iniciar();
-    // proc.procDescargaDescFaciales.ejecutarDescargaYGeneracion();
-
+    LOG_INFO(LOG_COMP, "Proceso finalizado.");
     return 0;
 }
