@@ -4,6 +4,7 @@
 #include <string>
 
 #include "app/ExtractorFacialArchivo.h"
+#include "app/LectorConfig.h"
 
 class ProcDescargaDescFaciales {
    public:
@@ -108,6 +109,36 @@ class ProcDescargaDescFaciales {
      * Id tarea programada para completar
      */
     int idTareaProgramada = -1;
+
+
+    /**
+     * Método de configuración de parámetros
+     */
+    void configure() {
+        const auto cfg = LectorConfig::getInstance().getParams();
+
+        dotnetUrl          = cfg->getString("dotnetUrl");
+        endpointCompletado = cfg->getString("dotnetEndpointCompletado");
+
+        appWebUrl  = cfg->getString("appWebUrl");
+        generarLog = cfg->getStringBool("generarLogPingMonitoreo", false);
+        pathLog    = cfg->getString("pathLogPingMonitoreo");
+
+        endpointDescargaZip = cfg->getString("zipEndpoint");
+        endpointAuth        = cfg->getString("authEndpoint");
+        username            = cfg->getString("username");
+        password            = cfg->getString("password");
+        archivoFinal        = cfg->getString("archivoFinal");
+
+        const std::string dirExtraccion = cfg->getString("directorioExtraccion");
+        const std::string archivoIndice = cfg->getString("archivoIndice");
+
+        extractor.pathArchivoDatos = dirExtraccion + "/" + archivoIndice;
+        extractor.pathFotos        = dirExtraccion;
+        extractor.pathArchivoBD    = dirExtraccion + "/" + archivoFinal;
+
+        extractor.configure();
+    }
 
    private:
     /**

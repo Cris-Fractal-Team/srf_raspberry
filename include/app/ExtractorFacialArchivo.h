@@ -14,6 +14,7 @@
 #include "lib/hailolib/FaceRecHailo.h"
 #include "lib/hailolib/DetectionTrackerHailo.h"
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
+#include "app/LectorConfig.h"
 
 
 /**
@@ -178,6 +179,36 @@ class ExtractorFacialArchivo
          * Ejecuta el proceso
          */
         void ejecutar();
+
+        /**
+         * Método de configuración de parámetros
+         */
+        void configure() {
+            const auto cfg = LectorConfig::getInstance().getParams();
+    
+            alturaRostroMinima = cfg->getStringLong("anchoMinCaraRec", 90);
+            anchoRostroMinimo  = cfg->getStringLong("alturaMinCaraRec", 90);
+            toleranciaDetec    = cfg->getStringDouble("presicionDeteccion", 0.40);
+            toleranciaIden     = cfg->getStringDouble("deltaRostroMax", 0.60);
+    
+            paramContraste     = cfg->getStringDouble("paramContraste", 0);
+            pixelSuavizado     = cfg->getStringLong("pixelSuavizado", 5);
+            alturaImagenBase   = cfg->getStringLong("alturaImagenBase", 0);
+            jpegSuavizado      = cfg->getStringLong("jpegSuavizado", 100);
+            resizeSuavizado    = cfg->getStringDouble("resizeSuavizado", 1);
+    
+            guardarCarasFrontalesAlineadas =
+                cfg->getStringBool("guardarCarasFrontalesAlineadas", false);
+    
+            encuadrarRostros = cfg->getString("encuadrarRostros");
+            pathModeloDescFacial = cfg->getString("pathModeloDescFacial");
+            nombreCapaSalidaRedFacial = cfg->getString("nombreUltimaCapaRedNeuronal");
+    
+            previsualizaImgReconocimiento =
+                cfg->getStringBool("previsualizaImgReconocimiento", false);
+            esperarPrevImgReconocimiento =
+                cfg->getStringBool("esperarPrevImgReconocimiento", false);
+        }
 
     private:
 

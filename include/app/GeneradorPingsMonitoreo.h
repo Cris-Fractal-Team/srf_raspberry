@@ -7,6 +7,7 @@ using std::string;
 
 #include "lib/general/GThread.h"
 #include "lib/general/GLinkedList.h"
+#include "app/LectorConfig.h"
 
 class ProcesoRecFacial;
 
@@ -83,6 +84,20 @@ public:
      * Proceso de Reconocimiento facial de los Archivos.
      */
     ProcesoRecFacial* procRecFacial = nullptr;
+
+    /**
+     * Método de configuración de parámetros
+     */
+    void configure() {
+        const auto cfg = LectorConfig::getInstance().getParams();
+        dotnetUrl               = cfg->getString("dotnetUrl");
+        dotnetEndpointMonitoreo = cfg->getString("dotnetEndpointMonitoreo");
+
+        generarLogPing = cfg->getStringBool("generarLogPingMonitoreo", false);
+        pathLogPing    = cfg->getString("pathLogPingMonitoreo");
+        pingIntervalMs = cfg->getStringLong("pingIntervalMsMonitoreo", 5000);
+    }
+
 private:
 
     /**

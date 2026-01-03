@@ -664,95 +664,6 @@ void ProcesoRecFacial::guardaParametros() {
 }
 
 /**
- * Lee los parametros de ejecucion
- */
-void ProcesoRecFacial::leeParametros(string path) {
-    pathParametros = path;
-    lstParamsApp = leeArchivoConfig(pathParametros);
-
-    // --- Nuevo: Config Pings App Web (desde config.txt) ---
-    generadorPingsAppWeb.appWebUrl = lstParamsApp->getString("appWebUrl");
-    generadorPingsAppWeb.generarLogPing =
-        lstParamsApp->getStringBool("generarLogPingAppWeb", false);
-    generadorPingsAppWeb.pathLogPing =
-        lstParamsApp->getString("pathLogPingAppWeb");
-    generadorPingsAppWeb.pingIntervalMs =
-        lstParamsApp->getStringLong("pingIntervalMsAppWeb", 5000);
-    // ------------------------------------------------------
-    generadorPingsMonitoreo->dotnetUrl = lstParamsApp->getString("dotnetUrl");
-    generadorPingsMonitoreo->dotnetEndpointMonitoreo = lstParamsApp->getString("dotnetEndpointMonitoreo");
-
-    generadorPingsMonitoreo->generarLogPing =
-        lstParamsApp->getStringBool("generarLogPingMonitoreo", false);
-    generadorPingsMonitoreo->pathLogPing =
-        lstParamsApp->getString("pathLogPingMonitoreo");
-    generadorPingsMonitoreo->pingIntervalMs =
-        lstParamsApp->getStringLong("pingIntervalMsMonitoreo", 5000);
-    // ------------------------------------------------------
-    procDescargaDescFaciales.dotnetUrl = lstParamsApp->getString("dotnetUrl");
-    procDescargaDescFaciales.endpointCompletado = lstParamsApp->getString("dotnetEndpointCompletado");
-
-    procDescargaDescFaciales.appWebUrl = lstParamsApp->getString("appWebUrl");
-    procDescargaDescFaciales.generarLog =
-        lstParamsApp->getStringBool("generarLogPingMonitoreo", false);
-    procDescargaDescFaciales.pathLog =
-        lstParamsApp->getString("pathLogPingMonitoreo");
-    procDescargaDescFaciales.endpointDescargaZip =
-        lstParamsApp->getString("zipEndpoint");
-    procDescargaDescFaciales.endpointAuth =
-        lstParamsApp->getString("authEndpoint");
-    procDescargaDescFaciales.username = lstParamsApp->getString("username");
-    procDescargaDescFaciales.password = lstParamsApp->getString("password");
-    procDescargaDescFaciales.archivoFinal =  lstParamsApp->getString("archivoFinal");
-
-    // -------------------------------------------------------
-    procDescargaDescFaciales.extractor.pathArchivoDatos =
-        lstParamsApp->getString("directorioExtraccion") + "/" +
-        lstParamsApp->getString("archivoIndice");
-
-    procDescargaDescFaciales.extractor.pathFotos =
-        lstParamsApp->getString("directorioExtraccion");
-
-    procDescargaDescFaciales.extractor.pathArchivoBD =
-        lstParamsApp->getString("directorioExtraccion") + "/" +
-        lstParamsApp->getString("archivoFinal");
-
-    procDescargaDescFaciales.extractor.alturaRostroMinima =
-        lstParamsApp->getStringLong("anchoMinCaraRec", 90);
-    procDescargaDescFaciales.extractor.anchoRostroMinimo =
-        lstParamsApp->getStringLong("alturaMinCaraRec", 90);
-    procDescargaDescFaciales.extractor.toleranciaDetec =
-        lstParamsApp->getStringDouble("presicionDeteccion", 0.40);
-    procDescargaDescFaciales.extractor.toleranciaIden =
-        lstParamsApp->getStringDouble("deltaRostroMax", 0.60);
-
-    procDescargaDescFaciales.extractor.paramContraste =
-        lstParamsApp->getStringDouble("paramContraste", 0);
-    procDescargaDescFaciales.extractor.pixelSuavizado =
-        lstParamsApp->getStringLong("pixelSuavizado", 5);
-    procDescargaDescFaciales.extractor.alturaImagenBase =
-        lstParamsApp->getStringLong("alturaImagenBase", 0);
-    procDescargaDescFaciales.extractor.jpegSuavizado =
-        lstParamsApp->getStringLong("jpegSuavizado", 100);
-    procDescargaDescFaciales.extractor.resizeSuavizado =
-        lstParamsApp->getStringDouble("resizeSuavizado", 1);
-    procDescargaDescFaciales.extractor.guardarCarasFrontalesAlineadas =
-        lstParamsApp->getStringBool("guardarCarasFrontalesAlineadas", false);
-    procDescargaDescFaciales.extractor.encuadrarRostros =
-        lstParamsApp->getString("encuadrarRostros");
-
-    procDescargaDescFaciales.extractor.pathModeloDescFacial =
-        lstParamsApp->getString("pathModeloDescFacial");
-    procDescargaDescFaciales.extractor.nombreCapaSalidaRedFacial =
-        lstParamsApp->getString("nombreUltimaCapaRedNeuronal");
-
-    procDescargaDescFaciales.extractor.previsualizaImgReconocimiento =
-        lstParamsApp->getStringBool("previsualizaImgReconocimiento", false);
-    procDescargaDescFaciales.extractor.esperarPrevImgReconocimiento =
-        lstParamsApp->getStringBool("esperarPrevImgReconocimiento", false);
-}
-
-/**
  * Notifica al servidor web sobre las detecciones ocurridas
  */
 void ProcesoRecFacial::notificaDetecciones(
@@ -911,4 +822,12 @@ void ProcesoRecFacial::notificaDetecciones(
                 generadorEventos.agregarTramaNoIden(trama);
         }
     }
+}
+
+void ProcesoRecFacial::configure() {
+    const auto cfg = LectorConfig::getInstance().getParams();
+    lstParamsApp = cfg;
+    generadorPingsAppWeb.configure();
+    if (generadorPingsMonitoreo) generadorPingsMonitoreo->configure();
+    procDescargaDescFaciales.configure();
 }

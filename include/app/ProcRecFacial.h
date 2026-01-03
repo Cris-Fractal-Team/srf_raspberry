@@ -239,11 +239,6 @@ class ProcesoRecFacial
          */
         void guardaParametros();
 
-        /**
-         * Lee los parametros de ejecucion
-         */
-        void leeParametros( string path );
-
         void setFlagProcesarImagenes( bool valor );
 
         bool getFlagProcesarImagenes();
@@ -255,6 +250,11 @@ class ProcesoRecFacial
         void setUsandoNPU( bool valor );
 
         bool getUsandoNPU();
+
+        /**
+        * Método de configuración de parámetros
+        */
+       void configure();
 
     private:        
         

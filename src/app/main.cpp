@@ -445,8 +445,7 @@ int main(int argc, char* argv[])
 
     ProcesoRecFacial proceso;
 
-    proceso.lstParamsApp = config;
-    proceso.leeParametros("./config/config.txt");
+    proceso.configure(); 
 
     cargarParametrosDeProcesoDesdeConfig(proceso, config);
 

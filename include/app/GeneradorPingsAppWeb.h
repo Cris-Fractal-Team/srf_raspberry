@@ -7,6 +7,7 @@
 using std::string;
 
 #include "lib/general/GThread.h"
+#include "app/LectorConfig.h"
 
 /**
  * Clase que genera pings periódicos (GET) contra la app web
@@ -40,6 +41,17 @@ public:
      * Bucle del thread
      */
     void runThread() override;
+
+    /**
+     * Método de configuración de parámetros
+     */
+    void configure() {
+        const auto cfg = LectorConfig::getInstance().getParams();
+        appWebUrl     = cfg->getString("appWebUrl");
+        generarLogPing = cfg->getStringBool("generarLogPingAppWeb", false);
+        pathLogPing    = cfg->getString("pathLogPingAppWeb");
+        pingIntervalMs = cfg->getStringLong("pingIntervalMsAppWeb", 5000);
+    }
 
 private:
     std::chrono::steady_clock::time_point ultimoPingTp = std::chrono::steady_clock::now();
