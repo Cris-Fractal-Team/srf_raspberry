@@ -1,13 +1,17 @@
 #include "app/ProcRecFacial.h"
 #include "app/GeneradorPingsMonitoreo.h"
 #include "app/GeneradorPingsAppWeb.h"
+#include "app/LectorConfig.h"
 
 #include <stdint.h>
 #include <stdio.h>
 
+#include <chrono>
 #include <cstring>
 #include <iostream>
+#include <mutex>
 #include <sstream>
+
 #include <opencv2/opencv.hpp>
 
 #include "lib/graphics/GDibujo.h"
@@ -48,103 +52,88 @@ void ProcesoRecFacial::setImageFactory(shared_ptr<ImageSourceFactory> factory) {
     imageSource = factory->getInstance();
 }
 
-void ProcesoRecFacial::setFlagProcesarImagenes(bool valor) {
-    mtx.lock();
-    flagProcesarImagenes = valor;
-    mtx.unlock();
+void ProcesoRecFacial::setFlagProcesarImagenes(bool nuevoValor) {
+    std::lock_guard<std::mutex> lock(mtx);
+    flagProcesarImagenes = nuevoValor;
 }
 
 bool ProcesoRecFacial::getFlagProcesarImagenes() {
-    bool rpta;
-    mtx.lock();
-    if (flagProcesarImagenes) {
-        rpta = true;
-    } else {
-        rpta = false;
-    }
-    mtx.unlock();
-    return rpta;
+    std::lock_guard<std::mutex> lock(mtx);
+    return flagProcesarImagenes;
 }
 
-void ProcesoRecFacial::setIdTareaProgramada(int valor) {
-    mtx.lock();
-    idTareaProgramada = valor;
-    mtx.unlock();
+void ProcesoRecFacial::setIdTareaProgramada(int nuevoIdTareaProgramada) {
+    std::lock_guard<std::mutex> lock(mtx);
+    idTareaProgramada = nuevoIdTareaProgramada;
 }
 
 int ProcesoRecFacial::getIdTareaProgramada() {
-    int rpta;
-    mtx.lock();
-    rpta = idTareaProgramada;
-    mtx.unlock();
-    return rpta;
+    std::lock_guard<std::mutex> lock(mtx);
+    return idTareaProgramada;
 }
 
 bool ProcesoRecFacial::getUsandoNPU() {
-    bool rpta;
-    mtx.lock();
-    if (usandoNpu) {
-        rpta = true;
-    } else {
-        rpta = false;
-    }
-    mtx.unlock();
-    return rpta;
+    std::lock_guard<std::mutex> lock(mtx);
+    return usandoNpu;
 }
 
-void ProcesoRecFacial::setUsandoNPU(bool valor) {
-    mtx.lock();
-    usandoNpu = valor;
-    mtx.unlock();
+void ProcesoRecFacial::setUsandoNPU(bool nuevoValor) {
+    std::lock_guard<std::mutex> lock(mtx);
+    usandoNpu = nuevoValor;
 }
 
 /**
  * Bucle que realiza todo el flujo
  */
 void ProcesoRecFacial::iniciar() {
-    GImage imagenCapturada, imagenDeteccion;
-    GImage imagenVisor, imagenPreviaVisor;
-    Mat flipped;
-    vector<DeteccionCaraHailo> lstDet;
-    vector<DeteccionCaraHailo> lstDetFiltrado;
-    vector<TrackedDetectionHailo*> lstCaras;
-    vector<TrackedDetectionHailo*> lstCarasTrack;
-    hailort::Expected<std::unique_ptr<hailort::VDevice>>* devicePtr;
-    float factorXVisor, factorYVisor;
-    DetectorCarasHailoSCRFD detector;
-    FaceRecHailo generadorDesc;
-    int cargaEnDuro = 1;
+    GImage frameCapturado, frameParaDeteccion;
+    GImage frameVisor, frameVisorPrevio;
+
+    cv::Mat matrizInvertida;
+
+    vector<DeteccionCaraHailo> deteccionesBrutas;
+    vector<DeteccionCaraHailo> deteccionesFiltradas;
+
+    vector<TrackedDetectionHailo*> carasTrackTemporales;
+    vector<TrackedDetectionHailo*> carasTrackFinal;
+
+    hailort::Expected<std::unique_ptr<hailort::VDevice>>* vdevicePtr = nullptr;
+
+    float factorEscalaModeloX = 0.0f;
+    float factorEscalaModeloY = 0.0f;
+
+    DetectorCarasHailoSCRFD detectorRostros;
+    FaceRecHailo generadorDescriptores;
+
+    int modoCargaEnDuro = 1;
 
     errorInicial = false;
-    numIndentificacionesMin =
-        lstParamsApp->getStringLong("numIndentificacionesMin", 3);
+    numIndentificacionesMin = lstParamsApp->getStringLong("numIndentificacionesMin", 3);
 
     // Crea el dispositivo virtual
     LOG_INFO(LOG_COMPONENT, "Creando VDevice");
-    hailort::Expected<std::unique_ptr<hailort::VDevice>> device =
-        hailort::VDevice::create();
-    if (!device) {
-        LOG_ERROR(LOG_COMPONENT,
-                  "Error: No se pudo inicializar el dispositivo Hailo.");
+    hailort::Expected<std::unique_ptr<hailort::VDevice>> vdevice = hailort::VDevice::create();
+    if (!vdevice) {
+        LOG_ERROR(LOG_COMPONENT, "Error: No se pudo inicializar el dispositivo Hailo.");
         errorInicial = true;
         return;
     }
-    devicePtr = &device;
+    vdevicePtr = &vdevice;
 
-    procDescargaDescFaciales.extractor.vdevice = &device;
+    procDescargaDescFaciales.extractor.vdevice = &vdevice;
 
     // crea el detector
-    detector.setDimImagenes(640, 640);
-    detector.previsualizaImgParaDeteccion =
+    detectorRostros.setDimImagenes(640, 640);
+    detectorRostros.previsualizaImgParaDeteccion =
         lstParamsApp->getStringBool("previsualizaImgParaDeteccion", false);
-    detector.esperarPrevImgParaDeteccion =
+    detectorRostros.esperarPrevImgParaDeteccion =
         lstParamsApp->getStringBool("esperarPrevImgParaDeteccion", false);
 
     generadorPingsMonitoreo->idEquipo = GStringUtils::trim(idEquipo);
     procDescargaDescFaciales.idEquipo = GStringUtils::trim(idEquipo);
 
-    detector.runner.device = &device;
-    if (detector.cargarModelo("./models/scrfd_2.5ga.hef") != 0) {
+    detectorRostros.runner.device = &vdevice;
+    if (detectorRostros.cargarModelo("./models/scrfd_2.5ga.hef") != 0) {
         LOG_ERROR(LOG_COMPONENT, "Error al cargar el modelo detector");
         errorInicial = true;
         return;
@@ -152,27 +141,29 @@ void ProcesoRecFacial::iniciar() {
     LOG_INFO(LOG_COMPONENT, "Detector de rostros iniciado");
 
     // crea el generador de descriptores faciales
-    generadorDesc.runner.device = &device;
-    generadorDesc.paramContraste = paramContraste;
-    generadorDesc.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
-    generadorDesc.previsualizaImgReconocimiento =
+    generadorDescriptores.runner.device = &vdevice;
+    generadorDescriptores.paramContraste = paramContraste;
+    generadorDescriptores.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
+
+    generadorDescriptores.previsualizaImgReconocimiento =
         lstParamsApp->getStringBool("previsualizaImgReconocimiento", false);
-    generadorDesc.esperarPrevImgReconocimiento =
+    generadorDescriptores.esperarPrevImgReconocimiento =
         lstParamsApp->getStringBool("esperarPrevImgReconocimiento", false);
-    generadorDesc.guardarPrevImgReconocimiento =
+    generadorDescriptores.guardarPrevImgReconocimiento =
         lstParamsApp->getStringBool("guardarPrevImgReconocimiento", false);
-    generadorDesc.guardarCarasFrontalesAlineadas =
+    generadorDescriptores.guardarCarasFrontalesAlineadas =
         lstParamsApp->getStringBool("guardarCarasFrontalesAlineadas", false);
-    generadorDesc.prefijoImgReconocimiento =
+
+    generadorDescriptores.prefijoImgReconocimiento =
         lstParamsApp->getString("prefijoImgReconocimiento");
-    generadorDesc.prefijoImgReconocimiento +=
+    generadorDescriptores.prefijoImgReconocimiento +=
         "_" + to_string(TimeDateUtils::getDateTimeMs()) + "_";
-    generadorDesc.similaridadFrontal =
+
+    generadorDescriptores.similaridadFrontal =
         lstParamsApp->getStringDouble("similaridadFrontal", 5.0);
 
-    if (generadorDesc.cargarModelo(pathModeloDescFacial) != 0) {
-        LOG_ERROR(LOG_COMPONENT,
-                  "Error al cargar modelo generador de descriptores");
+    if (generadorDescriptores.cargarModelo(pathModeloDescFacial) != 0) {
+        LOG_ERROR(LOG_COMPONENT, "Error al cargar modelo generador de descriptores");
         errorInicial = true;
         return;
     }
@@ -192,25 +183,32 @@ void ProcesoRecFacial::iniciar() {
     generadorEventos.start();
     generadorPingsMonitoreo->start();
     generadorPingsAppWeb.start();
-    factorXVisor = (float)anchoCamara / ((float)640);
-    factorYVisor = (float)alturaCamara / ((float)640);
+
+    factorEscalaModeloX = (float)anchoCamara / 640.0f;
+    factorEscalaModeloY = (float)alturaCamara / 640.0f;
 
     // bucle principal
     finalizar = false;
     idDesconocidoSgte = 0;
-    while (finalizar == false) {
-        auto inicio = std::chrono::high_resolution_clock::now();
 
+    while (!finalizar) {
+        const auto tInicioCiclo = std::chrono::high_resolution_clock::now();
+
+        // validar si se debe o no procesar las imagenes
         if (getFlagProcesarImagenes()) {
             if (!getUsandoNPU()) {
-                LOG_INFO(LOG_COMPONENT,
-                         "Procesamiento solicitado: descarga + generación + recarga de universo");
+                LOG_INFO(LOG_COMPONENT, "Procesamiento solicitado: descarga + generación + recarga de universo");
+
                 procDescargaDescFaciales.idTareaProgramada = getIdTareaProgramada();
                 procDescargaDescFaciales.ejecutarDescargaYGeneracion();
-                string paramUnificarDescr = lstParamsApp->getString("unificarDescriptores");
-                bool unifidarDescr = false;
-                if ( paramUnificarDescr.compare("S") == 0 ) unifidarDescr = true;
-                universoPersonas.cargarpPerConocidas(lstParamsApp->getString("pathBDPersonas"), unifidarDescr);
+
+                const std::string parametroUnificarDescriptores = lstParamsApp->getString("unificarDescriptores");
+                const bool unificarDescriptores = (parametroUnificarDescriptores == "S");
+
+                universoPersonas.cargarpPerConocidas(
+                    lstParamsApp->getString("pathBDPersonas"),
+                    unificarDescriptores);
+
                 setFlagProcesarImagenes(false);
                 LOG_INFO(LOG_COMPONENT, "Procesamiento solicitado finalizado");
             }
@@ -218,9 +216,8 @@ void ProcesoRecFacial::iniciar() {
             continue;
         }
 
-        imagenCapturada = imageSource->getImage();
-
-        if ((imagenCapturada.ancho == 0) || (imagenCapturada.altura == 0)) {
+        frameCapturado = imageSource->getImage();
+        if ((frameCapturado.ancho == 0) || (frameCapturado.altura == 0)) {
             continue;
         }
 
@@ -229,111 +226,121 @@ void ProcesoRecFacial::iniciar() {
 
         // invierte verticalmente
         if (invertirVertical) {
-            flip(imagenCapturada.imagenOpencv, flipped, -1);
-            imagenCapturada.imagenOpencv = flipped;
+            cv::flip(frameCapturado.imagenOpencv, matrizInvertida, -1);
+            frameCapturado.imagenOpencv = matrizInvertida;
         }
 
         if ((regionInteresInicioX > 0) || (regionInteresFinX < anchoCamara)) {
-            imagenDeteccion = imagenCapturada.getRect(
+            frameParaDeteccion = frameCapturado.getRect(
                 regionInteresInicioX, 0, regionInteresFinX, alturaCamara);
-        } else
-            imagenDeteccion = imagenCapturada;
+        } else {
+            frameParaDeteccion = frameCapturado;
+        }
 
-        auto finCaptura = std::chrono::high_resolution_clock::now();
+        const auto tFinCaptura = std::chrono::high_resolution_clock::now();
 
         // detecta rostros
-        lstDet = detector.detectar_2_5g(imagenDeteccion, toleranciaDetec);
-        if (detector.errorDeteccion == true) {
+        deteccionesBrutas = detectorRostros.detectar_2_5g(frameParaDeteccion, toleranciaDetec);
+        if (detectorRostros.errorDeteccion) {
             LOG_ERROR(LOG_COMPONENT, "Error al detectar rostros");
             break;
         }
 
         // elimina rostros pequeños
-        lstDetFiltrado.clear();
-        for (DeteccionCaraHailo cara : lstDet) {
-            if (((cara.getAncho() > anchoRostroMinimo) &&
-                 (cara.getAltura() > alturaRostroMinima)) &&
-                (cara.caraDePerfil() == false)) {
-                cara.desplazaPtosCara(regionInteresInicioX, 0);
-                cara.desplazaRegion(regionInteresInicioX, 0);
-                if (encuadrarRostros.compare("S") == 0)
-                    cara.ajustarCuadrado(anchoCamara, alturaCamara);
-                else if (encuadrarRostros.compare("M") == 0)
-                    cara.ajustarMiniCuadrado(anchoCamara, alturaCamara);
+        deteccionesFiltradas.clear();
+        for (DeteccionCaraHailo deteccionCara : deteccionesBrutas) {
+            const bool superaMinimo =
+                (deteccionCara.getAncho() > anchoRostroMinimo) &&
+                (deteccionCara.getAltura() > alturaRostroMinima);
 
-                lstDetFiltrado.push_back(cara);
+            const bool noEsPerfil = (deteccionCara.caraDePerfil() == false);
+
+            if (superaMinimo && noEsPerfil) {
+                deteccionCara.desplazaPtosCara(regionInteresInicioX, 0);
+                deteccionCara.desplazaRegion(regionInteresInicioX, 0);
+
+                if (encuadrarRostros == "S")
+                    deteccionCara.ajustarCuadrado(anchoCamara, alturaCamara);
+                else if (encuadrarRostros == "M")
+                    deteccionCara.ajustarMiniCuadrado(anchoCamara, alturaCamara);
+
+                deteccionesFiltradas.push_back(deteccionCara);
             }
         }
 
-        lstCaras = detTracker.generaListaTrackTemporal(&lstDetFiltrado);
-        auto finDeteccion = std::chrono::high_resolution_clock::now();
+        // Analiza tracking temporal
+        carasTrackTemporales = detTracker.generaListaTrackTemporal(&deteccionesFiltradas);
+        const auto tFinDeteccion = std::chrono::high_resolution_clock::now();
 
         // genera descriptores faciales
-        calculaDescriptores(&generadorDesc, imagenCapturada, &lstCaras);
-        auto finDescriptores = std::chrono::high_resolution_clock::now();
+        calculaDescriptores(&generadorDescriptores, frameCapturado, &carasTrackTemporales);
+        const auto tFinDescriptores = std::chrono::high_resolution_clock::now();
 
         // identifica personas
-        identificarPersonas(&lstCaras);
-        auto finIdentificacion = std::chrono::high_resolution_clock::now();
+        identificarPersonas(&carasTrackTemporales);
+        const auto tFinIdentificacion = std::chrono::high_resolution_clock::now();
 
-        // tracking
-        imagenVisor.ancho = detector.imgModeloAncho;
-        imagenVisor.altura = detector.imgModeloAltura;
-        imagenVisor.imagenOpencv = detector.imagenRedim;
-        lstCarasTrack = detTracker.analizaPorIdentificacionYTracker(
-            &lstCaras, &imagenVisor, &imagenPreviaVisor, factorXVisor,
-            factorYVisor);
-        auto finTracking = std::chrono::high_resolution_clock::now();
+        // tracking final (identificación + tracker)
+        frameVisor.ancho = detectorRostros.imgModeloAncho;
+        frameVisor.altura = detectorRostros.imgModeloAltura;
+        frameVisor.imagenOpencv = detectorRostros.imagenRedim;
+
+        carasTrackFinal = detTracker.analizaPorIdentificacionYTracker(
+            &carasTrackTemporales,
+            &frameVisor,
+            &frameVisorPrevio,
+            factorEscalaModeloX,
+            factorEscalaModeloY);
+
+        const auto tFinTracking = std::chrono::high_resolution_clock::now();
 
         // Notifica al servidor web las incidencias o detecciones
-        notificaDetecciones(imagenCapturada, &lstCarasTrack);
-        auto finNotifica = std::chrono::high_resolution_clock::now();
-        imagenPreviaVisor = imagenVisor.clone();
+        notificaDetecciones(frameCapturado, &carasTrackFinal);
+        const auto tFinNotifica = std::chrono::high_resolution_clock::now();
 
-        imagenVisor = dibujaCaras(imagenCapturada, &lstCarasTrack);
-        auto finDibuja = std::chrono::high_resolution_clock::now();
+        frameVisorPrevio = frameVisor.clone();
+
+        frameVisor = dibujaCaras(frameCapturado, &carasTrackFinal);
+        const auto tFinDibuja = std::chrono::high_resolution_clock::now();
 
         universoPersonas.eliminaDesAntiguos(tiempoMaxNoReconocido);
 
         // calcula los tiempos transcurridos (sin imprimir)
-        auto durCaptura = std::chrono::duration_cast<std::chrono::microseconds>(
-            finCaptura - inicio);
-        auto durDetecta = std::chrono::duration_cast<std::chrono::microseconds>(
-            finDeteccion - finCaptura);
-        auto durDescriptor =
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                finDescriptores - finDeteccion);
-        auto durIdentificacion =
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                finIdentificacion - finDescriptores);
-        auto durTracking =
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                finTracking - finIdentificacion);
-        auto durNotifica =
-            std::chrono::duration_cast<std::chrono::microseconds>(finNotifica -
-                                                                  finTracking);
-        auto durDibuja = std::chrono::duration_cast<std::chrono::microseconds>(
-            finDibuja - finNotifica);
-        auto durTotal = std::chrono::duration_cast<std::chrono::microseconds>(
-            finDibuja - inicio);
+        const auto durCaptura = std::chrono::duration_cast<std::chrono::microseconds>(tFinCaptura - tInicioCiclo);
+        const auto durDetecta = std::chrono::duration_cast<std::chrono::microseconds>(tFinDeteccion - tFinCaptura);
+        const auto durDescriptor = std::chrono::duration_cast<std::chrono::microseconds>(tFinDescriptores - tFinDeteccion);
+        const auto durIdentificacion = std::chrono::duration_cast<std::chrono::microseconds>(tFinIdentificacion - tFinDescriptores);
+        const auto durTracking = std::chrono::duration_cast<std::chrono::microseconds>(tFinTracking - tFinIdentificacion);
+        const auto durNotifica = std::chrono::duration_cast<std::chrono::microseconds>(tFinNotifica - tFinTracking);
+        const auto durDibuja = std::chrono::duration_cast<std::chrono::microseconds>(tFinDibuja - tFinNotifica);
+        const auto durTotal = std::chrono::duration_cast<std::chrono::microseconds>(tFinDibuja - tInicioCiclo);
+
+        (void)durCaptura;
+        (void)durDetecta;
+        (void)durDescriptor;
+        (void)durIdentificacion;
+        (void)durTracking;
+        (void)durNotifica;
+        (void)durDibuja;
+        (void)durTotal;
 
         // Envia la imagen al servidor web de configuracion
-        ProcesoRecFacial::lstUltCarasDet = lstCarasTrack;
-        servidorWeb->setImage(imagenVisor);
+        ProcesoRecFacial::lstUltCarasDet = carasTrackFinal;
+        servidorWeb->setImage(frameVisor);
 
         // Envia la imagen a la pantalla local
-        GDibujo::show(imagenVisor, "Visor");
+        GDibujo::show(frameVisor, "Visor");
 
         // configura el procesar de eventos del mouse
         cv::setMouseCallback("Visor", onMouse, this);
 
-        // Lee el teclada para finalziar si presiona ESC
-        int tecla = GDibujo::waitForKey(10);
+        // Lee el teclado para finalizar si presiona 'q'
+        const int tecla = GDibujo::waitForKey(10);
         if (tecla == 'q') {
             LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q)");
             break;
         } else if (tecla == '1') {
-            cargaEnDuro = 1;
+            modoCargaEnDuro = 1;
         }
 
         // marcar el flag usandoNPU = false
@@ -343,6 +350,7 @@ void ProcesoRecFacial::iniciar() {
     LOG_INFO(LOG_COMPONENT, "Finaliza bucle de reconocimiento");
     GDibujo::closeAllWindows();
     imageSource->stop();
+
     generadorPingsAppWeb.finalizar();
     generadorPingsMonitoreo->finalizar();
     generadorEventos.finalizar();
@@ -362,35 +370,43 @@ void ProcesoRecFacial::iniciar() {
 void ProcesoRecFacial::calculaDescriptores(
     FaceRecHailo* generador, GImage foto,
     vector<TrackedDetectionHailo*>* lstRostros) {
-    GLinkedList<TrackedDetectionHailo*> lstCarasDet;
-    GLinkedList<GImage> lstCaras;
-    GLinkedList<DeteccionCaraHailo> lstDetecciones;
-    GLinkedList<SIMD_TYPE*> lstDescriptores;
-    TrackedDetectionHailo* deteccion;
-    int n = lstRostros->size();
 
-    for (int i = 0; i < n; i++) {
-        deteccion = lstRostros->at(i);
+    GLinkedList<TrackedDetectionHailo*> listaCarasDeteccion;
+    GLinkedList<GImage> listaCaras;                 // (no usado actualmente)
+    GLinkedList<DeteccionCaraHailo> listaDetecciones; // (no usado actualmente)
+    GLinkedList<SIMD_TYPE*> listaDescriptores;      // (no usado actualmente)
 
-        deteccion->cara.detRelCara = deteccion->cara.deteccion;
-        deteccion->cara.detRelCara.desplazaPtosCara(
-            -deteccion->cara.deteccion.ptoSupIzq.x,
-            -deteccion->cara.deteccion.ptoSupIzq.y);
-        deteccion->cara.detRelCara.ptoSupIzq.x = 0;
-        deteccion->cara.detRelCara.ptoSupIzq.y = 0;
-        deteccion->cara.detRelCara.ptoInfDer.x -=
-            deteccion->cara.deteccion.ptoSupIzq.x;
-        deteccion->cara.detRelCara.ptoInfDer.y -=
-            deteccion->cara.deteccion.ptoSupIzq.y;
+    TrackedDetectionHailo* trackFace = nullptr;
+    const int totalRostros = (int)lstRostros->size();
 
-        deteccion->cara.calculaFotoCara(foto);
-        lstCarasDet.add(deteccion);
+    (void)listaCaras;
+    (void)listaDetecciones;
+    (void)listaDescriptores;
+
+    for (int indiceRostro = 0; indiceRostro < totalRostros; indiceRostro++) {
+        trackFace = lstRostros->at(indiceRostro);
+
+        // calcula la deteccion relativa al rectangulo en el que se detecto
+        trackFace->cara.detRelCara = trackFace->cara.deteccion;
+        trackFace->cara.detRelCara.desplazaPtosCara(
+            -trackFace->cara.deteccion.ptoSupIzq.x,
+            -trackFace->cara.deteccion.ptoSupIzq.y);
+
+        trackFace->cara.detRelCara.ptoSupIzq.x = 0;
+        trackFace->cara.detRelCara.ptoSupIzq.y = 0;
+
+        trackFace->cara.detRelCara.ptoInfDer.x -= trackFace->cara.deteccion.ptoSupIzq.x;
+        trackFace->cara.detRelCara.ptoInfDer.y -= trackFace->cara.deteccion.ptoSupIzq.y;
+
+        trackFace->cara.calculaFotoCara(foto);
+        listaCarasDeteccion.add(trackFace);
     }
 
-    if (n > 0)
-        generador->calculaDescriptor(&lstCarasDet);
+    if (totalRostros > 0) {
+        generador->calculaDescriptor(&listaCarasDeteccion);
+    }
 
-    lstCarasDet.reset();
+    listaCarasDeteccion.reset();
 }
 
 /**
@@ -399,91 +415,131 @@ void ProcesoRecFacial::calculaDescriptores(
  */
 void ProcesoRecFacial::identificarPersonas(
     vector<TrackedDetectionHailo*>* lstRostros) {
-    TrackedDetectionHailo* deteccion;
-    DescPersonaExterno* personaConocida;
-    IdentificacionPersona idenPersonaValidaDec;
-    int i, n;
-    long long fecDet;
-    float distEucli;
 
-    fecDet = TimeDateUtils::getDateTimeMs();
-    n = lstRostros->size() - 1;
-    for (i = n; i >= 0; i--) {
-        deteccion = lstRostros->at(i);
-        if (deteccion->ciclosNoDetectados > 0) {
+    TrackedDetectionHailo* trackFace = nullptr;
+    DescPersonaExterno* personaCoincidente = nullptr;
+
+    IdentificacionPersona ultimaIdentificacionValida;
+
+    long long timestampDeteccionMs = TimeDateUtils::getDateTimeMs();
+    float distanciaEuclidiana = 0.0f;
+
+    const int ultimoIndice = (int)lstRostros->size() - 1;
+
+    for (int indice = ultimoIndice; indice >= 0; indice--) {
+        trackFace = lstRostros->at(indice);
+
+        if (trackFace->ciclosNoDetectados > 0) {
             continue;
         }
 
-        if (deteccion->tracker.empty() == true) {
-            personaConocida = universoPersonas.buscaPersonaCon(
-                deteccion->cara.descriptor, toleranciaIden, &distEucli,
+        // solo se identifica a la persona si es nueva (no viene de tracker)
+        if (trackFace->tracker.empty()) {
+            personaCoincidente = universoPersonas.buscaPersonaCon(
+                trackFace->cara.descriptor,
+                toleranciaIden,
+                &distanciaEuclidiana,
                 usarDistEuclideana);
         } else {
             continue;
         }
 
-        if (personaConocida != NULL) {
-            IdentificacionPersona iden;
+        if (personaCoincidente != NULL) {
+            IdentificacionPersona identificacion;
 
-            iden.fecDet = fecDet;
-            std::memcpy(iden.vecDescripcion, deteccion->cara.descriptor,
-                        NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
-            iden.comparacion = distEucli;
-            deteccion->cara.personaIdent = true;
-            personaConocida->anonimo = false;
-            deteccion->cara.identificador.agregaIdentif(personaConocida, iden,
-                                                        fecDet);
+            identificacion.fecDet = timestampDeteccionMs;
+            std::memcpy(
+                identificacion.vecDescripcion,
+                trackFace->cara.descriptor,
+                NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
 
-            idenPersonaValidaDec =
-                deteccion->cara.identificador.getUltimaIdentificacion();
-        } else if (reportarDesconocidos == true) {
-            personaConocida = universoPersonas.buscaPersonaDesc(
-                deteccion->cara.descriptor, toleranciaIden, &distEucli,
+            identificacion.comparacion = distanciaEuclidiana;
+
+            trackFace->cara.personaIdent = true;
+            personaCoincidente->anonimo = false;
+
+            trackFace->cara.identificador.agregaIdentif(
+                personaCoincidente,
+                identificacion,
+                timestampDeteccionMs);
+
+            ultimaIdentificacionValida =
+                trackFace->cara.identificador.getUltimaIdentificacion();
+
+        } else if (reportarDesconocidos) {
+
+            personaCoincidente = universoPersonas.buscaPersonaDesc(
+                trackFace->cara.descriptor,
+                toleranciaIden,
+                &distanciaEuclidiana,
                 usarDistEuclideana);
-            if (personaConocida != NULL) {
-                IdentificacionPersona iden;
 
-                iden.fecDet = fecDet;
-                std::memcpy(iden.vecDescripcion, deteccion->cara.descriptor,
-                            NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
-                iden.comparacion = distEucli;
-                deteccion->cara.personaIdent = true;
-                deteccion->cara.identificador.agregaIdentif(personaConocida,
-                                                            iden, fecDet);
-                personaConocida->ultimaFechaDetectada = fecDet;
+            if (personaCoincidente != NULL) {
+                IdentificacionPersona identificacion;
 
-                idenPersonaValidaDec =
-                    deteccion->cara.identificador.getUltimaIdentificacion();
+                identificacion.fecDet = timestampDeteccionMs;
+                std::memcpy(
+                    identificacion.vecDescripcion,
+                    trackFace->cara.descriptor,
+                    NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
+
+                identificacion.comparacion = distanciaEuclidiana;
+
+                trackFace->cara.personaIdent = true;
+
+                trackFace->cara.identificador.agregaIdentif(
+                    personaCoincidente,
+                    identificacion,
+                    timestampDeteccionMs);
+
+                personaCoincidente->ultimaFechaDetectada = timestampDeteccionMs;
+
+                ultimaIdentificacionValida =
+                    trackFace->cara.identificador.getUltimaIdentificacion();
+
             } else {
-                IdentificacionPersona iden;
+                IdentificacionPersona identificacion;
 
-                iden.fecDet = fecDet;
-                std::memcpy(iden.vecDescripcion, deteccion->cara.descriptor,
-                            NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
-                iden.comparacion = 100;
-                deteccion->cara.personaIdent = true;
+                identificacion.fecDet = timestampDeteccionMs;
+                std::memcpy(
+                    identificacion.vecDescripcion,
+                    trackFace->cara.descriptor,
+                    NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
+
+                identificacion.comparacion = 100;
+
+                trackFace->cara.personaIdent = true;
 
                 DescPersonaExterno personaExterna;
 
                 personaExterna.anonimo = true;
-                std::memcpy(personaExterna.vecDescripcion, iden.vecDescripcion,
-                            NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
+                std::memcpy(
+                    personaExterna.vecDescripcion,
+                    identificacion.vecDescripcion,
+                    NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
+
                 personaExterna.id = std::to_string(idDesconocidoSgte);
                 personaExterna.nombre = "Desc." + personaExterna.id;
-                personaExterna.ultimaFechaDetectada = fecDet;
+                personaExterna.ultimaFechaDetectada = timestampDeteccionMs;
+
                 idDesconocidoSgte++;
                 universoPersonas.lstPerNoIdent.add(personaExterna);
 
-                deteccion->cara.identificador.agregaIdentif(
-                    universoPersonas.lstPerNoIdent.getAddrUltimo(), iden,
-                    fecDet);
-                idenPersonaValidaDec =
-                    deteccion->cara.identificador.getUltimaIdentificacion();
+                trackFace->cara.identificador.agregaIdentif(
+                    universoPersonas.lstPerNoIdent.getAddrUltimo(),
+                    identificacion,
+                    timestampDeteccionMs);
+
+                ultimaIdentificacionValida =
+                    trackFace->cara.identificador.getUltimaIdentificacion();
             }
+
         } else {
-            deteccion->cara.personaIdent = false;
+            trackFace->cara.personaIdent = false;
         }
     }
+
+    (void)ultimaIdentificacionValida;
 }
 
 /**
@@ -492,135 +548,136 @@ void ProcesoRecFacial::identificarPersonas(
  */
 GImage ProcesoRecFacial::dibujaCaras(GImage imagen,
                                      vector<TrackedDetectionHailo*>* lstCaras) {
-    GImage imagenVisor;
-    CaraDescrita* cara;
-    TrackedDetectionHailo* det;
+    GImage frameVisor;
+
+    CaraDescrita* cara = nullptr;
+    TrackedDetectionHailo* trackFace = nullptr;
+
     GPoint punto;
-    GRect caja;
-    GColor amarillo(0, 255, 255);
-    GColor rojo(255, 0, 0);
-    GColor verde(0, 255, 0);
-    GColor azul(0, 0, 255);
-    GColor blanco(255, 255, 255);
-    DescPersonaExterno* datosPersona;
-    GRect rc;
-    string id;
-    int temp, radioPuntos = 2;
-    float escalaX, escalaY, escalaXTrack, escalaYTrack;
+    GRect cajaRostro;
+    GRect cajaAux;
 
-    imagenVisor = imagen.cloneResize(anchoVisualiza, alturaVisualiza);
-    escalaX = ((float)anchoVisualiza) / ((float)anchoCamara);
-    escalaY = ((float)alturaVisualiza) / ((float)alturaCamara);
+    GColor colorAmarillo(0, 255, 255);
+    GColor colorRojo(255, 0, 0);
+    GColor colorVerde(0, 255, 0);
+    GColor colorAzul(0, 0, 255);
+    GColor colorBlanco(255, 255, 255);
 
-    escalaXTrack = ((float)anchoVisualiza) / ((float)NUM_ELEMS_DESC_FACIAL);
-    escalaYTrack = ((float)alturaVisualiza) / ((float)NUM_ELEMS_DESC_FACIAL);
+    DescPersonaExterno* datosPersona = nullptr;
 
-    rc.x1 = (int)((float)regionInteresInicioX) * escalaX;
-    rc.x2 = (int)((float)regionInteresFinX) * escalaX;
-    rc.y1 = 0;
-    rc.y2 = alturaVisualiza;
-    GDibujo::drawRect(imagenVisor, rc, azul, 1);
+    string etiquetaId;
 
-    int n = lstCaras->size();
-    for (int i = 0; i < n; i++) {
-        det = lstCaras->at(i);
+    int yTextoCaja = 0;
+    const int radioPuntos = 2;
 
-        if (det->id > 0)
-            id = to_string(det->id);
-        else
-            id = "";
+    const float escalaX = ((float)anchoVisualiza) / ((float)anchoCamara);
+    const float escalaY = ((float)alturaVisualiza) / ((float)alturaCamara);
 
-        cara = &det->cara;
+    const float escalaXTrack = ((float)anchoVisualiza) / ((float)NUM_ELEMS_DESC_FACIAL);
+    const float escalaYTrack = ((float)alturaVisualiza) / ((float)NUM_ELEMS_DESC_FACIAL);
 
-        caja.x1 = cara->deteccion.ptoSupIzq.x * escalaX;
-        caja.y1 = cara->deteccion.ptoSupIzq.y * escalaY;
-        caja.x2 = cara->deteccion.ptoInfDer.x * escalaX;
-        caja.y2 = cara->deteccion.ptoInfDer.y * escalaY;
+    frameVisor = imagen.cloneResize(anchoVisualiza, alturaVisualiza);
 
-        datosPersona = det->cara.identificador.getDatosPerIden();
+    cajaAux.x1 = (int)((float)regionInteresInicioX) * escalaX;
+    cajaAux.x2 = (int)((float)regionInteresFinX) * escalaX;
+    cajaAux.y1 = 0;
+    cajaAux.y2 = alturaVisualiza;
+    GDibujo::drawRect(frameVisor, cajaAux, colorAzul, 1);
 
-        if (det->tracker.empty() == false) {
-            rc.x1 = (int)(((float)det->trackerBox.x) * escalaXTrack);
-            rc.y1 = (int)(((float)det->trackerBox.y) * escalaYTrack);
-            rc.x2 =
-                rc.x1 + (int)(((float)det->trackerBox.width) * escalaXTrack);
-            rc.y2 =
-                rc.y1 + (int)(((float)det->trackerBox.height) * escalaYTrack);
+    const int totalCaras = (int)lstCaras->size();
+    for (int indiceCara = 0; indiceCara < totalCaras; indiceCara++) {
+        trackFace = lstCaras->at(indiceCara);
 
-            GDibujo::drawRect(imagenVisor, rc, amarillo, 1);
+        etiquetaId = (trackFace->id > 0) ? to_string(trackFace->id) : "";
+
+        cara = &trackFace->cara;
+
+        cajaRostro.x1 = cara->deteccion.ptoSupIzq.x * escalaX;
+        cajaRostro.y1 = cara->deteccion.ptoSupIzq.y * escalaY;
+        cajaRostro.x2 = cara->deteccion.ptoInfDer.x * escalaX;
+        cajaRostro.y2 = cara->deteccion.ptoInfDer.y * escalaY;
+
+        datosPersona = trackFace->cara.identificador.getDatosPerIden();
+
+        if (!trackFace->tracker.empty()) {
+            cajaAux.x1 = (int)(((float)trackFace->trackerBox.x) * escalaXTrack);
+            cajaAux.y1 = (int)(((float)trackFace->trackerBox.y) * escalaYTrack);
+            cajaAux.x2 = cajaAux.x1 + (int)(((float)trackFace->trackerBox.width) * escalaXTrack);
+            cajaAux.y2 = cajaAux.y1 + (int)(((float)trackFace->trackerBox.height) * escalaYTrack);
+
+            GDibujo::drawRect(frameVisor, cajaAux, colorAmarillo, 1);
         }
 
-        if (cara->descCalculado == false) {
-            GDibujo::drawRect(imagenVisor, caja, amarillo, 2);
-        } else if ((cara->personaIdent == false) || (datosPersona == NULL)) {
-            GDibujo::drawRect(imagenVisor, caja, rojo, 2);
+        if (!cara->descCalculado) {
+            GDibujo::drawRect(frameVisor, cajaRostro, colorAmarillo, 2);
+        } else if ((!cara->personaIdent) || (datosPersona == NULL)) {
+            GDibujo::drawRect(frameVisor, cajaRostro, colorRojo, 2);
         } else {
             if (datosPersona != NULL) {
-                id.append(" - ");
-                id.append(GStringUtils::to_string_fixed(
-                    det->cara.identificador.getPromedioComparacion(), 2));
-                id.append(" : ");
-                id.append(datosPersona->nombre);
+                etiquetaId.append(" - ");
+                etiquetaId.append(GStringUtils::to_string_fixed(
+                    trackFace->cara.identificador.getPromedioComparacion(), 2));
+                etiquetaId.append(" : ");
+                etiquetaId.append(datosPersona->nombre);
             }
-            if (datosPersona->anonimo == true)
-                GDibujo::drawRect(imagenVisor, caja, rojo, 2);
+
+            if (datosPersona->anonimo)
+                GDibujo::drawRect(frameVisor, cajaRostro, colorRojo, 2);
             else
-                GDibujo::drawRect(imagenVisor, caja, verde, 2);
+                GDibujo::drawRect(frameVisor, cajaRostro, colorVerde, 2);
         }
 
-        if (det->tracker.empty() == true) {
+        if (trackFace->tracker.empty()) {
             punto.x = (int)(((float)cara->deteccion.ojoIzq.x) * escalaX);
             punto.y = (int)(((float)cara->deteccion.ojoIzq.y) * escalaY);
-            GDibujo::drawElipse(imagenVisor, punto, radioPuntos, radioPuntos,
-                                rojo, 1);
+            GDibujo::drawElipse(frameVisor, punto, radioPuntos, radioPuntos, colorRojo, 1);
 
             punto.x = (int)(((float)cara->deteccion.ojoDer.x) * escalaX);
             punto.y = (int)(((float)cara->deteccion.ojoDer.y) * escalaY);
-            GDibujo::drawElipse(imagenVisor, punto, radioPuntos, radioPuntos,
-                                rojo, 1);
+            GDibujo::drawElipse(frameVisor, punto, radioPuntos, radioPuntos, colorRojo, 1);
 
             punto.x = (int)(((float)cara->deteccion.nariz.x) * escalaX);
             punto.y = (int)(((float)cara->deteccion.nariz.y) * escalaY);
-            GDibujo::drawElipse(imagenVisor, punto, radioPuntos, radioPuntos,
-                                rojo, 1);
+            GDibujo::drawElipse(frameVisor, punto, radioPuntos, radioPuntos, colorRojo, 1);
 
             punto.x = (int)(((float)cara->deteccion.bocaIzq.x) * escalaX);
             punto.y = (int)(((float)cara->deteccion.bocaIzq.y) * escalaY);
-            GDibujo::drawElipse(imagenVisor, punto, radioPuntos, radioPuntos,
-                                rojo, 1);
+            GDibujo::drawElipse(frameVisor, punto, radioPuntos, radioPuntos, colorRojo, 1);
 
             punto.x = (int)(((float)cara->deteccion.bocaDer.x) * escalaX);
             punto.y = (int)(((float)cara->deteccion.bocaDer.y) * escalaY);
-            GDibujo::drawElipse(imagenVisor, punto, radioPuntos, radioPuntos,
-                                rojo, 1);
+            GDibujo::drawElipse(frameVisor, punto, radioPuntos, radioPuntos, colorRojo, 1);
         }
 
-        temp = caja.y1 - 30;
-        if (temp < 0) {
-            caja.y1 = caja.y2;
-            caja.y2 += 40;
+        // dibuja la caja con el ID / texto
+        yTextoCaja = cajaRostro.y1 - 30;
+        if (yTextoCaja < 0) {
+            // se dibuja la caja en la parte inferior
+            cajaRostro.y1 = cajaRostro.y2;
+            cajaRostro.y2 += 40;
         } else {
-            caja.y2 = caja.y1;
-            caja.y1 -= 40;
+            cajaRostro.y2 = cajaRostro.y1;
+            cajaRostro.y1 -= 40;
         }
-        caja.x2 += 100;
-        caja.x1 -= 200;
-        if (caja.x1 < 0) caja.x1 = 0;
+
+        cajaRostro.x2 += 100;
+        cajaRostro.x1 -= 200;
+        if (cajaRostro.x1 < 0) cajaRostro.x1 = 0;
 
         if (datosPersona != NULL) {
-            if (det->cara.identificador.fechaUltEvento == 0) {
-                GDibujo::drawRect(imagenVisor, caja, blanco, -1);
-                GDibujo::drawText(imagenVisor, caja.x1, caja.y1 + 30, id,
-                                  GDIBUJO_FONT_HELVETICA, azul, 0.8, 2);
+            if (trackFace->cara.identificador.fechaUltEvento == 0) {
+                GDibujo::drawRect(frameVisor, cajaRostro, colorBlanco, -1);
+                GDibujo::drawText(frameVisor, cajaRostro.x1, cajaRostro.y1 + 30,
+                                  etiquetaId, GDIBUJO_FONT_HELVETICA, colorAzul, 0.8, 2);
             } else {
-                GDibujo::drawRect(imagenVisor, caja, azul, -1);
-                GDibujo::drawText(imagenVisor, caja.x1, caja.y1 + 30, id,
-                                  GDIBUJO_FONT_HELVETICA, blanco, 0.8, 2);
+                GDibujo::drawRect(frameVisor, cajaRostro, colorAzul, -1);
+                GDibujo::drawText(frameVisor, cajaRostro.x1, cajaRostro.y1 + 30,
+                                  etiquetaId, GDIBUJO_FONT_HELVETICA, colorBlanco, 0.8, 2);
             }
         }
     }
 
-    return imagenVisor;
+    return frameVisor;
 }
 
 /**
@@ -628,27 +685,31 @@ GImage ProcesoRecFacial::dibujaCaras(GImage imagen,
  */
 void ProcesoRecFacial::onMouse(int event, int x, int y, int flags,
                                void* userdata) {
-    float escalaX = ((float)1920) / ((float)1280);
-    float escalaY = ((float)1080) / ((float)720);
-    float x1, y1, x2, y2;
-    int i, n;
-    TrackedDetectionHailo* track;
+    const float escalaX = ((float)1920) / ((float)1280);
+    const float escalaY = ((float)1080) / ((float)720);
+
+    float x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
+    TrackedDetectionHailo* trackFace = nullptr;
 
     if (event != cv::EVENT_LBUTTONDOWN) return;
 
-    n = ProcesoRecFacial::lstUltCarasDet.size();
-    for (i = 0; i < n; i++) {
-        track = ProcesoRecFacial::lstUltCarasDet.at(i);
-        x1 = ((float)track->cara.deteccion.ptoSupIzq.x) / escalaX;
-        y1 = ((float)track->cara.deteccion.ptoSupIzq.y) / escalaY;
-        x2 = ((float)track->cara.deteccion.ptoInfDer.x) / escalaX;
-        y2 = ((float)track->cara.deteccion.ptoInfDer.y) / escalaY;
+    const int totalCaras = (int)ProcesoRecFacial::lstUltCarasDet.size();
+    for (int indiceCara = 0; indiceCara < totalCaras; indiceCara++) {
+        trackFace = ProcesoRecFacial::lstUltCarasDet.at(indiceCara);
 
-        if (((x1 <= x) && (x2 >= x)) && ((y1 <= y) && (y2 >= y))) {
+        x1 = ((float)trackFace->cara.deteccion.ptoSupIzq.x) / escalaX;
+        y1 = ((float)trackFace->cara.deteccion.ptoSupIzq.y) / escalaY;
+        x2 = ((float)trackFace->cara.deteccion.ptoInfDer.x) / escalaX;
+        y2 = ((float)trackFace->cara.deteccion.ptoInfDer.y) / escalaY;
+
+        const bool dentroX = (x1 <= x) && (x2 >= x);
+        const bool dentroY = (y1 <= y) && (y2 >= y);
+
+        if (dentroX && dentroY) {
             std::ostringstream oss;
-            for (int j = 0; j < NUM_ELEMS_DESC_FACIAL; j++) {
-                oss << track->cara.descriptor[j];
-                if (j < (NUM_ELEMS_DESC_FACIAL - 1)) oss << ",";
+            for (int indiceElem = 0; indiceElem < NUM_ELEMS_DESC_FACIAL; indiceElem++) {
+                oss << trackFace->cara.descriptor[indiceElem];
+                if (indiceElem < (NUM_ELEMS_DESC_FACIAL - 1)) oss << ",";
             }
             LOG_INFO(LOG_COMPONENT, "Descriptor seleccionado: " << oss.str());
             break;
@@ -667,167 +728,165 @@ void ProcesoRecFacial::guardaParametros() {
  * Notifica al servidor web sobre las detecciones ocurridas
  */
 void ProcesoRecFacial::notificaDetecciones(
-    GImage imagen, vector<TrackedDetectionHailo*>* lstCaras) {
-    int i, n, j, numIteracionesUnif;
-    int bufferLen;
-    double valor;
-    size_t bufferLen64;
-    string jsonLstRostros, nombres;
-    TrackedDetectionHailo* persona;
-    char *bufferImgVisor, *bufferImgVisor64;
-    long long delta, fecEvento = TimeDateUtils::getDateTimeMs();
-    string ahora = TimeDateUtils::getFechaDesdeMs(fecEvento);
-    DescPersonaExterno* descPersona;
+    GImage frameOriginal, vector<TrackedDetectionHailo*>* carasTrackFinal) {
 
-    if (generadorEventos.usarEndpointUnificado == true)
-        numIteracionesUnif = 1;
-    else
-        numIteracionesUnif = 2;
+    int iteracionesTipoPersona = 0;
 
-    n = lstCaras->size();
-    for (int bucleTipoPer = 0; bucleTipoPer < numIteracionesUnif;
-         bucleTipoPer++) {
-        jsonLstRostros = "";
-        for (i = 0; i < n; i++) {
-            persona = lstCaras->at(i);
-            descPersona = persona->cara.identificador.getDatosPerIden();
-            if (descPersona == NULL) continue;
+    int jpegLenBytes = 0;
+    size_t base64LenBytes = 0;
 
-            if (generadorEventos.usarEndpointUnificado == false) {
-                if ((bucleTipoPer == 0) &&
-                    (persona->cara.identificador.getDatosPerIden()->anonimo ==
-                     true))
-                    continue;
-                else if ((bucleTipoPer == 1) &&
-                         (persona->cara.identificador.getDatosPerIden()
-                              ->anonimo == false))
-                    continue;
+    double valorEscalado = 0.0;
+
+    string jsonRostros;
+    string nombresReconocidosCsv;
+
+    TrackedDetectionHailo* trackFace = nullptr;
+
+    char* jpegBuffer = nullptr;
+    char* jpegBase64 = nullptr;
+
+    const long long timestampEventoMs = TimeDateUtils::getDateTimeMs();
+    const string fechaEventoStr = TimeDateUtils::getFechaDesdeMs(timestampEventoMs);
+
+    DescPersonaExterno* personaDetectada = nullptr;
+
+    iteracionesTipoPersona = (generadorEventos.usarEndpointUnificado ? 1 : 2);
+
+    const int totalCaras = (int)carasTrackFinal->size();
+
+    // bucle para generar datos de personas conocidas (tipoPersona=0) y para
+    // personas no identificadas (tipoPersona=1) cuando NO hay endpoint unificado.
+    for (int tipoPersona = 0; tipoPersona < iteracionesTipoPersona; tipoPersona++) {
+        jsonRostros.clear();
+
+        for (int indiceCara = 0; indiceCara < totalCaras; indiceCara++) {
+            trackFace = carasTrackFinal->at(indiceCara);
+
+            personaDetectada = trackFace->cara.identificador.getDatosPerIden();
+            if (personaDetectada == NULL) continue;
+
+            if (!generadorEventos.usarEndpointUnificado) {
+                const bool esAnonimo = personaDetectada->anonimo;
+
+                if ((tipoPersona == 0) && esAnonimo) continue;
+                if ((tipoPersona == 1) && !esAnonimo) continue;
             }
 
-            delta = fecEvento - persona->cara.identificador.fechaUltEvento;
-            if ((persona->cara.identificador.getNumIdentificaciones() >=
-                 numIndentificacionesMin) &&
-                ((persona->cara.identificador.cambioIdentificacion == true) ||
-                 ((persona->cara.personaIdent == true) &&
-                  (delta >= tiempoReEvento)))) {
-                persona->cara.identificador.fechaUltEvento = fecEvento;
+            const long long deltaMs = timestampEventoMs - trackFace->cara.identificador.fechaUltEvento;
 
-                nombres.append(
-                    persona->cara.identificador.getDatosPerIden()->nombre);
-                nombres.append(",");
+            const bool cumpleMinimoIdentificaciones =
+                (trackFace->cara.identificador.getNumIdentificaciones() >= numIndentificacionesMin);
 
-                bufferImgVisor = GDibujo::encode(
-                    persona->cara.fotoCara, GDIBUJO_ENCODE_JPEG, 80, bufferLen);
-                bufferImgVisor64 =
-                    base64_encode((const unsigned char*)bufferImgVisor,
-                                  bufferLen, &bufferLen64);
-                free(bufferImgVisor);
+            const bool debeReemitirEvento =
+                trackFace->cara.identificador.cambioIdentificacion ||
+                (trackFace->cara.personaIdent && (deltaMs >= tiempoReEvento));
 
-                if (jsonLstRostros.length() > 0) jsonLstRostros.append(",");
+            if (cumpleMinimoIdentificaciones && debeReemitirEvento) {
+                trackFace->cara.identificador.fechaUltEvento = timestampEventoMs;
 
-                jsonLstRostros.append("\n{");
+                nombresReconocidosCsv.append(personaDetectada->nombre);
+                nombresReconocidosCsv.append(",");
 
-                GStringUtils::addJsonAtt(&jsonLstRostros, "foto",
-                                         bufferImgVisor64, false);
-                free(bufferImgVisor64);
+                jpegBuffer = GDibujo::encode(
+                    trackFace->cara.fotoCara, GDIBUJO_ENCODE_JPEG, 80, jpegLenBytes);
 
-                jsonLstRostros.append("\"coordenadas\":{");
+                jpegBase64 = base64_encode(
+                    (const unsigned char*)jpegBuffer, jpegLenBytes, &base64LenBytes);
 
-                valor = ((double)persona->cara.deteccion.ptoSupIzq.x) *
-                        factorEscalaVisualizaX;
-                GStringUtils::addJsonAtt(&jsonLstRostros, "x1",
-                                         to_string(valor), true);
+                free(jpegBuffer);
 
-                valor = ((double)persona->cara.deteccion.ptoSupIzq.y) *
-                        factorEscalaVisualizaY;
-                GStringUtils::addJsonAtt(&jsonLstRostros, "y1",
-                                         to_string(valor), true);
+                if (!jsonRostros.empty()) jsonRostros.append(",");
 
-                valor = ((double)persona->cara.deteccion.ptoInfDer.x) *
-                        factorEscalaVisualizaX;
-                GStringUtils::addJsonAtt(&jsonLstRostros, "x2",
-                                         to_string(valor), true);
+                jsonRostros.append("\n{");
 
-                valor = ((double)persona->cara.deteccion.ptoInfDer.y) *
-                        factorEscalaVisualizaY;
-                GStringUtils::addJsonAtt(&jsonLstRostros, "y2",
-                                         to_string(valor), true, false);
+                GStringUtils::addJsonAtt(&jsonRostros, "foto", jpegBase64, false);
+                free(jpegBase64);
 
-                jsonLstRostros.append("},\n");
-                jsonLstRostros.append("\"descripcionFacial\":[\n");
+                jsonRostros.append("\"coordenadas\":{");
 
-                for (j = 0; j < NUM_ELEMS_DESC_FACIAL; j++) {
-                    jsonLstRostros.append(
-                        to_string(persona->cara.descriptor[j]));
-                    if (j < (NUM_ELEMS_DESC_FACIAL - 1))
-                        jsonLstRostros.append(",");
+                valorEscalado = ((double)trackFace->cara.deteccion.ptoSupIzq.x) * factorEscalaVisualizaX;
+                GStringUtils::addJsonAtt(&jsonRostros, "x1", to_string(valorEscalado), true);
+
+                valorEscalado = ((double)trackFace->cara.deteccion.ptoSupIzq.y) * factorEscalaVisualizaY;
+                GStringUtils::addJsonAtt(&jsonRostros, "y1", to_string(valorEscalado), true);
+
+                valorEscalado = ((double)trackFace->cara.deteccion.ptoInfDer.x) * factorEscalaVisualizaX;
+                GStringUtils::addJsonAtt(&jsonRostros, "x2", to_string(valorEscalado), true);
+
+                valorEscalado = ((double)trackFace->cara.deteccion.ptoInfDer.y) * factorEscalaVisualizaY;
+                GStringUtils::addJsonAtt(&jsonRostros, "y2", to_string(valorEscalado), true, false);
+
+                jsonRostros.append("},\n");
+                jsonRostros.append("\"descripcionFacial\":[\n");
+
+                for (int indiceElem = 0; indiceElem < NUM_ELEMS_DESC_FACIAL; indiceElem++) {
+                    jsonRostros.append(to_string(trackFace->cara.descriptor[indiceElem]));
+                    if (indiceElem < (NUM_ELEMS_DESC_FACIAL - 1)) jsonRostros.append(",");
                 }
 
-                jsonLstRostros.append("\n],\n");
-                if (persona->cara.identificador.getDatosPerIden()->anonimo ==
-                    false) {
-                    GStringUtils::addJsonAtt(
-                        &jsonLstRostros, "idReconocido",
-                        persona->cara.identificador.getDatosPerIden()->id,
-                        true);
-                    jsonLstRostros.append("\"idTipoRostro\":2,\n");
+                jsonRostros.append("\n],\n");
+
+                if (!personaDetectada->anonimo) {
+                    GStringUtils::addJsonAtt(&jsonRostros, "idReconocido", personaDetectada->id, true);
+                    jsonRostros.append("\"idTipoRostro\":2,\n");
                 } else {
-                    GStringUtils::addJsonAtt(&jsonLstRostros, "idReconocido",
-                                             "0", true);
-                    jsonLstRostros.append("\"idTipoRostro\":1,\n");
+                    GStringUtils::addJsonAtt(&jsonRostros, "idReconocido", "0", true);
+                    jsonRostros.append("\"idTipoRostro\":1,\n");
                 }
 
                 GStringUtils::addJsonAtt(
-                    &jsonLstRostros, "probabilidad",
-                    GStringUtils::to_string_fixed(
-                        persona->cara.identificador.getPromedioComparacion(),
-                        2),
-                    true, false);
-                jsonLstRostros.append("}\n");
+                    &jsonRostros,
+                    "probabilidad",
+                    GStringUtils::to_string_fixed(trackFace->cara.identificador.getPromedioComparacion(), 2),
+                    true,
+                    false);
+
+                jsonRostros.append("}\n");
             }
         }
 
-        if (jsonLstRostros.size() > 0) {
-            string trama;
-            GImage fotoEscalada =
-                imagen.cloneResize(anchoVisualiza, alturaVisualiza);
+        if (!jsonRostros.empty()) {
+            string payloadEvento;
 
-            bufferImgVisor = GDibujo::encode(fotoEscalada, GDIBUJO_ENCODE_JPEG,
-                                             compresionJpeg, bufferLen);
-            bufferImgVisor64 = base64_encode(
-                (const unsigned char*)bufferImgVisor, bufferLen, &bufferLen64);
-            free(bufferImgVisor);
+            GImage frameEscalado = frameOriginal.cloneResize(anchoVisualiza, alturaVisualiza);
 
-            trama.append("{\n");
-            GStringUtils::addJsonAtt(&trama, "cuadro", bufferImgVisor64, false);
-            free(bufferImgVisor64);
+            jpegBuffer = GDibujo::encode(frameEscalado, GDIBUJO_ENCODE_JPEG, compresionJpeg, jpegLenBytes);
+            jpegBase64 = base64_encode((const unsigned char*)jpegBuffer, jpegLenBytes, &base64LenBytes);
+            free(jpegBuffer);
 
-            GStringUtils::addJsonAtt(&trama, "serieEquipo",
-                                     GStringUtils::trim(idEquipo), false);
-            GStringUtils::addJsonAtt(&trama, "fecEvento", ahora, false);
+            payloadEvento.append("{\n");
+            GStringUtils::addJsonAtt(&payloadEvento, "cuadro", jpegBase64, false);
+            free(jpegBase64);
 
-            trama.append("\"lstRostros\":[");
-            trama.append(jsonLstRostros);
-            trama.append("]\n");
-            trama.append("}\n");
+            GStringUtils::addJsonAtt(&payloadEvento, "serieEquipo", GStringUtils::trim(idEquipo), false);
+            GStringUtils::addJsonAtt(&payloadEvento, "fecEvento", fechaEventoStr, false);
 
-            LOG_INFO(LOG_COMPONENT,
+            payloadEvento.append("\"lstRostros\":[");
+            payloadEvento.append(jsonRostros);
+            payloadEvento.append("]\n");
+            payloadEvento.append("}\n");
+
+            LOG_DEBUG(LOG_COMPONENT,
                      "Evento generado. tipo="
-                         << (bucleTipoPer == 0 ? "identificados" : "no_identificados")
-                         << " total_rostros=" << n);
+                         << (tipoPersona == 0 ? "identificados" : "no_identificados")
+                         << " total_rostros=" << totalCaras);
 
-            if (bucleTipoPer == 0)
-                generadorEventos.agregarTramaIden(trama);
+            if (tipoPersona == 0)
+                generadorEventos.agregarTramaIden(payloadEvento);
             else
-                generadorEventos.agregarTramaNoIden(trama);
+                generadorEventos.agregarTramaNoIden(payloadEvento);
         }
     }
 }
 
 void ProcesoRecFacial::configure() {
     const auto cfg = LectorConfig::getInstance().getParams();
+
     lstParamsApp = cfg;
+
     generadorPingsAppWeb.configure();
-    if (generadorPingsMonitoreo) generadorPingsMonitoreo->configure();
+    if (generadorPingsMonitoreo) {
+        generadorPingsMonitoreo->configure();
+    }
     procDescargaDescFaciales.configure();
 }

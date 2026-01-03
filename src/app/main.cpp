@@ -425,38 +425,53 @@ namespace
  */
 int main(int argc, char* argv[])
 {
-    // 1) Cargar configuración desde el singleton LectorConfig
-    LectorConfig::getInstance().initFromFile("./config/config.txt");
-    const std::shared_ptr<GHashMap> config = LectorConfig::getInstance().getParams();
-
-    // 2) Configurar logger usando config
-    configurarLoggerDesdeConfig(config);
-
-    // 3) Si hay modo CLI (procesa / compara / dataset), ejecútalo y termina
-    const int resultadoCli = procesarArgumentosLineaComandos(argc, argv, config);
-    if (resultadoCli <= 0)
+    try
     {
-        LOG_INFO(LOG_COMP, "Ejecución finalizada en modo CLI.");
-        return resultadoCli;
+        // 1) Cargar configuración desde el singleton LectorConfig
+        LectorConfig::getInstance().initFromFile("./config/config.txt");
+        const std::shared_ptr<GHashMap> config = LectorConfig::getInstance().getParams();
+
+        // 2) Configurar logger usando config
+        configurarLoggerDesdeConfig(config);
+
+        // 3) Si hay modo CLI (procesa / compara / dataset), ejecútalo y termina
+        const int resultadoCli = procesarArgumentosLineaComandos(argc, argv, config);
+        if (resultadoCli <= 0)
+        {
+            LOG_INFO(LOG_COMP, "Ejecución finalizada en modo CLI.");
+            return resultadoCli;
+        }
+
+        // 4) Modo detector: iniciar el proceso principal
+        LOG_INFO(LOG_COMP, "Iniciando modo detector (tiempo real).");
+
+        ProcesoRecFacial proceso;
+
+        proceso.configure();
+
+        cargarParametrosDeProcesoDesdeConfig(proceso, config);
+
+        const std::shared_ptr<ImageSourceFactory> fuenteImagenes = crearFuenteImagenesDesdeConfig(config);
+        proceso.setImageFactory(fuenteImagenes);
+
+        cargarUniversoPersonasYEndpoints(proceso, config);
+
+        LOG_INFO(LOG_COMP, "Iniciando proceso de reconocimiento facial...");
+        proceso.iniciar();
+
+        LOG_INFO(LOG_COMP, "Proceso finalizado.");
+        return 0;
     }
-
-    // 4) Modo detector: iniciar el proceso principal
-    LOG_INFO(LOG_COMP, "Iniciando modo detector (tiempo real).");
-
-    ProcesoRecFacial proceso;
-
-    proceso.configure(); 
-
-    cargarParametrosDeProcesoDesdeConfig(proceso, config);
-
-    const std::shared_ptr<ImageSourceFactory> fuenteImagenes = crearFuenteImagenesDesdeConfig(config);
-    proceso.setImageFactory(fuenteImagenes);
-
-    cargarUniversoPersonasYEndpoints(proceso, config);
-
-    LOG_INFO(LOG_COMP, "Iniciando proceso de reconocimiento facial...");
-    proceso.iniciar();
-
-    LOG_INFO(LOG_COMP, "Proceso finalizado.");
-    return 0;
+    catch (const std::exception& ex)
+    {
+        LOG_CRITICAL(LOG_COMP, "Excepción no controlada (std::exception): " << ex.what());
+        std::cerr << "[FATAL] Excepción no controlada (std::exception): " << ex.what() << std::endl;
+        return -1;
+    }
+    catch (...)
+    {
+        LOG_CRITICAL(LOG_COMP, "Excepción no controlada (desconocida).");
+        std::cerr << "[FATAL] Excepción no controlada (desconocida)." << std::endl;
+        return -2;
+    }
 }
