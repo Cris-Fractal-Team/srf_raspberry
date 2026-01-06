@@ -76,29 +76,26 @@ echo "[copiaDeSeguridadDescFaciales] Subiendo backup a: ${BACKUP_ENDPOINT}"
 echo "[copiaDeSeguridadDescFaciales] Archivo: ${BACKUP_FILE}"
 
 RESPONSE_FILE="$(mktemp)"
-PAYLOAD_FILE="$(mktemp)"
-B64_FILE="$(mktemp)"
-
-# Genera base64 en archivo (no en variable)
-base64 -w0 "${BACKUP_FILE}" > "${B64_FILE}"
-
-# Construye JSON en archivo para que NO vaya como argumento gigantesco a curl
-printf '{"nombreArchivo":"%s","archivoBase64":"' "${BASE_LABEL}" > "${PAYLOAD_FILE}"
-cat "${B64_FILE}" >> "${PAYLOAD_FILE}"
-printf '"}' >> "${PAYLOAD_FILE}"
 
 set +e
-HTTP_CODE=$(
-  curl -sS -o "${RESPONSE_FILE}" -w '%{http_code}' \
-    -X POST "${BACKUP_ENDPOINT}" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer ${TOKEN}" \
-    --data-binary @"${PAYLOAD_FILE}"
-)
+if [[ -n "${CUSTOM_LABEL}" ]]; then
+  HTTP_CODE=$(
+    curl -sS -o "${RESPONSE_FILE}" -w '%{http_code}' \
+      -X POST "${BACKUP_ENDPOINT}" \
+      -H "Authorization: Bearer ${TOKEN}" \
+      -F "file=@${BACKUP_FILE};type=text/plain" \
+      -F "nombreArchivo=${BASE_LABEL}.txt"
+  )
+else
+  HTTP_CODE=$(
+    curl -sS -o "${RESPONSE_FILE}" -w '%{http_code}' \
+      -X POST "${BACKUP_ENDPOINT}" \
+      -H "Authorization: Bearer ${TOKEN}" \
+      -F "file=@${BACKUP_FILE};type=text/plain"
+  )
+fi
 CURL_EXIT=$?
 set -e
-
-rm -f "${PAYLOAD_FILE}" "${B64_FILE}"
 
 if [[ "${CURL_EXIT}" -ne 0 ]]; then
   echo "[copiaDeSeguridadDescFaciales] ERROR al invocar API (curl exit code ${CURL_EXIT})"
