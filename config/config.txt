@@ -145,7 +145,7 @@ _pathBDPersonas=./data/colegio-20250916.txt
 pathBDPersonas=./data/rostros_conocidos.txt
 
 
-# pathBDPersonas=./data/personas-fractal.txt
+# pathBDPersonas=./data/rostros-conocidos.txt
 
 # *************************************************************************************
 #  Configuracion para camaras onvif 
@@ -158,8 +158,8 @@ urlServidor=/cam/realmonitor?channel=1&subtype=0
 # urlServidor=/stream1
 
 onvifLogin=admin
-onvifPassword=12345678@
-onvifIP=192.168.3.201
+onvifPassword=12345678D
+onvifIP=192.168.1.123
 onvifPuerto=554
 
 # *************************************************************************************
@@ -216,9 +216,9 @@ urlBaseServidorUnificado_2=http://configsrfbackendstaging-dpdbdyahdtenbecr.canad
 _urlBaseServidorIden=http://iawks02.local/clientes/fractal/registra_data.php
 _urlBaseServidorNoIden=http://iawks02.local/clientes/fractal/registra_data.php
 _urlBaseServidorUnificado=http://iawks02.local/clientes/fractal/registra_data.php
-urlBaseServidorIden=http://192.168.3.103:8080/api/sensor/eventoSensor
-urlBaseServidorNoIden=http://192.168.3.103:8080/api/sensor/eventoDesconocidoSensor
-urlBaseServidorUnificado=http://192.168.3.103:8080/api/sensor/eventoDesconocidoSensor
+urlBaseServidorIden=http://lap01.local/clientes/fractal/registra_data.php
+urlBaseServidorNoIden=http://lap01.local/clientes/fractal/registra_data.php
+urlBaseServidorUnificado=http://lap01.local/clientes/fractal/registra_data.php
 
 
 # nivel de calidad JPEG
@@ -316,7 +316,7 @@ pixelSuavizado=0
 resizeSuavizado=0
 
 # Suavizado del JPEG que genera artefactos de compresion
-jpegSuavizado=50
+jpegSuavizado=100
 
 # Paramtro del nivel de contraste que se genera
 paramContraste=0
@@ -329,7 +329,7 @@ paramContraste=0
 encuadrarRostros=S
 
 # Altura a la que se escalan las imagenes antes de detectar rostros, esto tambien elimina detalles
-alturaImagenBase=800
+alturaImagenBase=1080
 
 # Ping Configuracion
 
@@ -338,7 +338,7 @@ generarLogPingAppWeb=true
 pathLogPingAppWeb=./pings_app_web.log
 pingIntervalMsAppWeb=3000000
 
-dotnetUrl=http://192.168.3.103:8080/api
+dotnetUrl=http://192.168.1.120:5070/api
 dotnetEndpointMonitoreo=/ping/log/
 dotnetEndpointCompletado=/ping/completo/
 
@@ -354,9 +354,12 @@ username=rpi-1
 password=Fr4ktal01$
 
 # Extractor Config
-directorioExtraccion=./descriptores_faciales/
+directorioExtraccion=./lab/
 archivoIndice=datos.txt
-archivoFinal=rostros_conocidos_blablabla.txt
+archivoFinal=rostros-conocidos.txt
 
 #Logger
 logLevel=INFO
+
+# Temperatura
+pathTemperatura=/sys/class/thermal/thermal_zone0/temp

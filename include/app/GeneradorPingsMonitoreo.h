@@ -8,6 +8,7 @@ using std::string;
 #include "lib/general/GThread.h"
 #include "lib/general/GLinkedList.h"
 #include "app/LectorConfig.h"
+#include "app/ExtractorTemperatura.h"
 
 class ProcesoRecFacial;
 
@@ -85,6 +86,10 @@ public:
      */
     ProcesoRecFacial* procRecFacial = nullptr;
 
+    /**
+     * Extracttor de Temperatura del dispositivo para cada ping
+     */
+    ExtractorTemperatura extractorTemperatura;
     /**
      * Método de configuración de parámetros
      */

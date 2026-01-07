@@ -28,6 +28,18 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
         int resultadoSolicitudMonitoreo =
             httpClientConsulta.doHttp(urlConsultaMonitoreo, "GET", nullptr, 0);
 
+        bool okTemperatura = false;
+        double tempC = extractorTemperatura.getTempCpuC(&okTemperatura);
+
+        if (okTemperatura)
+        {
+            LOG_INFO(LOG_COMPONENT, "Temperatura CPU: " << tempC << " °C");
+        }
+        else
+        {
+            LOG_ERROR(LOG_COMPONENT, "No se pudo obtener la temperatura CPU");
+        }
+
         if (resultadoSolicitudMonitoreo != 0) {
             LOG_ERROR(
                 LOG_COMPONENT,
