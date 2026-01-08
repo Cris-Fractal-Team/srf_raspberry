@@ -1,6 +1,7 @@
 /obj
 /config/config.txt
 *.log
+/videos
 myapp
 models
 .vscode

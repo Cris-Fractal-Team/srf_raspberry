@@ -101,6 +101,7 @@ public:
         generarLogPing = cfg->getStringBool("generarLogPingMonitoreo", false);
         pathLogPing    = cfg->getString("pathLogPingMonitoreo");
         pingIntervalMs = cfg->getStringLong("pingIntervalMsMonitoreo", 5000);
+        extractorTemperatura.configure();
     }
 
 private:
