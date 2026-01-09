@@ -18,27 +18,29 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
         std::string urlConsultaMonitoreo =
             dotnetUrl + dotnetEndpointMonitoreo + idEquipo;
 
-        if (idTareaProgramada != 0) {
-            urlConsultaMonitoreo += "?idTareaProgramada=" + std::to_string(idTareaProgramada);
-        }
-
         bool okTemperatura = false;
         double tempC = extractorTemperatura.getTempCpuC(&okTemperatura);
 
         if (okTemperatura)
         {
             LOG_INFO(LOG_COMPONENT, "Temperatura CPU: " << tempC << " °C");
+            urlConsultaMonitoreo += "?temperatura=" + std::to_string(tempC);
         }
         else
         {
             LOG_ERROR(LOG_COMPONENT, "No se pudo obtener la temperatura CPU");
         }
 
+        if (idTareaProgramada != 0) {
+            urlConsultaMonitoreo += "&idTareaProgramada=" + std::to_string(idTareaProgramada);
+        }
+
         LOG_DEBUG(LOG_COMPONENT, "Haciendo GET monitoreo: " << urlConsultaMonitoreo);
 
         GHttpClient httpClientConsulta;
-        int resultadoSolicitudMonitoreo =
-            httpClientConsulta.doHttp(urlConsultaMonitoreo, "GET", nullptr, 0);
+        httpClientConsulta.setHeader("Content-Type", "application/json");
+
+        int resultadoSolicitudMonitoreo = httpClientConsulta.doHttp(urlConsultaMonitoreo, "GET", nullptr, 0);
 
         LOG_DEBUG(LOG_COMPONENT, "GET retornó code=" << resultadoSolicitudMonitoreo);
 
@@ -54,6 +56,36 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
 
         LOG_INFO(LOG_COMPONENT, "DOTNET PING -> url=" << urlConsultaMonitoreo << " code=" << resultadoSolicitudMonitoreo << " success=" << (success ? "true" : "false"));
 
+        if (!success) {
+            return;
+        }
+
+        if (!jsonRespuesta.contains("pending") || !jsonRespuesta["pending"].is_array()) 
+        {
+            LOG_WARN(LOG_COMPONENT, "Respuesta sin array 'pending'");
+            return;
+        }
+
+        const json& listaTareasPendientes = jsonRespuesta["pending"];
+
+        if (listaTareasPendientes.empty()) {
+            return;
+        }
+
+        for (const auto& jsonTarea : listaTareasPendientes) 
+        {
+            if (!jsonTarea.is_object()) 
+            {
+                continue;
+            }
+
+            int idTareaProgramadaDesdeJson = jsonTarea.value("idTareaProgramada", 0);
+            int tipoDeTarea = jsonTarea.value("tipoDeTarea", 0);
+
+            LOG_INFO(LOG_COMPONENT, "Tarea pendiente recibida -> idTareaProgramada=" << idTareaProgramadaDesdeJson << " tipoDeTarea=" << tipoDeTarea);
+
+            procesarTareaProgramada(tipoDeTarea, idTareaProgramadaDesdeJson);
+        }
     } catch (const std::exception& ex) {
         LOG_ERROR(LOG_COMPONENT, "Excepción en consultarTareasProgramadas: " << ex.what());
     } catch (...) {
