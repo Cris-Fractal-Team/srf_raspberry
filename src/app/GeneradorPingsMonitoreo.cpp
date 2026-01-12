@@ -31,6 +31,10 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
             LOG_ERROR(LOG_COMPONENT, "No se pudo obtener la temperatura CPU");
         }
 
+        if (!username.empty()) {
+            urlConsultaMonitoreo += "&usuario=" + username;
+        }
+
         if (idTareaProgramada != 0) {
             urlConsultaMonitoreo += "&idTareaProgramada=" + std::to_string(idTareaProgramada);
         }

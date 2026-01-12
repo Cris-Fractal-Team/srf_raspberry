@@ -5,6 +5,7 @@
 
 #include "app/ExtractorFacialArchivo.h"
 #include "app/LectorConfig.h"
+#include "app/ExtractorTemperatura.h"
 
 class ProcDescargaDescFaciales {
    public:
@@ -110,6 +111,10 @@ class ProcDescargaDescFaciales {
      */
     int idTareaProgramada = -1;
 
+    /**
+     * Extracttor de Temperatura del dispositivo para cada ping
+     */
+    ExtractorTemperatura extractorTemperatura;
 
     /**
      * Método de configuración de parámetros
@@ -138,6 +143,7 @@ class ProcDescargaDescFaciales {
         extractor.pathArchivoBD    = dirExtraccion + "/" + archivoFinal;
 
         extractor.configure();
+        extractorTemperatura.configure();
     }
 
    private:

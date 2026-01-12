@@ -90,6 +90,11 @@ public:
      * Extracttor de Temperatura del dispositivo para cada ping
      */
     ExtractorTemperatura extractorTemperatura;
+
+    /**
+     * Nombre de usuario
+     */
+    string username;
     /**
      * Método de configuración de parámetros
      */
@@ -101,6 +106,7 @@ public:
         generarLogPing = cfg->getStringBool("generarLogPingMonitoreo", false);
         pathLogPing    = cfg->getString("pathLogPingMonitoreo");
         pingIntervalMs = cfg->getStringLong("pingIntervalMsMonitoreo", 5000);
+        username = cfg->getString("username");
         extractorTemperatura.configure();
     }
 
