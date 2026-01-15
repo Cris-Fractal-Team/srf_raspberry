@@ -129,8 +129,8 @@ void ProcesoRecFacial::iniciar() {
     detectorRostros.esperarPrevImgParaDeteccion =
         lstParamsApp->getStringBool("esperarPrevImgParaDeteccion", false);
 
-    generadorPingsMonitoreo->idEquipo = GStringUtils::trim(idEquipo);
-    procDescargaDescFaciales.idEquipo = GStringUtils::trim(idEquipo);
+    generadorPingsMonitoreo->serieEquipo = GStringUtils::trim(serieEquipo);
+    procDescargaDescFaciales.serieEquipo = GStringUtils::trim(serieEquipo);
 
     detectorRostros.runner.device = &vdevice;
     if (detectorRostros.cargarModelo("./models/scrfd_2.5ga.hef") != 0) {
@@ -858,7 +858,7 @@ void ProcesoRecFacial::notificaDetecciones(
             GStringUtils::addJsonAtt(&payloadEvento, "cuadro", jpegBase64, false);
             free(jpegBase64);
 
-            GStringUtils::addJsonAtt(&payloadEvento, "serieEquipo", GStringUtils::trim(idEquipo), false);
+            GStringUtils::addJsonAtt(&payloadEvento, "serieEquipo", GStringUtils::trim(serieEquipo), false);
             GStringUtils::addJsonAtt(&payloadEvento, "fecEvento", fechaEventoStr, false);
 
             payloadEvento.append("\"lstRostros\":[");
@@ -886,6 +886,7 @@ void ProcesoRecFacial::configure() {
 
     generadorPingsAppWeb.configure();
     if (generadorPingsMonitoreo) {
+        generadorPingsMonitoreo->serieEquipo = serieEquipo;
         generadorPingsMonitoreo->configure();
     }
     procDescargaDescFaciales.configure();

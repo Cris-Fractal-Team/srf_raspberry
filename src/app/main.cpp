@@ -286,8 +286,8 @@ namespace
 
     void cargarParametrosDeProcesoDesdeConfig(ProcesoRecFacial& proceso, const std::shared_ptr<GHashMap>& config)
     {
-        proceso.idEquipo = SystemUtils::getRaspberryPiSerial();
-        LOG_INFO(LOG_COMP, "Serie del equipo: " << proceso.idEquipo);
+        proceso.serieEquipo = GStringUtils::trim(SystemUtils::getRaspberryPiSerial());
+        LOG_INFO(LOG_COMP, "Serie del equipo: " << proceso.serieEquipo);
 
         proceso.alturaRostroMinima = config->getStringLong("anchoMinCaraRec", 90);
         proceso.anchoRostroMinimo  = config->getStringLong("alturaMinCaraRec", 90);
@@ -446,10 +446,10 @@ int main(int argc, char* argv[])
         LOG_INFO(LOG_COMP, "Iniciando modo detector (tiempo real).");
 
         ProcesoRecFacial proceso;
+        
+        cargarParametrosDeProcesoDesdeConfig(proceso, config);
 
         proceso.configure();
-
-        cargarParametrosDeProcesoDesdeConfig(proceso, config);
 
         const std::shared_ptr<ImageSourceFactory> fuenteImagenes = crearFuenteImagenesDesdeConfig(config);
         proceso.setImageFactory(fuenteImagenes);

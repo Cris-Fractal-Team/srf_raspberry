@@ -12,7 +12,7 @@ class ProcDescargaDescFaciales {
     /**
      * Nro de serie del equipo
      */
-    std::string idEquipo;
+    std::string serieEquipo;
 
     /**
      * URL base de la app web, por ejemplo:

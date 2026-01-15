@@ -39,6 +39,19 @@ public:
      */
     void configure();
 
+    /**
+     * Evaluar temperatura crítica 
+     */
+    bool esTemperaturaCritica(double temperaturaC);
 private:
+    /**
+     * Ruta de temperatura CPU
+     */
     std::string pathTempCpu;
+
+     /**
+     * Umbral de temperatura
+     */
+    double temperaturaCritica;
+
 };

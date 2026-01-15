@@ -17,6 +17,7 @@ ExtractorTemperatura::ExtractorTemperatura()
 void ExtractorTemperatura::configure()
 {
     const auto cfg = LectorConfig::getInstance().getParams();
+    temperaturaCritica = cfg->getStringDouble("temperaturaCritica", 0.1);
     string pathTemperatura = cfg->getString("pathTemperatura");
     setPathTempCpu(pathTemperatura);
 }
@@ -92,7 +93,15 @@ double ExtractorTemperatura::getTempCpuC(bool* ok)
     if (ok) *ok = r;
 
     if (!r)
-        return std::numeric_limits<double>::quiet_NaN(); // ✅ valor “inválido” si falló
+        return std::numeric_limits<double>::quiet_NaN();
 
-    return tempC; // ✅ valor numérico listo para usar
+    return tempC;
+}
+
+
+bool ExtractorTemperatura::esTemperaturaCritica(double temperaturaC)
+{
+    bool veredicto = temperaturaC >= temperaturaCritica;
+    if (veredicto) LOG_CRITICAL(LOG_COMPONENT, "Temperatura peligrosa: " << temperaturaC << "°C");
+    return veredicto;
 }

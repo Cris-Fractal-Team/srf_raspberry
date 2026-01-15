@@ -191,9 +191,9 @@ void ProcDescargaDescFaciales::crearCopiaSeguridadDescriptores(const std::string
 
     // Firma:
     // copiaDeSeguridadDescFaciales.sh <DIRECTORIO_DATASET> <API_URL> <SERIE_EQUIPO> <TOKEN> [ETIQUETA_OPCIONAL] [NOMBRE_ARCHIVO_FINAL]
-    std::string backupCommand = scriptPath + " \"" + datasetDirectory + "\" \"" + apiUrl + "\" \"" + idEquipo + "\" \"" + token + "\" \"" + backupLabel + "\" \"" + outputName + "\"";
+    std::string backupCommand = scriptPath + " \"" + datasetDirectory + "\" \"" + apiUrl + "\" \"" + serieEquipo + "\" \"" + token + "\" \"" + backupLabel + "\" \"" + outputName + "\"";
 
-    std::string backupCommandLog = scriptPath + " \"" + datasetDirectory + "\" \"" + apiUrl + "\" \"" + idEquipo + "\" \"" + token.substr(0, 8) + "***SECRET***" + "\" \"" + backupLabel + "\" \"" + outputName + "\"";
+    std::string backupCommandLog = scriptPath + " \"" + datasetDirectory + "\" \"" + apiUrl + "\" \"" + serieEquipo + "\" \"" + token.substr(0, 8) + "***SECRET***" + "\" \"" + backupLabel + "\" \"" + outputName + "\"";
 
     LOG_INFO(LOG_COMPONENT, "Ejecutando backup: " << backupCommandLog);
 
@@ -413,7 +413,7 @@ void ProcDescargaDescFaciales::notificarTareaCompletada()
         }
 
         json bodyJson;
-        bodyJson["nroDeSerie"] = idEquipo;
+        bodyJson["nroDeSerie"] = serieEquipo;
         bodyJson["temperatura"] = tempC;
         bodyJson["usuario"] = username;
 

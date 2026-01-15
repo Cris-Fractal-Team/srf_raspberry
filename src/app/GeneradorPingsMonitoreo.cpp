@@ -16,7 +16,7 @@ static constexpr const char* LOG_COMPONENT = "GeneradorPingsMonitoreo";
 void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
     try {
         std::string urlConsultaMonitoreo =
-            dotnetUrl + dotnetEndpointMonitoreo + idEquipo;
+            dotnetUrl + dotnetEndpointMonitoreo + serieEquipo;
 
         bool okTemperatura = false;
         double tempC = extractorTemperatura.getTempCpuC(&okTemperatura);
@@ -25,6 +25,9 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
         {
             LOG_INFO(LOG_COMPONENT, "Temperatura CPU: " << tempC << " °C");
             urlConsultaMonitoreo += "?temperatura=" + std::to_string(tempC);
+            if(extractorTemperatura.esTemperaturaCritica(tempC)){
+                emisorCorreosAlerta.postEmailAlerta(tempC);
+            }
         }
         else
         {
@@ -149,4 +152,18 @@ void GeneradorPingsMonitoreo::runThread() {
         LOG_ERROR(LOG_COMPONENT,
                   "Excepción desconocida fuera del bucle del thread");
     }
+}
+
+void GeneradorPingsMonitoreo::configure() {
+        const auto cfg = LectorConfig::getInstance().getParams();
+        dotnetUrl               = cfg->getString("dotnetUrl");
+        dotnetEndpointMonitoreo = cfg->getString("dotnetEndpointMonitoreo");
+
+        generarLogPing = cfg->getStringBool("generarLogPingMonitoreo", false);
+        pathLogPing    = cfg->getString("pathLogPingMonitoreo");
+        pingIntervalMs = cfg->getStringLong("pingIntervalMsMonitoreo", 5000);
+        username = cfg->getString("username");
+        emisorCorreosAlerta.configure();
+        emisorCorreosAlerta.setSerieEquipo(serieEquipo);
+        extractorTemperatura.configure();
 }

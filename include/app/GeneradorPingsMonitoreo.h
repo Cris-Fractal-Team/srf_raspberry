@@ -9,6 +9,7 @@ using std::string;
 #include "lib/general/GLinkedList.h"
 #include "app/LectorConfig.h"
 #include "app/ExtractorTemperatura.h"
+#include "app/EmisorCorreosAlerta.h"
 
 class ProcesoRecFacial;
 
@@ -52,7 +53,7 @@ public:
      * Serie del equipo que se usa en la URL:
      *   /api/ping/log/{serie}
      */
-    string idEquipo;
+    string serieEquipo;
 
     string dotnetEndpointMonitoreo;
 
@@ -98,20 +99,13 @@ public:
     /**
      * Método de configuración de parámetros
      */
-    void configure() {
-        const auto cfg = LectorConfig::getInstance().getParams();
-        dotnetUrl               = cfg->getString("dotnetUrl");
-        dotnetEndpointMonitoreo = cfg->getString("dotnetEndpointMonitoreo");
-
-        generarLogPing = cfg->getStringBool("generarLogPingMonitoreo", false);
-        pathLogPing    = cfg->getString("pathLogPingMonitoreo");
-        pingIntervalMs = cfg->getStringLong("pingIntervalMsMonitoreo", 5000);
-        username = cfg->getString("username");
-        extractorTemperatura.configure();
-    }
+    void configure();
 
 private:
-
+    /**
+     * Instancia para enviar correos de alerta
+     */
+    EmisorCorreosAlerta emisorCorreosAlerta;
     /**
      * Lista de tramas pendientes de enviar de personas identificadas
      */

@@ -27,7 +27,7 @@ class ProcesoRecFacial
         /**
          * Codigo unico del equipo, coincide con el ID unico del Raspberry PI
          */
-        string idEquipo;
+        string serieEquipo;
 
         /**
          * Generador de eventos que envia los datos en paralelo
