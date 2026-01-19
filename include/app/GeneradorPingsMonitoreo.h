@@ -3,6 +3,8 @@
 
 #include <chrono>
 #include <string>
+#include <atomic>
+
 using std::string;
 
 #include "lib/general/GThread.h"
@@ -101,7 +103,17 @@ public:
      */
     void configure();
 
+    /**
+     * Getter y Setter de habilitado
+     */
+    void setEnabled(bool v) { enabled.store(v); }
+    bool isEnabled() const { return enabled.load(); }
+
 private:
+    /**
+     * Habilitado para flujo
+     */
+    std::atomic<bool> enabled{true};
     /**
      * Instancia para enviar correos de alerta
      */

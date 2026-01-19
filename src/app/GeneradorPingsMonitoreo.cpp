@@ -27,6 +27,7 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
             urlConsultaMonitoreo += "?temperatura=" + std::to_string(tempC);
             if(extractorTemperatura.esTemperaturaCritica(tempC)){
                 emisorCorreosAlerta.postEmailAlerta(tempC);
+                procRecFacial->setEstadoSuspendido();
             }
         }
         else
@@ -133,6 +134,12 @@ void GeneradorPingsMonitoreo::runThread() {
         ultimoPingTp = std::chrono::steady_clock::now();
 
         while (!isFinalizado()) {
+            if (!enabled.load())
+            {
+                // modo deshabilitado: duerme y no hace llamadas
+                sleepMS(200);
+                continue;
+            }
             auto ahora = std::chrono::steady_clock::now();
             auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(ahora - ultimoPingTp).count();
 

@@ -142,7 +142,7 @@ _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R100_j80_C0_cuad_fractal_v3
 _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j80_C0_fractal_20250902-1102.txt
 _pathBDPersonas=./data/per_colegio_mobilenet_A800_S0_R1_j100_C0_fractal_20250902-1102.txt
 _pathBDPersonas=./data/colegio-20250916.txt
-pathBDPersonas=./data/rostros_conocidos.txt
+pathBDPersonas=./data/rostros-conocidos.txt
 
 
 # pathBDPersonas=./data/rostros-conocidos.txt
@@ -338,7 +338,7 @@ generarLogPingAppWeb=true
 pathLogPingAppWeb=./pings_app_web.log
 pingIntervalMsAppWeb=3000000
 
-dotnetUrl=http://192.168.1.120:5070/api
+dotnetUrl=http://127.0.0.1:5555/api
 dotnetEndpointMonitoreo=/ping/log/
 dotnetEndpointCompletado=/ping/completo/
 
@@ -363,3 +363,5 @@ logLevel=INFO
 
 # Temperatura
 pathTemperatura=/sys/class/thermal/thermal_zone0/temp
+temperaturaCritica=60.0
+emailAlertaEndpoint=/srf/sensor/email-alerta

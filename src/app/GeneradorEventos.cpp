@@ -65,6 +65,11 @@ void GeneradorEventos::runThread()
 
     while (isFinalizado() == false)
     {
+        if (!enabled.load())
+        {
+            sleepMS(200);
+            continue;
+        }
         auto inicioBucle = std::chrono::high_resolution_clock::now();
 
         if (hayEventosPend() == false)

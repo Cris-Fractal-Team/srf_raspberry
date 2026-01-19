@@ -191,9 +191,70 @@ void ProcesoRecFacial::iniciar() {
     finalizar = false;
     idDesconocidoSgte = 0;
 
+    bool avisoSuspendido = false;
+    bool avisoApagado = false;
+
     while (!finalizar) {
         const auto tInicioCiclo = std::chrono::high_resolution_clock::now();
 
+        if (isSuspendido())
+        {
+            setUsandoNPU(false);
+
+            if (!avisoSuspendido)
+            {
+                LOG_WARN(
+                    LOG_COMPONENT,
+                    "=== MODO SUSPENDIDO === Solo AppWebPings activo. "
+                    "Presiona 'y' para volver a ENCENDIDO o 'q' para salir.");
+                avisoSuspendido = true;
+                avisoApagado = false;
+            }
+
+            const int tecla = GDibujo::waitForKey(50);
+            if (tecla == 'q')
+            {
+                LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q) en SUSPENDIDO");
+                break;
+            }
+            if (tecla == 'y')
+            {
+                setEstadoEncendido();
+                LOG_INFO(LOG_COMPONENT, "Estado -> ENCENDIDO (desde SUSPENDIDO)");
+                avisoSuspendido = false;
+                avisoApagado = false;
+            }
+
+            usleep(200000);
+            continue;
+        }
+
+        if (isApagado())
+        {
+            setUsandoNPU(false);
+
+            if (!avisoApagado)
+            {
+                LOG_WARN(
+                    LOG_COMPONENT,
+                    "=== MODO APAGADO === Monitoreo + AppWebPings activos. Eventos apagados. "
+                    "Presiona 'q' para salir.");
+                avisoApagado = true;
+                avisoSuspendido = false;
+            }
+
+            const int tecla = GDibujo::waitForKey(50);
+            if (tecla == 'q')
+            {
+                LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q) en APAGADO");
+                break;
+            }
+
+            usleep(200000);
+            continue;
+        }
+        avisoSuspendido = false;
+        avisoApagado = false;
         // validar si se debe o no procesar las imagenes
         if (getFlagProcesarImagenes()) {
             if (!getUsandoNPU()) {
@@ -336,11 +397,10 @@ void ProcesoRecFacial::iniciar() {
 
         // Lee el teclado para finalizar si presiona 'q'
         const int tecla = GDibujo::waitForKey(10);
-        if (tecla == 'q') {
+        if (tecla == 'q')
+        {
             LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q)");
             break;
-        } else if (tecla == '1') {
-            modoCargaEnDuro = 1;
         }
 
         // marcar el flag usandoNPU = false
@@ -890,4 +950,49 @@ void ProcesoRecFacial::configure() {
         generadorPingsMonitoreo->configure();
     }
     procDescargaDescFaciales.configure();
+}
+
+void ProcesoRecFacial::setEstadoSolo(uint8_t flag)
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    flagsEstado = flag;
+}
+
+void ProcesoRecFacial::setEstadoEncendido()
+{
+    generadorPingsMonitoreo->setEnabled(true);
+    generadorEventos.setEnabled(true);
+    setEstadoSolo(EST_ENCENDIDO);
+}
+
+void ProcesoRecFacial::setEstadoApagado()
+{
+    generadorPingsMonitoreo->setEnabled(true);
+    generadorEventos.setEnabled(false);
+    setEstadoSolo(EST_APAGADO);
+}
+
+void ProcesoRecFacial::setEstadoSuspendido()
+{
+    generadorPingsMonitoreo->setEnabled(false);
+    generadorEventos.setEnabled(false);
+    setEstadoSolo(EST_SUSPENDIDO);
+}
+
+bool ProcesoRecFacial::isEncendido()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    return (flagsEstado & EST_ENCENDIDO) != 0;
+}
+
+bool ProcesoRecFacial::isApagado()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    return (flagsEstado & EST_APAGADO) != 0;
+}
+
+bool ProcesoRecFacial::isSuspendido()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    return (flagsEstado & EST_SUSPENDIDO) != 0;
 }

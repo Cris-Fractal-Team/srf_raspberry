@@ -256,6 +256,20 @@ class ProcesoRecFacial
         */
        void configure();
 
+       enum FlagsEstado : uint8_t
+        {
+            EST_APAGADO    = 1 << 0,
+            EST_ENCENDIDO  = 1 << 1,
+            EST_SUSPENDIDO = 1 << 2
+        };
+
+        void setEstadoEncendido();
+        void setEstadoApagado();
+        void setEstadoSuspendido();
+
+        bool isEncendido();
+        bool isApagado();
+        bool isSuspendido();
     private:        
         
         /**
@@ -332,6 +346,11 @@ class ProcesoRecFacial
          * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
          */
         double factorEscalaVisualizaY;
+        
+        uint8_t flagsEstado = EST_ENCENDIDO;
+
+        void setEstadoSolo(uint8_t flag);
+
 };
 
 

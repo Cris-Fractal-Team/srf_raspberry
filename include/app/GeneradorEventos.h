@@ -4,6 +4,7 @@
 
 #include "lib/general/GThread.h"
 #include "lib/general/GLinkedList.h"
+#include <atomic>
 
 
 /**
@@ -65,9 +66,17 @@ class GeneradorEventos : public GThread
          **/
         bool hayEventosPend();
 
-
+        /**
+        * Getter y Setter de habilitado
+        */
+        void setEnabled(bool v) { enabled.store(v); }
+        bool isEnabled() const { return enabled.load(); }
     private:
 
+        /**
+         * Habilitado para flujo
+         */
+        std::atomic<bool> enabled{true};
         /**
          * Lista de tramas pendientes de enviar de personas identificadas
          */
