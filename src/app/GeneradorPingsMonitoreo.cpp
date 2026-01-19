@@ -39,7 +39,7 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
             urlConsultaMonitoreo += "&usuario=" + username;
         }
 
-        if (idTareaProgramada != 0) {
+        if (idTareaProgramada != 0 && procRecFacial->isEncendido()) {
             urlConsultaMonitoreo += "&idTareaProgramada=" + std::to_string(idTareaProgramada);
         }
 
@@ -101,23 +101,47 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
     }
 }
 
-void GeneradorPingsMonitoreo::procesarTareaProgramada(
-    int tipoDeTarea, int idTareaProgramadaDesdeJson) {
-    switch (tipoDeTarea) {
-        case 0:
-            break;
-        case 1:
-            idTareaProgramada = idTareaProgramadaDesdeJson;
-            LOG_DEBUG(LOG_COMPONENT, "Actualizando idTareaProgramada a " << idTareaProgramadaDesdeJson);
-            break;
-        case 2:
-            LOG_INFO(LOG_COMPONENT, "Activando procesamiento de imágenes para tarea " << idTareaProgramadaDesdeJson);
-            procRecFacial->setIdTareaProgramada(idTareaProgramadaDesdeJson);
-            procRecFacial->setFlagProcesarImagenes(true);
-            break;
-        default:
-            LOG_WARN(LOG_COMPONENT, "Tipo de tarea desconocido: " << tipoDeTarea);
-            break;
+void GeneradorPingsMonitoreo::procesarTareaProgramada(int tipoDeTarea, int idTareaProgramadaDesdeJson) {
+    if(procRecFacial->isEncendido()){
+        switch (tipoDeTarea) {
+            case 0:
+                break;
+            case 1:
+                idTareaProgramada = idTareaProgramadaDesdeJson;
+                LOG_DEBUG(LOG_COMPONENT, "Actualizando idTareaProgramada a " << idTareaProgramadaDesdeJson);
+                break;
+            case 2:
+                LOG_INFO(LOG_COMPONENT, "Activando procesamiento de imágenes para tarea " << idTareaProgramadaDesdeJson);
+                procRecFacial->setIdTareaProgramada(idTareaProgramadaDesdeJson);
+                procRecFacial->setFlagProcesarImagenes(true);
+                break;
+            case 4:
+                LOG_INFO(LOG_COMPONENT, "Cambiando el estado a APAGADO PROGRAMADO segun la tarea programada " << idTareaProgramadaDesdeJson);
+                procRecFacial->setEstadoApagado();
+                break;
+            default:
+                LOG_WARN(LOG_COMPONENT, "Tipo de tarea desconocido: " << tipoDeTarea);
+                break;
+        }
+    }else{
+       switch (tipoDeTarea) {
+            case 0:
+                break;
+            case 1:
+                idTareaProgramada = idTareaProgramadaDesdeJson;
+                LOG_DEBUG(LOG_COMPONENT, "Actualizando idTareaProgramada a " << idTareaProgramadaDesdeJson);
+                procRecFacial->setEstadoEncendido();
+                break;
+            case 2:
+                LOG_INFO(LOG_COMPONENT, "APAGADO: ignorando tarea tipo 2 (procesamiento de imágenes) id=" << idTareaProgramada);
+                break;
+            case 4:
+                LOG_INFO(LOG_COMPONENT, "Manteniendo el estado a APAGADO PROGRAMADO segun la tarea programada " << idTareaProgramadaDesdeJson);
+                break;
+            default:
+                LOG_WARN(LOG_COMPONENT, "Tipo de tarea desconocido: " << tipoDeTarea);
+                break;
+        } 
     }
 }
 

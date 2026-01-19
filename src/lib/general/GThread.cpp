@@ -28,10 +28,14 @@ GThread::GThread()
     threadPool = NULL;
     th = NULL;
 
-    // signal(SIGPIPE, sigpipe_handler_thread);
-        
-    // th = new thread( &GThread::bucleThread,this);
     thName = "";
+
+    nucleoAsociado = -1;
+    esDemonio = false;
+
+    ocupado = false;
+    finalizado = true;   // aún no corre
+    thCreado = false;    // si lo tienes
 }
 
 /**
@@ -57,12 +61,30 @@ GThread::GThread( string nombre )
  */
 GThread::~GThread()
 {
-    if ( finalizado == false )
-    {
-        finalizar();
-    }
+    finalizarYEsperar();
 }
 
+void GThread::finalizarYEsperar()
+{
+    finalizar();
+
+    // Despierta el bucle si está esperando "ocupado"
+    mtxBloquea();
+    ocupado = true;
+    mtxLibera();
+
+    if (th != NULL)
+    {
+        return;
+    }
+
+    if (th->joinable())
+    {
+        th->join();
+    }
+    delete th;
+    th = NULL;
+}
 
 /**
  * Genera una pausa de milisegundos

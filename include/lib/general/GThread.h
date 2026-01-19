@@ -135,6 +135,9 @@ class GThread : public GObject
          */
         std::mutex& getMutexRef();
 
+
+        void finalizarYEsperar();
+
     private:
 
         /**

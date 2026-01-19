@@ -9,7 +9,15 @@ Hailo8LRunner::Hailo8LRunner()
 {
     estadoEjec = H8LR_LIB_ESTADO_NUEVO;
     estadoInferencia = H8LR_LIB_INF_PENDIENTE;
+
+    device = nullptr;
+    inferData = nullptr;
+    inferDataSize = 0;
+    inferNumber = 1;
+    errorEjec = 0;
+
 }
+
 
 
 /**
@@ -18,12 +26,7 @@ Hailo8LRunner::Hailo8LRunner()
 Hailo8LRunner::~Hailo8LRunner()
 {
     cout << "Destructor de Hailo8LRunner" << endl;
-    if ( isFinalizado() == false )
-    {
-        cout << "Se solicita finalizar thread" << endl;
-        finalizar();
-    }
-    sleep(1);
+    finalizarYEsperar();
 }
 
 /**
@@ -148,6 +151,14 @@ void Hailo8LRunner::runThread()
     //     setEstadoEjec(H8LR_LIB_ESTADO_ERROR_CARGA_RED);
     //     return;
     // }
+
+    if (device == nullptr || !(*device))
+    {
+        cerr << "Error: device no inicializado en runner" << endl;
+        errorEjec = H8LR_LIB_ERR_CREAR_DISPOSITIVO;
+        setEstadoEjec(H8LR_LIB_ESTADO_ERROR_CARGA_RED);
+        return;
+    }
 
     mtxBloquea();
     path = pathModelo;
