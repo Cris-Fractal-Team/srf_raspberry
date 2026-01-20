@@ -270,6 +270,8 @@ class ProcesoRecFacial
         bool isEncendido();
         bool isApagado();
         bool isSuspendido();
+
+        GImage construirFrameAviso(int ancho, int alto, const std::vector<std::string>& lineas);
     private:        
         
         /**

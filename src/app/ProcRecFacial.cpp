@@ -191,9 +191,6 @@ void ProcesoRecFacial::iniciar() {
     finalizar = false;
     idDesconocidoSgte = 0;
 
-    bool avisoSuspendido = false;
-    bool avisoApagado = false;
-
     while (!finalizar) {
         const auto tInicioCiclo = std::chrono::high_resolution_clock::now();
 
@@ -201,28 +198,26 @@ void ProcesoRecFacial::iniciar() {
         {
             setUsandoNPU(false);
 
-            if (!avisoSuspendido)
-            {
-                LOG_WARN(
-                    LOG_COMPONENT,
-                    "=== MODO SUSPENDIDO === Solo AppWebPings activo. "
-                    "Presiona 'y' para volver a ENCENDIDO o 'q' para salir.");
-                avisoSuspendido = true;
-                avisoApagado = false;
-            }
+            std::vector<std::string> msg = {
+                "=== MODO SUSPENDIDO ===",
+                "Solo AppWebPings activo.",
+                "Presiona 'y' para volver a ENCENDIDO",
+                "Presiona 'q' para salir"
+            };
+
+            GImage frameAviso = construirFrameAviso(anchoVisualiza, alturaVisualiza, msg);
+
+            servidorWeb->setImage(frameAviso);
+            GDibujo::show(frameAviso, "Visor");
 
             const int tecla = GDibujo::waitForKey(50);
             if (tecla == 'q')
             {
-                LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q) en SUSPENDIDO");
                 break;
             }
             if (tecla == 'y')
             {
                 setEstadoEncendido();
-                LOG_INFO(LOG_COMPONENT, "Estado -> ENCENDIDO (desde SUSPENDIDO)");
-                avisoSuspendido = false;
-                avisoApagado = false;
             }
 
             usleep(200000);
@@ -233,28 +228,27 @@ void ProcesoRecFacial::iniciar() {
         {
             setUsandoNPU(false);
 
-            if (!avisoApagado)
-            {
-                LOG_WARN(
-                    LOG_COMPONENT,
-                    "=== MODO APAGADO === Monitoreo + AppWebPings activos. Eventos apagados. "
-                    "Presiona 'q' para salir.");
-                avisoApagado = true;
-                avisoSuspendido = false;
-            }
+            std::vector<std::string> msg = {
+                "=== MODO APAGADO ===",
+                "Monitoreo + AppWebPings activos.",
+                "Eventos apagados.",
+                "Presiona 'q' para salir"
+            };
+
+            GImage frameAviso = construirFrameAviso(anchoVisualiza, alturaVisualiza, msg);
+
+            servidorWeb->setImage(frameAviso);
+            GDibujo::show(frameAviso, "Visor");
 
             const int tecla = GDibujo::waitForKey(50);
             if (tecla == 'q')
             {
-                LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q) en APAGADO");
                 break;
             }
 
             usleep(200000);
             continue;
         }
-        avisoSuspendido = false;
-        avisoApagado = false;
         // validar si se debe o no procesar las imagenes
         if (getFlagProcesarImagenes()) {
             if (!getUsandoNPU()) {
@@ -995,4 +989,39 @@ bool ProcesoRecFacial::isSuspendido()
 {
     std::lock_guard<std::mutex> lock(mtx);
     return (flagsEstado & EST_SUSPENDIDO) != 0;
+}
+
+GImage ProcesoRecFacial::construirFrameAviso(int ancho, int alto, const std::vector<std::string>& lineas)
+{
+    // Crea un frame negro RGB
+    GImage img(ancho, alto, GDIBUJO_IMAGEN_MODO_RGB);
+
+    // "Tarjeta" central
+    GRect caja;
+    caja.x1 = 40;
+    caja.y1 = 40;
+    caja.x2 = ancho - 40;
+    caja.y2 = alto - 40;
+
+    GColor colorFondo(20, 20, 20);
+    GColor colorBorde(80, 80, 80);
+    GColor colorTexto(255, 255, 255);
+
+    GDibujo::drawRect(img, caja, colorFondo, -1);
+    GDibujo::drawRect(img, caja, colorBorde, 2);
+
+    int x = caja.x1 + 30;
+    int y = caja.y1 + 60;
+
+    const double escala = 1.0;
+    const int grosor = 2;
+    const int salto = 45;
+
+    for (const auto& s : lineas)
+    {
+        GDibujo::drawText(img, x, y, s, GDIBUJO_FONT_HELVETICA, colorTexto, escala, grosor);
+        y += salto;
+    }
+
+    return img;
 }
