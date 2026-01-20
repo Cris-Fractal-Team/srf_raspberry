@@ -26,8 +26,8 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
             LOG_INFO(LOG_COMPONENT, "Temperatura CPU: " << tempC << " °C");
             urlConsultaMonitoreo += "?temperatura=" + std::to_string(tempC);
             if(extractorTemperatura.esTemperaturaCritica(tempC)){
-                emisorCorreosAlerta.postEmailAlerta(tempC);
                 procRecFacial->setEstadoSuspendido();
+                emisorCorreosAlerta.postEmailAlerta(tempC);
             }
         }
         else
@@ -65,6 +65,11 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
         LOG_INFO(LOG_COMPONENT, "DOTNET PING -> url=" << urlConsultaMonitoreo << " code=" << resultadoSolicitudMonitoreo << " success=" << (success ? "true" : "false"));
 
         if (!success) {
+            if(idTareaProgramada != 0)
+            {
+                idTareaProgramada = 0;
+                consultarTareasProgramadas();
+            }
             return;
         }
 
@@ -123,7 +128,7 @@ void GeneradorPingsMonitoreo::procesarTareaProgramada(int tipoDeTarea, int idTar
                 LOG_WARN(LOG_COMPONENT, "Tipo de tarea desconocido: " << tipoDeTarea);
                 break;
         }
-    }else{
+    }else if (procRecFacial->isApagado()){
        switch (tipoDeTarea) {
             case 0:
                 break;
