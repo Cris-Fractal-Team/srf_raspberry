@@ -148,6 +148,8 @@ private:
      * y permite extender comportamientos via switch.
      */
     void procesarTareaProgramada(int tipoDeTarea, int idTareaJson);
+
+    void marcadoCompletoAuxiliar();
 };
 
 #endif

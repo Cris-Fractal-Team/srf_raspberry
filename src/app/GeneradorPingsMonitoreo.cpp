@@ -12,6 +12,64 @@
 using json = nlohmann::json;
 
 static constexpr const char* LOG_COMPONENT = "GeneradorPingsMonitoreo";
+static constexpr const int TAREA_PROGRAMADA_NULL = 0;
+
+void GeneradorPingsMonitoreo::marcadoCompletoAuxiliar() {
+    try{
+        std::string urlConsultaMonitoreo =
+            dotnetUrl + dotnetEndpointMonitoreo + serieEquipo;
+
+        bool okTemperatura = false;
+        double tempC = extractorTemperatura.getTempCpuC(&okTemperatura);
+
+        if (okTemperatura)
+        {
+            LOG_INFO(LOG_COMPONENT, "Temperatura CPU: " << tempC << " °C");
+            urlConsultaMonitoreo += "?temperatura=" + std::to_string(tempC);
+            if(extractorTemperatura.esTemperaturaCritica(tempC)){
+                procRecFacial->setEstadoSuspendido();
+                emisorCorreosAlerta.postEmailAlerta(tempC);
+            }
+        }
+        else
+        {
+            LOG_ERROR(LOG_COMPONENT, "No se pudo obtener la temperatura CPU");
+        }
+
+        if (!username.empty()) {
+            urlConsultaMonitoreo += "&usuario=" + username;
+        }
+
+        if (idTareaProgramada != 0 && procRecFacial->isEncendido()) {
+            urlConsultaMonitoreo += "&idTareaProgramada=" + std::to_string(idTareaProgramada);
+        }
+
+        LOG_DEBUG(LOG_COMPONENT, "Haciendo GET monitoreo: " << urlConsultaMonitoreo);
+
+        GHttpClient httpClientConsulta;
+        httpClientConsulta.setHeader("Content-Type", "application/json");
+
+        int resultadoSolicitudMonitoreo = httpClientConsulta.doHttp(urlConsultaMonitoreo, "GET", nullptr, 0);
+
+        LOG_DEBUG(LOG_COMPONENT, "GET retornó code=" << resultadoSolicitudMonitoreo);
+
+        if (resultadoSolicitudMonitoreo != 0) {
+            LOG_ERROR(LOG_COMPONENT, "ERROR al hacer GET pings dotnet. code=" << resultadoSolicitudMonitoreo << " url=" << urlConsultaMonitoreo);
+            return;
+        }
+
+        std::string cuerpoRespuesta = httpClientConsulta.responseToStr();
+        json jsonRespuesta = json::parse(cuerpoRespuesta);
+
+        bool success = jsonRespuesta.value("success", false);
+
+        LOG_INFO(LOG_COMPONENT, "DOTNET PING -> url=" << urlConsultaMonitoreo << " code=" << resultadoSolicitudMonitoreo << " success=" << (success ? "true" : "false"));
+    } catch (const std::exception& ex) {
+        LOG_ERROR(LOG_COMPONENT, "Excepción en consultarTareasProgramadas: " << ex.what());
+    } catch (...) {
+        LOG_ERROR(LOG_COMPONENT, "Excepción desconocida en consultarTareasProgramadas");
+    }
+}
 
 void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
     try {
@@ -65,9 +123,9 @@ void GeneradorPingsMonitoreo::consultarTareasProgramadas() {
         LOG_INFO(LOG_COMPONENT, "DOTNET PING -> url=" << urlConsultaMonitoreo << " code=" << resultadoSolicitudMonitoreo << " success=" << (success ? "true" : "false"));
 
         if (!success) {
-            if(idTareaProgramada != 0)
+            if(idTareaProgramada != TAREA_PROGRAMADA_NULL)
             {
-                idTareaProgramada = 0;
+                idTareaProgramada = TAREA_PROGRAMADA_NULL;
                 consultarTareasProgramadas();
             }
             return;
@@ -112,8 +170,11 @@ void GeneradorPingsMonitoreo::procesarTareaProgramada(int tipoDeTarea, int idTar
             case 0:
                 break;
             case 1:
-                idTareaProgramada = idTareaProgramadaDesdeJson;
-                LOG_DEBUG(LOG_COMPONENT, "Actualizando idTareaProgramada a " << idTareaProgramadaDesdeJson);
+                if(idTareaProgramada == TAREA_PROGRAMADA_NULL){
+                    idTareaProgramada = idTareaProgramadaDesdeJson;
+                    marcadoCompletoAuxiliar();
+                    LOG_DEBUG(LOG_COMPONENT, "Actualizando idTareaProgramada a " << idTareaProgramadaDesdeJson);
+                }
                 break;
             case 2:
                 LOG_INFO(LOG_COMPONENT, "Activando procesamiento de imágenes para tarea " << idTareaProgramadaDesdeJson);
@@ -123,6 +184,7 @@ void GeneradorPingsMonitoreo::procesarTareaProgramada(int tipoDeTarea, int idTar
             case 4:
                 LOG_INFO(LOG_COMPONENT, "Cambiando el estado a APAGADO PROGRAMADO segun la tarea programada " << idTareaProgramadaDesdeJson);
                 procRecFacial->setEstadoApagado();
+                idTareaProgramada = TAREA_PROGRAMADA_NULL;
                 break;
             default:
                 LOG_WARN(LOG_COMPONENT, "Tipo de tarea desconocido: " << tipoDeTarea);
@@ -136,6 +198,7 @@ void GeneradorPingsMonitoreo::procesarTareaProgramada(int tipoDeTarea, int idTar
                 idTareaProgramada = idTareaProgramadaDesdeJson;
                 LOG_DEBUG(LOG_COMPONENT, "Actualizando idTareaProgramada a " << idTareaProgramadaDesdeJson);
                 procRecFacial->setEstadoEncendido();
+                marcadoCompletoAuxiliar();
                 break;
             case 2:
                 LOG_INFO(LOG_COMPONENT, "APAGADO: ignorando tarea tipo 2 (procesamiento de imágenes) id=" << idTareaProgramada);
