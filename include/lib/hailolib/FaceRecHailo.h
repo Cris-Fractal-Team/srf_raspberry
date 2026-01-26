@@ -174,11 +174,16 @@ class DescPersonaExterno
 class GrupoIdenPersona
 {
     public:
+        /**
+         * Copia estable del ID (NO depende de que descExterno siga vivo)
+         */
+        std::string idExterno;
 
         /**
-         * Descriptor de la persona base externo
+         * Descriptor de la persona base externo (puntero no-owning)
+         * OJO: puede quedar colgando si lo liberan en otro lado.
          */
-        DescPersonaExterno *descExterno;        
+        DescPersonaExterno *descExterno;
 
         /**
          * Fecha de creacion del objeto 
@@ -188,7 +193,14 @@ class GrupoIdenPersona
         /**
          * Lista de identificaciones
          */
-        GLinkedList<IdentificacionPersona>lstIdentificaciones;
+        GLinkedList<IdentificacionPersona> lstIdentificaciones;
+
+        GrupoIdenPersona()
+            : idExterno("")
+            , descExterno(nullptr)
+            , fecCrea(0)
+        {
+        }
 };
 
 /**

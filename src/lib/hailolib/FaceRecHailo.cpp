@@ -14,15 +14,21 @@
  */
 void DescPersonaExterno::reset()
 {
-    UnivIdenPersona *ptrUnivIden;
-    int n = lstPersonas.size();
+    // Clona para evitar problemas si durante el borrado se modifica lstPersonas
+    GLinkedList<UnivIdenPersona*> copia = lstPersonas.getClone();
 
-    for(int i=0; i<n; i++)
+    for (int i = 0; i < copia.size(); ++i)
     {
-        ptrUnivIden = lstPersonas.get(i);
-
+        UnivIdenPersona *u = copia.get(i);
+        if (u != nullptr)
+        {
+            u->borrarDescPersonaExterno(this);
+        }
     }
+
+    lstPersonas.reset();
 }
+
 
 /**
  * Normaliza el descriptor
@@ -54,22 +60,33 @@ UnivIdenPersona::UnivIdenPersona()
 /**
  * Borra las referencias a descriptor externo
  */
-void UnivIdenPersona::borrarDescPersonaExterno( DescPersonaExterno *descExterno )
+void UnivIdenPersona::borrarDescPersonaExterno(DescPersonaExterno *descExterno)
 {
-    GrupoIdenPersona *grupo;
-    int i,n;
+    int i = lstGrupoIden.size() - 1;
 
-    n = lstGrupoIden.size()-1;
-    for(i=n; i >= n; i--)
+    for (; i >= 0; --i)
     {
-        grupo = lstGrupoIden.getAddr(i);
-        if ( grupo->descExterno == descExterno )
+        GrupoIdenPersona *grupo = lstGrupoIden.getAddr(i);
+        if (grupo != nullptr && grupo->descExterno == descExterno)
         {
             grupo->lstIdentificaciones.reset();
             lstGrupoIden.remove(i);
         }
     }
+
+    // opcional: si borraste el grupo principal, recalcula indiceGrupoPrin
+    if (lstGrupoIden.size() == 0)
+    {
+        indiceGrupoPrin = 0;
+        numIden = 0;
+        cambioIdentificacion = true;
+    }
+    else if (indiceGrupoPrin >= lstGrupoIden.size())
+    {
+        indiceGrupoPrin = lstGrupoIden.size() - 1;
+    }
 }
+
 
 
 /**
@@ -103,54 +120,72 @@ void UnivIdenPersona::reset()
  *          Fecha en la que se hizo la deteccion
  * 
  */
-void UnivIdenPersona::agregaIdentif( DescPersonaExterno *descExterno, IdentificacionPersona iden, long long fecDet )
+void UnivIdenPersona::agregaIdentif(DescPersonaExterno *descExterno, IdentificacionPersona iden, long long fecDet)
 {
-    int i,n,len;
-    bool encontro;
-    GrupoIdenPersona *grupo;
+    int i, n, len;
+    bool encontro = false;
+    GrupoIdenPersona *grupo = nullptr;
 
-    encontro = false;
+    // ID estable (si descExterno es null, usa algo fijo)
+    const std::string idKey = (descExterno != nullptr) ? descExterno->id : std::string("__ANON__");
+
     n = lstGrupoIden.size();
-    for(i=0;i<n;i++)
+    for (i = 0; i < n; i++)
     {
         grupo = lstGrupoIden.getAddr(i);
-        if ( grupo->descExterno->id.compare(descExterno->id) == 0 )
+
+        // ✅ NO tocar grupo->descExterno->id (puede estar colgando)
+        if (grupo->idExterno == idKey)
         {
-            // se encontro que ya existe ese descriptor en el universo
             iden.fecDet = fecDet;
             grupo->lstIdentificaciones.add(iden);
-            len = grupo->lstIdentificaciones.size(); 
-            if ( len > numIden )
-            {
-                if ( i != indiceGrupoPrin ) cambioIdentificacion = true;
-                else cambioIdentificacion = false;
 
+            len = grupo->lstIdentificaciones.size();
+            if (len > numIden)
+            {
+                cambioIdentificacion = (i != indiceGrupoPrin);
                 indiceGrupoPrin = i;
-                numIden = len;                
+                numIden = len;
             }
+
+            // Mantén el puntero si sigue vivo
+            if (grupo->descExterno == nullptr)
+                grupo->descExterno = descExterno;
+
             encontro = true;
             break;
         }
     }
-    if ( encontro == false )
+
+    if (!encontro)
     {
         GrupoIdenPersona grupoNuevo;
 
         iden.fecDet = fecDet;
+        grupoNuevo.idExterno = idKey;
         grupoNuevo.descExterno = descExterno;
         grupoNuevo.fecCrea = fecDet;
         grupoNuevo.lstIdentificaciones.add(iden);
 
-        lstGrupoIden.add(grupoNuevo);        
-        if ( numIden == 0 )
+        lstGrupoIden.add(grupoNuevo);
+
+        if (numIden == 0)
         {
-            // Es el primer grupo que se crea
             indiceGrupoPrin = 0;
             numIden = 1;
             cambioIdentificacion = true;
-        }        
+        }
 
-        grupoNuevo.lstIdentificaciones.reset();
+        // ❌ NO reset aquí
+    }
+
+    // (Opcional pero recomendado) registrar “esta persona” como referenciadora del descriptor externo
+    // Solo si descExterno != nullptr y quieres usar DescPersonaExterno::reset()
+    if (descExterno != nullptr)
+    {
+        // Evita duplicados si tu flujo puede repetir, si no, puedes dejarlo simple.
+        // Si no tienes contains, lo dejamos simple.
+        descExterno->lstPersonas.add(this);
     }
 }
 
