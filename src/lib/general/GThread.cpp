@@ -68,23 +68,27 @@ void GThread::finalizarYEsperar()
 {
     finalizar();
 
-    // Despierta el bucle si está esperando "ocupado"
     mtxBloquea();
     ocupado = true;
     mtxLibera();
 
-    if (th != NULL)
+    if (th == NULL)
+        return;
+
+    if (esDemonio)
     {
+        delete th;
+        th = NULL;
         return;
     }
 
     if (th->joinable())
-    {
         th->join();
-    }
+
     delete th;
     th = NULL;
 }
+
 
 /**
  * Genera una pausa de milisegundos

@@ -14,6 +14,8 @@
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
 #include "app/GeneradorPingsAppWeb.h"
 #include "app/ProcDescargaDescFaciales.h"
+#include <unordered_map>
+#include <mutex>
 
 class GeneradorPingsMonitoreo;
 
@@ -272,6 +274,14 @@ class ProcesoRecFacial
         bool isSuspendido();
 
         GImage construirFrameAviso(int ancho, int alto, const std::vector<std::string>& lineas);
+
+
+        long throttleNoIdentMs = 1000;
+        std::mutex mtxDebounceAnon;
+        std::unordered_map<std::string, long long> lastSentAnon;
+
+        bool shouldEmitAnonimo(const std::string& anonId, long long nowMs);
+
     private:        
         
         /**

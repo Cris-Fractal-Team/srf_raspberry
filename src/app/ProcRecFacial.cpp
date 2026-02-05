@@ -836,7 +836,13 @@ void ProcesoRecFacial::notificaDetecciones(
                 (trackFace->cara.personaIdent && (deltaMs >= tiempoReEvento));
 
             if (cumpleMinimoIdentificaciones && debeReemitirEvento) {
-                trackFace->cara.identificador.fechaUltEvento = timestampEventoMs;
+                if (personaDetectada->anonimo)
+                {
+                    if (!shouldEmitAnonimo(personaDetectada->id, timestampEventoMs))
+                    {
+                        continue;
+                    }
+                }
 
                 nombresReconocidosCsv.append(personaDetectada->nombre);
                 nombresReconocidosCsv.append(",");
@@ -896,6 +902,15 @@ void ProcesoRecFacial::notificaDetecciones(
                     false);
 
                 jsonRostros.append("}\n");
+
+                trackFace->cara.identificador.fechaUltEvento = timestampEventoMs;
+
+                LOG_DEBUG(LOG_COMPONENT,
+                    "ROSTRO ADD tipoPersona=" << tipoPersona
+                    << " anon=" << (personaDetectada->anonimo ? "S" : "N")
+                    << " id=" << personaDetectada->id
+                    << " deltaMs=" << deltaMs
+                    << " numId=" << trackFace->cara.identificador.getNumIdentificaciones());
             }
         }
 
@@ -944,6 +959,12 @@ void ProcesoRecFacial::configure() {
         generadorPingsMonitoreo->configure();
     }
     procDescargaDescFaciales.configure();
+
+    throttleNoIdentMs = lstParamsApp->getStringLong("throttleNoIdentMs", 1000);
+    if (throttleNoIdentMs < 0) throttleNoIdentMs = 0;
+
+    LOG_INFO(LOG_COMPONENT,"CONFIG Backpressure throttleNoIdentMs=" << throttleNoIdentMs);
+    generadorEventos.configure();
 }
 
 void ProcesoRecFacial::setEstadoSolo(uint8_t flag)
@@ -1024,4 +1045,30 @@ GImage ProcesoRecFacial::construirFrameAviso(int ancho, int alto, const std::vec
     }
 
     return img;
+}
+
+bool ProcesoRecFacial::shouldEmitAnonimo(const std::string& anonId, long long nowMs)
+{
+    std::lock_guard<std::mutex> lock(mtxDebounceAnon);
+
+    auto it = lastSentAnon.find(anonId);
+    if (it == lastSentAnon.end())
+    {
+        lastSentAnon.emplace(anonId, nowMs);
+        LOG_DEBUG(LOG_COMPONENT, "THROTTLE PASS anonId=" << anonId << " (first)");
+        return true;
+    }
+
+    const long long last = it->second;
+    const long long delta = nowMs - last;
+
+    if (delta < throttleNoIdentMs)
+    {
+        LOG_DEBUG(LOG_COMPONENT, "THROTTLE BLOCK anonId=" << anonId << " delta=" << delta << "ms < " << throttleNoIdentMs << "ms");
+        return false;
+    }
+
+    it->second = nowMs;
+    LOG_DEBUG(LOG_COMPONENT, "THROTTLE PASS anonId=" << anonId << " delta=" << delta << "ms");
+    return true;
 }

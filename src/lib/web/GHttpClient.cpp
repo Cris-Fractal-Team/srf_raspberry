@@ -71,7 +71,8 @@ GHttpClient::~GHttpClient()
  * 
  * Retorn 0 en caso de exito, -1 en caso de error, -2 error de ram
  */
-int GHttpClient::_doHttp( const char *servidor, int puerto, int usarSSL, const char* metodo, const char *url, char *data, long dataLen )
+int GHttpClient::_doHttp(const char *servidor, int puerto, int usarSSL, const char* metodo,
+                         const char *url, char *data, long dataLen)
 {
     int rptaCon;
     int post = 0;
@@ -83,91 +84,89 @@ int GHttpClient::_doHttp( const char *servidor, int puerto, int usarSSL, const c
 
     httpError = -1;
 
+    // --- CRÍTICO: limpiar cabeceras por request ---
+    cabeceraPeticion.clear();
+
     rptaCon = iniciaConexion();
-    if ( rptaCon != 0 ) 
-    {
+    if (rptaCon != 0)
         return rptaCon;
-    }        
 
-    comando = (char *)malloc(strlen(url)+strlen(servidor)+34);
-
-    if ( usarSSL == 0 )
+    comando = (char *)malloc(strlen(url) + strlen(servidor) + 64);
+    if (!comando)
     {
-        if ( puerto == 80 )
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s\r\n",metodo,url,servidor);
-        }
-        else
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s:%d\r\n",metodo,url,servidor,puerto);
-        }
+        cierraConexion();
+        return -2;
     }
+
+    if (puerto == (usarSSL ? 443 : 80))
+        sprintf(comando, "%s %s HTTP/1.1\r\nHost: %s\r\n", metodo, url, servidor);
     else
-    {
-        if ( puerto == 443 )
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s\r\n",metodo,url,servidor);
-        }
-        else
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s:%d\r\n",metodo,url,servidor,puerto);
-        }
-    }    
-    
-    rptaCon = writeData(comando,strlen(comando));    
+        sprintf(comando, "%s %s HTTP/1.1\r\nHost: %s:%d\r\n", metodo, url, servidor, puerto);
+
+    rptaCon = writeData(comando, strlen(comando));
     free(comando);
-    if ( rptaCon != 0 )
+
+    if (rptaCon != 0)
     {
         cierraConexion();
         return rptaCon;
     }
 
-    if ( strcmp(metodo,"POST") == 0 )
+    // --- Connection close recomendado ---
+    cabeceraPeticion.append("Connection: close\r\n");
+
+    if (strcmp(metodo, "POST") == 0)
     {
         post = 1;
+
         cabeceraPeticion.append("Content-Length: ");
         cabeceraPeticion.append(to_string(dataLen));
         cabeceraPeticion.append("\r\n");
 
-        if ( cabeceraPeticion.find("Content-Type") == string::npos )
+        // --- CRÍTICO: Content-Type con CRLF ---
+        if (cabeceraPeticion.find("Content-Type:") == string::npos)
         {
-            cabeceraPeticion.append("Content-Type: application/x-www-form-urlencoded");
+            cabeceraPeticion.append("Content-Type: application/json\r\n");
         }
     }
 
-    auto enviaCabecera = std::chrono::high_resolution_clock::now();
-    if ( cabeceraPeticion.length() > 0 )
+    if (!cabeceraPeticion.empty())
     {
-        rptaCon = writeData((char *)cabeceraPeticion.c_str(),cabeceraPeticion.length());
-        if ( rptaCon != 0 )
+        rptaCon = writeData((char *)cabeceraPeticion.c_str(), cabeceraPeticion.length());
+        if (rptaCon != 0)
         {
             cierraConexion();
             return rptaCon;
         }
     }
 
-    writeData("\r\n");
-
-    auto enviaCuerpo = std::chrono::high_resolution_clock::now();
-    if ( post == 1 )
+    rptaCon = writeData("\r\n");
+    if (rptaCon != 0)
     {
-        writeData(data,dataLen);
+        cierraConexion();
+        return rptaCon;
     }
-    auto leeRespuesta = std::chrono::high_resolution_clock::now();
 
-    if ( rptaCon == 0 )
+    if (post == 1)
     {
-        leeRespuestaHttp();
+        rptaCon = writeData(data, dataLen);
+        if (rptaCon != 0)
+        {
+            cierraConexion();
+            return rptaCon;
+        }
     }
-    auto finLeeRespuesta = std::chrono::high_resolution_clock::now();
 
-    cierraConexion();    
+    int rptaLee = leeRespuestaHttp(); // <-- NO ignores esto
+    cierraConexion();
 
-    auto durCabecera = std::chrono::duration_cast<std::chrono::milliseconds>(enviaCuerpo - enviaCabecera);
-    auto durCuerpo = std::chrono::duration_cast<std::chrono::milliseconds>(leeRespuesta - enviaCuerpo);
-    auto durRespuesta = std::chrono::duration_cast<std::chrono::milliseconds>(finLeeRespuesta - leeRespuesta);
+    // si no pudiste leer respuesta, falla
+    if (rptaLee != 0)
+        return rptaLee;
 
-    // cout << "HTTP.T.Cabecera " << durCabecera.count() << " ms T.Cuerpo " << durCuerpo.count() << " ms T.Respuesta " << durRespuesta.count() << endl;
+    // si el server respondió, deja el httpError con el status real
+    if (httpError < 200 || httpError >= 300)
+        return -10; // o retorna httpError si prefieres
 
     return 0;
 }
