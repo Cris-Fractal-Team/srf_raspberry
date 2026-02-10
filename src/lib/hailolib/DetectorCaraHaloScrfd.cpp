@@ -3,6 +3,7 @@
 #include <cmath>
 #include "lib/hailolib/DetectorCaraHaloScrfd.h"
 #include "lib/utils/NumberUtils.h"
+#include "app/LectorConfig.h"
 
 /**
  * Retorna el acho de la cara
@@ -851,4 +852,18 @@ std::vector<DeteccionCaraHailo> DetectorCarasHailoSCRFD::detectar_500m( GImage i
     return getDetecciones_500m(prec);
 }
 
+void DetectorCarasHailoSCRFD::configure()
+{
+    const auto cfg = LectorConfig::getInstance().getParams();
 
+    const int w = (int)cfg->getStringLong("scrfd_w", 640);
+    const int h = (int)cfg->getStringLong("scrfd_h", 640);
+
+    setDimImagenes(w > 0 ? w : 640, h > 0 ? h : 640);
+
+    previsualizaImgParaDeteccion = cfg->getStringBool("previsualizaImgParaDeteccion", false);
+    esperarPrevImgParaDeteccion  = cfg->getStringBool("esperarPrevImgParaDeteccion", false);
+
+    nms_iou_thresh = (float)cfg->getStringDouble("scrfd_nms_iou_thresh", 0.45);
+    errorDeteccion = false;
+}

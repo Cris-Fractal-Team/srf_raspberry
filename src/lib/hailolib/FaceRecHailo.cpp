@@ -2,10 +2,14 @@
 
 #include "lib/hailolib/FaceRecHailo.h"
 #include "lib/hailolib/DetectionTrackerHailo.h"
+#include "app/LectorConfig.h"
+#include "lib/utils/timedate.h"
+#include "lib/utils/DebugUtils.h"
 
 #include <math.h>
 #include <arm_neon.h>
 #include <cmath>
+#include <exception>
 
 
 /**
@@ -879,4 +883,25 @@ bool FaceRecHailo::calculaDescriptor( GLinkedList<TrackedDetectionHailo *> *lstD
     lstImgOpenCv.reset();
 
     return true;
+}
+
+void FaceRecHailo::configure(const std::string &serieEquipo, const std::string &nombreCapaSalidaRedFacial)
+{
+    const auto cfg = LectorConfig::getInstance().getParams();
+
+    paramContraste = (float)cfg->getStringDouble("paramContraste", paramContraste);
+
+    nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
+
+    previsualizaImgReconocimiento = cfg->getStringBool("previsualizaImgReconocimiento", false);
+    esperarPrevImgReconocimiento  = cfg->getStringBool("esperarPrevImgReconocimiento", false);
+    guardarPrevImgReconocimiento  = cfg->getStringBool("guardarPrevImgReconocimiento", false);
+    guardarCarasFrontalesAlineadas= cfg->getStringBool("guardarCarasFrontalesAlineadas", false);
+
+    prefijoImgReconocimiento = cfg->getString("prefijoImgReconocimiento");
+    if (prefijoImgReconocimiento.empty()) prefijoImgReconocimiento = "rec";
+
+    prefijoImgReconocimiento += "_" + serieEquipo + "_" + std::to_string(TimeDateUtils::getDateTimeMs()) + "_";
+
+    similaridadFrontal = (float)cfg->getStringDouble("similaridadFrontal", similaridadFrontal);
 }

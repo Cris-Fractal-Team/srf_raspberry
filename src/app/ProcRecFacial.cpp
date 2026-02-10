@@ -2,6 +2,7 @@
 #include "app/GeneradorPingsMonitoreo.h"
 #include "app/GeneradorPingsAppWeb.h"
 #include "app/LectorConfig.h"
+#include "lib/utils/DebugUtils.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -82,9 +83,6 @@ void ProcesoRecFacial::setUsandoNPU(bool nuevoValor) {
     usandoNpu = nuevoValor;
 }
 
-/**
- * Bucle que realiza todo el flujo
- */
 void ProcesoRecFacial::iniciar() {
     GImage frameCapturado, frameParaDeteccion;
     GImage frameVisor, frameVisorPrevio;
@@ -105,12 +103,9 @@ void ProcesoRecFacial::iniciar() {
     DetectorCarasHailoSCRFD detectorRostros;
     FaceRecHailo generadorDescriptores;
 
-    int modoCargaEnDuro = 1;
-
     errorInicial = false;
     numIndentificacionesMin = lstParamsApp->getStringLong("numIndentificacionesMin", 3);
 
-    // Crea el dispositivo virtual
     LOG_INFO(LOG_COMPONENT, "Creando VDevice");
     hailort::Expected<std::unique_ptr<hailort::VDevice>> vdevice = hailort::VDevice::create();
     if (!vdevice) {
@@ -118,20 +113,13 @@ void ProcesoRecFacial::iniciar() {
         errorInicial = true;
         return;
     }
-    vdevicePtr = &vdevice;
 
     procDescargaDescFaciales.extractor.vdevice = &vdevice;
-
-    // crea el detector
-    detectorRostros.setDimImagenes(640, 640);
-    detectorRostros.previsualizaImgParaDeteccion =
-        lstParamsApp->getStringBool("previsualizaImgParaDeteccion", false);
-    detectorRostros.esperarPrevImgParaDeteccion =
-        lstParamsApp->getStringBool("esperarPrevImgParaDeteccion", false);
 
     generadorPingsMonitoreo->serieEquipo = GStringUtils::trim(serieEquipo);
     procDescargaDescFaciales.serieEquipo = GStringUtils::trim(serieEquipo);
 
+    detectorRostros.configure();
     detectorRostros.runner.device = &vdevice;
     if (detectorRostros.cargarModelo("./models/scrfd_2.5ga.hef") != 0) {
         LOG_ERROR(LOG_COMPONENT, "Error al cargar el modelo detector");
@@ -140,28 +128,8 @@ void ProcesoRecFacial::iniciar() {
     }
     LOG_INFO(LOG_COMPONENT, "Detector de rostros iniciado");
 
-    // crea el generador de descriptores faciales
     generadorDescriptores.runner.device = &vdevice;
-    generadorDescriptores.paramContraste = paramContraste;
-    generadorDescriptores.nombreUltimaCapaModelo = nombreCapaSalidaRedFacial;
-
-    generadorDescriptores.previsualizaImgReconocimiento =
-        lstParamsApp->getStringBool("previsualizaImgReconocimiento", false);
-    generadorDescriptores.esperarPrevImgReconocimiento =
-        lstParamsApp->getStringBool("esperarPrevImgReconocimiento", false);
-    generadorDescriptores.guardarPrevImgReconocimiento =
-        lstParamsApp->getStringBool("guardarPrevImgReconocimiento", false);
-    generadorDescriptores.guardarCarasFrontalesAlineadas =
-        lstParamsApp->getStringBool("guardarCarasFrontalesAlineadas", false);
-
-    generadorDescriptores.prefijoImgReconocimiento =
-        lstParamsApp->getString("prefijoImgReconocimiento");
-    generadorDescriptores.prefijoImgReconocimiento +=
-        "_" + to_string(TimeDateUtils::getDateTimeMs()) + "_";
-
-    generadorDescriptores.similaridadFrontal =
-        lstParamsApp->getStringDouble("similaridadFrontal", 5.0);
-
+    generadorDescriptores.configure(GStringUtils::trim(serieEquipo), nombreCapaSalidaRedFacial);
     if (generadorDescriptores.cargarModelo(pathModeloDescFacial) != 0) {
         LOG_ERROR(LOG_COMPONENT, "Error al cargar modelo generador de descriptores");
         errorInicial = true;
@@ -191,216 +159,261 @@ void ProcesoRecFacial::iniciar() {
     finalizar = false;
     idDesconocidoSgte = 0;
 
+    // (Opcional) marca de etapa para saber "más o menos" dónde revienta
+    const char* etapa = "INIT";
+
     while (!finalizar) {
-        const auto tInicioCiclo = std::chrono::high_resolution_clock::now();
+        try {
+            etapa = "INICIO_CICLO";
+            const auto tInicioCiclo = std::chrono::high_resolution_clock::now();
 
-        if (isSuspendido())
-        {
-            setUsandoNPU(false);
-
-            std::vector<std::string> msg = {
-                "=== MODO SUSPENDIDO ===",
-                "Solo AppWebPings activo.",
-                "Presiona 'y' para volver a ENCENDIDO",
-                "Presiona 'q' para salir"
-            };
-
-            GImage frameAviso = construirFrameAviso(anchoVisualiza, alturaVisualiza, msg);
-
-            servidorWeb->setImage(frameAviso);
-            GDibujo::show(frameAviso, "Visor");
-
-            const int tecla = GDibujo::waitForKey(50);
-            if (tecla == 'q')
+            etapa = "CHECK_SUSPENDIDO";
+            if (isSuspendido())
             {
+                setUsandoNPU(false);
+
+                std::vector<std::string> msg = {
+                    "=== MODO SUSPENDIDO ===",
+                    "Solo AppWebPings activo.",
+                    "Presiona 'y' para volver a ENCENDIDO",
+                    "Presiona 'q' para salir"
+                };
+
+                GImage frameAviso = construirFrameAviso(anchoVisualiza, alturaVisualiza, msg);
+
+                servidorWeb->setImage(frameAviso);
+                GDibujo::show(frameAviso, "Visor");
+
+                const int tecla = GDibujo::waitForKey(50);
+                if (tecla == 'q')
+                {
+                    break;
+                }
+                if (tecla == 'y')
+                {
+                    setEstadoEncendido();
+                }
+
+                usleep(200000);
+                continue;
+            }
+
+            etapa = "CHECK_APAGADO";
+            if (isApagado())
+            {
+                setUsandoNPU(false);
+
+                std::vector<std::string> msg = {
+                    "=== MODO APAGADO ===",
+                    "Monitoreo + AppWebPings activos.",
+                    "Eventos apagados.",
+                    "Presiona 'q' para salir"
+                };
+
+                GImage frameAviso = construirFrameAviso(anchoVisualiza, alturaVisualiza, msg);
+
+                servidorWeb->setImage(frameAviso);
+                GDibujo::show(frameAviso, "Visor");
+
+                const int tecla = GDibujo::waitForKey(50);
+                if (tecla == 'q')
+                {
+                    break;
+                }
+
+                usleep(200000);
+                continue;
+            }
+
+            etapa = "CHECK_PROCESAR_IMAGENES";
+            if (getFlagProcesarImagenes()) {
+                if (!getUsandoNPU()) {
+                    LOG_INFO(LOG_COMPONENT, "Procesamiento solicitado: descarga + generación + recarga de universo");
+
+                    procDescargaDescFaciales.idTareaProgramada = getIdTareaProgramada();
+                    procDescargaDescFaciales.ejecutarDescargaYGeneracion();
+
+                    const std::string parametroUnificarDescriptores = lstParamsApp->getString("unificarDescriptores");
+                    const bool unificarDescriptores = (parametroUnificarDescriptores == "S");
+
+                    universoPersonas.cargarpPerConocidas(
+                        lstParamsApp->getString("pathBDPersonas"),
+                        unificarDescriptores);
+
+                    setFlagProcesarImagenes(false);
+                    LOG_INFO(LOG_COMPONENT, "Procesamiento solicitado finalizado");
+                }
+                usleep(20000);
+                continue;
+            }
+
+            etapa = "CAPTURA_FRAME";
+            frameCapturado = imageSource->getImage();
+            if ((frameCapturado.ancho == 0) || (frameCapturado.altura == 0)) {
+                continue;
+            }
+
+            etapa = "USANDO_NPU_TRUE";
+            setUsandoNPU(true);
+
+            etapa = "FLIP_VERTICAL";
+            if (invertirVertical) {
+                cv::flip(frameCapturado.imagenOpencv, matrizInvertida, -1);
+                frameCapturado.imagenOpencv = matrizInvertida;
+            }
+
+            etapa = "REGION_INTERES";
+            if ((regionInteresInicioX > 0) || (regionInteresFinX < anchoCamara)) {
+                frameParaDeteccion = frameCapturado.getRect(
+                    regionInteresInicioX, 0, regionInteresFinX, alturaCamara);
+            } else {
+                frameParaDeteccion = frameCapturado;
+            }
+
+            const auto tFinCaptura = std::chrono::high_resolution_clock::now();
+
+            etapa = "DETECCION_ROSTROS";
+            deteccionesBrutas = detectorRostros.detectar_2_5g(frameParaDeteccion, toleranciaDetec);
+            if (detectorRostros.errorDeteccion) {
+                LOG_ERROR(LOG_COMPONENT, "Error al detectar rostros");
                 break;
             }
-            if (tecla == 'y')
-            {
-                setEstadoEncendido();
+
+            etapa = "FILTRADO_DETECCIONES";
+            deteccionesFiltradas.clear();
+            for (DeteccionCaraHailo deteccionCara : deteccionesBrutas) {
+                const bool superaMinimo =
+                    (deteccionCara.getAncho() > anchoRostroMinimo) &&
+                    (deteccionCara.getAltura() > alturaRostroMinima);
+
+                const bool noEsPerfil = (deteccionCara.caraDePerfil() == false);
+
+                if (superaMinimo && noEsPerfil) {
+                    deteccionCara.desplazaPtosCara(regionInteresInicioX, 0);
+                    deteccionCara.desplazaRegion(regionInteresInicioX, 0);
+
+                    if (encuadrarRostros == "S")
+                        deteccionCara.ajustarCuadrado(anchoCamara, alturaCamara);
+                    else if (encuadrarRostros == "M")
+                        deteccionCara.ajustarMiniCuadrado(anchoCamara, alturaCamara);
+
+                    deteccionesFiltradas.push_back(deteccionCara);
+                }
             }
 
-            usleep(200000);
-            continue;
-        }
+            etapa = "TRACK_TEMPORAL";
+            carasTrackTemporales = detTracker.generaListaTrackTemporal(&deteccionesFiltradas);
+            const auto tFinDeteccion = std::chrono::high_resolution_clock::now();
 
-        if (isApagado())
-        {
-            setUsandoNPU(false);
+            etapa = "CALCULA_DESCRIPTORES";
+            calculaDescriptores(&generadorDescriptores, frameCapturado, &carasTrackTemporales);
+            const auto tFinDescriptores = std::chrono::high_resolution_clock::now();
 
-            std::vector<std::string> msg = {
-                "=== MODO APAGADO ===",
-                "Monitoreo + AppWebPings activos.",
-                "Eventos apagados.",
-                "Presiona 'q' para salir"
-            };
+            etapa = "IDENTIFICAR_PERSONAS";
+            identificarPersonas(&carasTrackTemporales);
+            const auto tFinIdentificacion = std::chrono::high_resolution_clock::now();
 
-            GImage frameAviso = construirFrameAviso(anchoVisualiza, alturaVisualiza, msg);
+            etapa = "TRACK_FINAL";
+            frameVisor.ancho = detectorRostros.imgModeloAncho;
+            frameVisor.altura = detectorRostros.imgModeloAltura;
+            frameVisor.imagenOpencv = detectorRostros.imagenRedim;
 
-            servidorWeb->setImage(frameAviso);
-            GDibujo::show(frameAviso, "Visor");
+            carasTrackFinal = detTracker.analizaPorIdentificacionYTracker(
+                &carasTrackTemporales,
+                &frameVisor,
+                &frameVisorPrevio,
+                factorEscalaModeloX,
+                factorEscalaModeloY);
 
-            const int tecla = GDibujo::waitForKey(50);
+            const auto tFinTracking = std::chrono::high_resolution_clock::now();
+
+            etapa = "NOTIFICA_DETECCIONES";
+            notificaDetecciones(frameCapturado, &carasTrackFinal);
+            const auto tFinNotifica = std::chrono::high_resolution_clock::now();
+
+            etapa = "CLONE_VISOR_PREVIO";
+            frameVisorPrevio = frameVisor.clone();
+
+            etapa = "DIBUJA_CARAS";
+            try {
+                frameVisor = dibujaCaras(frameCapturado, &carasTrackFinal);
+            }
+            catch (const std::exception &ex) {
+                LOG_CRITICAL(LOG_COMPONENT, std::string("Excepción en DIBUJA_CARAS: ") + ex.what());
+                frameVisor = frameCapturado.cloneResize(anchoVisualiza, alturaVisualiza);
+            }
+            catch (...) {
+                LOG_CRITICAL(LOG_COMPONENT, "Excepción desconocida en DIBUJA_CARAS");
+                frameVisor = frameCapturado.cloneResize(anchoVisualiza, alturaVisualiza);
+            }
+
+
+            const auto tFinDibuja = std::chrono::high_resolution_clock::now();
+
+            etapa = "ELIMINA_ANTIGUOS";
+            universoPersonas.eliminaDesAntiguos(tiempoMaxNoReconocido);
+
+            // calcula los tiempos transcurridos (sin imprimir)
+            const auto durCaptura = std::chrono::duration_cast<std::chrono::microseconds>(tFinCaptura - tInicioCiclo);
+            const auto durDetecta = std::chrono::duration_cast<std::chrono::microseconds>(tFinDeteccion - tFinCaptura);
+            const auto durDescriptor = std::chrono::duration_cast<std::chrono::microseconds>(tFinDescriptores - tFinDeteccion);
+            const auto durIdentificacion = std::chrono::duration_cast<std::chrono::microseconds>(tFinIdentificacion - tFinDescriptores);
+            const auto durTracking = std::chrono::duration_cast<std::chrono::microseconds>(tFinTracking - tFinIdentificacion);
+            const auto durNotifica = std::chrono::duration_cast<std::chrono::microseconds>(tFinNotifica - tFinTracking);
+            const auto durDibuja = std::chrono::duration_cast<std::chrono::microseconds>(tFinDibuja - tFinNotifica);
+            const auto durTotal = std::chrono::duration_cast<std::chrono::microseconds>(tFinDibuja - tInicioCiclo);
+
+            (void)durCaptura;
+            (void)durDetecta;
+            (void)durDescriptor;
+            (void)durIdentificacion;
+            (void)durTracking;
+            (void)durNotifica;
+            (void)durDibuja;
+            (void)durTotal;
+
+            etapa = "SET_IMAGE_WEB";
+            ProcesoRecFacial::lstUltCarasDet = carasTrackFinal;
+            servidorWeb->setImage(frameVisor);
+
+            etapa = "SHOW_LOCAL";
+            GDibujo::show(frameVisor, "Visor");
+
+            etapa = "MOUSE_CALLBACK";
+            cv::setMouseCallback("Visor", onMouse, this);
+
+            etapa = "WAIT_KEY";
+            const int tecla = GDibujo::waitForKey(10);
             if (tecla == 'q')
             {
+                LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q)");
                 break;
             }
 
-            usleep(200000);
-            continue;
+            etapa = "USANDO_NPU_FALSE";
+            setUsandoNPU(false);
         }
-        // validar si se debe o no procesar las imagenes
-        if (getFlagProcesarImagenes()) {
-            if (!getUsandoNPU()) {
-                LOG_INFO(LOG_COMPONENT, "Procesamiento solicitado: descarga + generación + recarga de universo");
-
-                procDescargaDescFaciales.idTareaProgramada = getIdTareaProgramada();
-                procDescargaDescFaciales.ejecutarDescargaYGeneracion();
-
-                const std::string parametroUnificarDescriptores = lstParamsApp->getString("unificarDescriptores");
-                const bool unificarDescriptores = (parametroUnificarDescriptores == "S");
-
-                universoPersonas.cargarpPerConocidas(
-                    lstParamsApp->getString("pathBDPersonas"),
-                    unificarDescriptores);
-
-                setFlagProcesarImagenes(false);
-                LOG_INFO(LOG_COMPONENT, "Procesamiento solicitado finalizado");
-            }
+        catch (const std::bad_alloc &ex) {
+            DebugUtils::logStdExceptionDebug(LOG_COMPONENT, etapa, ex);
+            setUsandoNPU(false);
             usleep(20000);
             continue;
         }
-
-        frameCapturado = imageSource->getImage();
-        if ((frameCapturado.ancho == 0) || (frameCapturado.altura == 0)) {
+        catch (const std::exception &ex) {
+            DebugUtils::logStdExceptionDebug(LOG_COMPONENT, etapa, ex);
+            setUsandoNPU(false);
+            usleep(20000);
             continue;
         }
-
-        // marcar el flag usandoNPU = true
-        setUsandoNPU(true);
-
-        // invierte verticalmente
-        if (invertirVertical) {
-            cv::flip(frameCapturado.imagenOpencv, matrizInvertida, -1);
-            frameCapturado.imagenOpencv = matrizInvertida;
+        catch (...) {
+            DebugUtils::logUnknownExceptionDebug(LOG_COMPONENT, etapa);
+            setUsandoNPU(false);
+            usleep(20000);
+            continue;
         }
-
-        if ((regionInteresInicioX > 0) || (regionInteresFinX < anchoCamara)) {
-            frameParaDeteccion = frameCapturado.getRect(
-                regionInteresInicioX, 0, regionInteresFinX, alturaCamara);
-        } else {
-            frameParaDeteccion = frameCapturado;
-        }
-
-        const auto tFinCaptura = std::chrono::high_resolution_clock::now();
-
-        // detecta rostros
-        deteccionesBrutas = detectorRostros.detectar_2_5g(frameParaDeteccion, toleranciaDetec);
-        if (detectorRostros.errorDeteccion) {
-            LOG_ERROR(LOG_COMPONENT, "Error al detectar rostros");
-            break;
-        }
-
-        // elimina rostros pequeños
-        deteccionesFiltradas.clear();
-        for (DeteccionCaraHailo deteccionCara : deteccionesBrutas) {
-            const bool superaMinimo =
-                (deteccionCara.getAncho() > anchoRostroMinimo) &&
-                (deteccionCara.getAltura() > alturaRostroMinima);
-
-            const bool noEsPerfil = (deteccionCara.caraDePerfil() == false);
-
-            if (superaMinimo && noEsPerfil) {
-                deteccionCara.desplazaPtosCara(regionInteresInicioX, 0);
-                deteccionCara.desplazaRegion(regionInteresInicioX, 0);
-
-                if (encuadrarRostros == "S")
-                    deteccionCara.ajustarCuadrado(anchoCamara, alturaCamara);
-                else if (encuadrarRostros == "M")
-                    deteccionCara.ajustarMiniCuadrado(anchoCamara, alturaCamara);
-
-                deteccionesFiltradas.push_back(deteccionCara);
-            }
-        }
-
-        // Analiza tracking temporal
-        carasTrackTemporales = detTracker.generaListaTrackTemporal(&deteccionesFiltradas);
-        const auto tFinDeteccion = std::chrono::high_resolution_clock::now();
-
-        // genera descriptores faciales
-        calculaDescriptores(&generadorDescriptores, frameCapturado, &carasTrackTemporales);
-        const auto tFinDescriptores = std::chrono::high_resolution_clock::now();
-
-        // identifica personas
-        identificarPersonas(&carasTrackTemporales);
-        const auto tFinIdentificacion = std::chrono::high_resolution_clock::now();
-
-        // tracking final (identificación + tracker)
-        frameVisor.ancho = detectorRostros.imgModeloAncho;
-        frameVisor.altura = detectorRostros.imgModeloAltura;
-        frameVisor.imagenOpencv = detectorRostros.imagenRedim;
-
-        carasTrackFinal = detTracker.analizaPorIdentificacionYTracker(
-            &carasTrackTemporales,
-            &frameVisor,
-            &frameVisorPrevio,
-            factorEscalaModeloX,
-            factorEscalaModeloY);
-
-        const auto tFinTracking = std::chrono::high_resolution_clock::now();
-
-        // Notifica al servidor web las incidencias o detecciones
-        notificaDetecciones(frameCapturado, &carasTrackFinal);
-        const auto tFinNotifica = std::chrono::high_resolution_clock::now();
-
-        frameVisorPrevio = frameVisor.clone();
-
-        frameVisor = dibujaCaras(frameCapturado, &carasTrackFinal);
-        const auto tFinDibuja = std::chrono::high_resolution_clock::now();
-
-        universoPersonas.eliminaDesAntiguos(tiempoMaxNoReconocido);
-
-        // calcula los tiempos transcurridos (sin imprimir)
-        const auto durCaptura = std::chrono::duration_cast<std::chrono::microseconds>(tFinCaptura - tInicioCiclo);
-        const auto durDetecta = std::chrono::duration_cast<std::chrono::microseconds>(tFinDeteccion - tFinCaptura);
-        const auto durDescriptor = std::chrono::duration_cast<std::chrono::microseconds>(tFinDescriptores - tFinDeteccion);
-        const auto durIdentificacion = std::chrono::duration_cast<std::chrono::microseconds>(tFinIdentificacion - tFinDescriptores);
-        const auto durTracking = std::chrono::duration_cast<std::chrono::microseconds>(tFinTracking - tFinIdentificacion);
-        const auto durNotifica = std::chrono::duration_cast<std::chrono::microseconds>(tFinNotifica - tFinTracking);
-        const auto durDibuja = std::chrono::duration_cast<std::chrono::microseconds>(tFinDibuja - tFinNotifica);
-        const auto durTotal = std::chrono::duration_cast<std::chrono::microseconds>(tFinDibuja - tInicioCiclo);
-
-        (void)durCaptura;
-        (void)durDetecta;
-        (void)durDescriptor;
-        (void)durIdentificacion;
-        (void)durTracking;
-        (void)durNotifica;
-        (void)durDibuja;
-        (void)durTotal;
-
-        // Envia la imagen al servidor web de configuracion
-        ProcesoRecFacial::lstUltCarasDet = carasTrackFinal;
-        servidorWeb->setImage(frameVisor);
-
-        // Envia la imagen a la pantalla local
-        GDibujo::show(frameVisor, "Visor");
-
-        // configura el procesar de eventos del mouse
-        cv::setMouseCallback("Visor", onMouse, this);
-
-        // Lee el teclado para finalizar si presiona 'q'
-        const int tecla = GDibujo::waitForKey(10);
-        if (tecla == 'q')
-        {
-            LOG_INFO(LOG_COMPONENT, "Salida solicitada por teclado (q)");
-            break;
-        }
-
-        // marcar el flag usandoNPU = false
-        setUsandoNPU(false);
     }
 
+    LOG_CRITICAL(LOG_COMPONENT, "Salio legalmente");
     LOG_INFO(LOG_COMPONENT, "Finaliza bucle de reconocimiento");
     GDibujo::closeAllWindows();
     imageSource->stop();
@@ -415,7 +428,7 @@ void ProcesoRecFacial::iniciar() {
     detTracker.reset();
     detTracker.lstUniverso.reset();
 
-    exit(0);
+    return;
 }
 
 /**

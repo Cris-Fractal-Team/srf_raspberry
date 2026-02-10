@@ -285,6 +285,8 @@ class DetectorCarasHailoSCRFD
          *          Porcentaje de precicion o accurary esperada
          */
         std::vector<DeteccionCaraHailo> getDetecciones_10g( float prec );
+        
+        void configure();
 
     private:
         

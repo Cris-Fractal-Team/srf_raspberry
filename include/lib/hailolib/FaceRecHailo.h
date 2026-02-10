@@ -491,6 +491,8 @@ class FaceRecHailo
          * Extrae el descriptor facial de la ultima inferencia en formato de OpenCV
          */
         cv::Mat extraeDescriptorMat();
+
+        void configure(const std::string &serieEquipo, const std::string &nombreCapaSalidaRedFacial);
         
     private:
 
