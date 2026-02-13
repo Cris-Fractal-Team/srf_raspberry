@@ -25,6 +25,8 @@
 #include "lib/utils/systemUtils.h"
 #include "lib/utils/timedate.h"
 #include "lib/web/GHttpClient.h"
+#include "lib/json/json.hpp"
+using json = nlohmann::json;
 
 static constexpr const char* LOG_COMPONENT = "ProcRecFacial";
 
@@ -792,48 +794,93 @@ void ProcesoRecFacial::guardaParametros() {
 }
 
 /**
+ * Valida que el descriptor facial sea usable para JSON (sin NaN/Inf).
+ * Si falla: el rostro se omite COMPLETAMENTE del evento.
+ */
+static inline bool isDescriptorFacialValido(const SIMD_TYPE* descriptor, int numElems)
+{
+    if (descriptor == nullptr) return false;
+
+    for (int i = 0; i < numElems; ++i)
+    {
+        // forzamos a float primero para evitar rarezas con __fp16 en cast directo
+        const double v = static_cast<double>(static_cast<float>(descriptor[i]));
+        if (!std::isfinite(v))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Arma descripcionFacial como array de doubles.
+ * (Solo llamar si isDescriptorFacialValido() dio true.)
+ */
+static inline json buildDescripcionFacialJson(const SIMD_TYPE* descriptor, int numElems)
+{
+    json arr = json::array();
+    // Nota: nlohmann::json no expone reserve() directo; reservamos el vector subyacente.
+    auto& vec = arr.get_ref<json::array_t&>();
+    vec.reserve(numElems);
+
+    for (int i = 0; i < numElems; ++i)
+    {
+        const double v = static_cast<double>(static_cast<float>(descriptor[i]));
+        arr.push_back(v);
+    }
+    return arr;
+}
+
+/**
  * Notifica al servidor web sobre las detecciones ocurridas
+ *
+ * Reglas:
+ * 1) Un evento puede tener 0..N rostros.
+ * 2) Se analiza cada rostro; si el descriptor es inválido -> SE OMITE ese rostro.
+ * 3) Si luego de filtrar el evento se queda sin rostros -> NO se encola trama para enviar.
+ * 4) Solo se encolan tramas que sí tienen rostros válidos.
  */
 void ProcesoRecFacial::notificaDetecciones(
-    GImage frameOriginal, vector<TrackedDetectionHailo*>* carasTrackFinal) {
-
-    int iteracionesTipoPersona = 0;
-
+    GImage frameOriginal,
+    std::vector<TrackedDetectionHailo*>* carasTrackFinal)
+{
     int jpegLenBytes = 0;
     size_t base64LenBytes = 0;
-
     double valorEscalado = 0.0;
 
-    string jsonRostros;
-    string nombresReconocidosCsv;
-
     TrackedDetectionHailo* trackFace = nullptr;
+    DescPersonaExterno* personaDetectada = nullptr;
 
     char* jpegBuffer = nullptr;
     char* jpegBase64 = nullptr;
 
     const long long timestampEventoMs = TimeDateUtils::getDateTimeMs();
-    const string fechaEventoStr = TimeDateUtils::getFechaDesdeMs(timestampEventoMs);
+    const std::string fechaEventoStr = TimeDateUtils::getFechaDesdeMs(timestampEventoMs);
 
-    DescPersonaExterno* personaDetectada = nullptr;
-
-    iteracionesTipoPersona = (generadorEventos.usarEndpointUnificado ? 1 : 2);
-
+    const int iteracionesTipoPersona = (generadorEventos.usarEndpointUnificado ? 1 : 2);
     const int totalCaras = (int)carasTrackFinal->size();
 
-    // bucle para generar datos de personas conocidas (tipoPersona=0) y para
-    // personas no identificadas (tipoPersona=1) cuando NO hay endpoint unificado.
-    for (int tipoPersona = 0; tipoPersona < iteracionesTipoPersona; tipoPersona++) {
-        jsonRostros.clear();
+    for (int tipoPersona = 0; tipoPersona < iteracionesTipoPersona; ++tipoPersona)
+    {
+        json lstRostros = json::array();
 
-        for (int indiceCara = 0; indiceCara < totalCaras; indiceCara++) {
+        for (int indiceCara = 0; indiceCara < totalCaras; ++indiceCara)
+        {
             trackFace = carasTrackFinal->at(indiceCara);
+            if (trackFace == nullptr) continue;
 
             personaDetectada = trackFace->cara.identificador.getDatosPerIden();
             if (personaDetectada == NULL) continue;
 
-            if (!generadorEventos.usarEndpointUnificado) {
-                const bool esAnonimo = personaDetectada->anonimo;
+            const bool anonLocal = personaDetectada->anonimo;
+            const std::string idLocal = personaDetectada->id;
+            const std::string nombreLocal = personaDetectada->nombre;
+            
+            // filtro por tipoPersona cuando NO hay endpoint unificado
+            if (!generadorEventos.usarEndpointUnificado)
+            {
+                const bool esAnonimo = anonLocal;
 
                 if ((tipoPersona == 0) && esAnonimo) continue;
                 if ((tipoPersona == 1) && !esAnonimo) continue;
@@ -848,115 +895,157 @@ void ProcesoRecFacial::notificaDetecciones(
                 trackFace->cara.identificador.cambioIdentificacion ||
                 (trackFace->cara.personaIdent && (deltaMs >= tiempoReEvento));
 
-            if (cumpleMinimoIdentificaciones && debeReemitirEvento) {
-                if (personaDetectada->anonimo)
-                {
-                    if (!shouldEmitAnonimo(personaDetectada->id, timestampEventoMs))
-                    {
-                        continue;
-                    }
-                }
-
-                nombresReconocidosCsv.append(personaDetectada->nombre);
-                nombresReconocidosCsv.append(",");
-
-                jpegBuffer = GDibujo::encode(
-                    trackFace->cara.fotoCara, GDIBUJO_ENCODE_JPEG, 80, jpegLenBytes);
-
-                jpegBase64 = base64_encode(
-                    (const unsigned char*)jpegBuffer, jpegLenBytes, &base64LenBytes);
-
-                free(jpegBuffer);
-
-                if (!jsonRostros.empty()) jsonRostros.append(",");
-
-                jsonRostros.append("\n{");
-
-                GStringUtils::addJsonAtt(&jsonRostros, "foto", jpegBase64, false);
-                free(jpegBase64);
-
-                jsonRostros.append("\"coordenadas\":{");
-
-                valorEscalado = ((double)trackFace->cara.deteccion.ptoSupIzq.x) * factorEscalaVisualizaX;
-                GStringUtils::addJsonAtt(&jsonRostros, "x1", to_string(valorEscalado), true);
-
-                valorEscalado = ((double)trackFace->cara.deteccion.ptoSupIzq.y) * factorEscalaVisualizaY;
-                GStringUtils::addJsonAtt(&jsonRostros, "y1", to_string(valorEscalado), true);
-
-                valorEscalado = ((double)trackFace->cara.deteccion.ptoInfDer.x) * factorEscalaVisualizaX;
-                GStringUtils::addJsonAtt(&jsonRostros, "x2", to_string(valorEscalado), true);
-
-                valorEscalado = ((double)trackFace->cara.deteccion.ptoInfDer.y) * factorEscalaVisualizaY;
-                GStringUtils::addJsonAtt(&jsonRostros, "y2", to_string(valorEscalado), true, false);
-
-                jsonRostros.append("},\n");
-                jsonRostros.append("\"descripcionFacial\":[\n");
-
-                for (int indiceElem = 0; indiceElem < NUM_ELEMS_DESC_FACIAL; indiceElem++) {
-                    jsonRostros.append(to_string(trackFace->cara.descriptor[indiceElem]));
-                    if (indiceElem < (NUM_ELEMS_DESC_FACIAL - 1)) jsonRostros.append(",");
-                }
-
-                jsonRostros.append("\n],\n");
-
-                if (!personaDetectada->anonimo) {
-                    GStringUtils::addJsonAtt(&jsonRostros, "idReconocido", personaDetectada->id, true);
-                    jsonRostros.append("\"idTipoRostro\":2,\n");
-                } else {
-                    GStringUtils::addJsonAtt(&jsonRostros, "idReconocido", "0", true);
-                    jsonRostros.append("\"idTipoRostro\":1,\n");
-                }
-
-                GStringUtils::addJsonAtt(
-                    &jsonRostros,
-                    "probabilidad",
-                    GStringUtils::to_string_fixed(trackFace->cara.identificador.getPromedioComparacion(), 2),
-                    true,
-                    false);
-
-                jsonRostros.append("}\n");
-
-                trackFace->cara.identificador.fechaUltEvento = timestampEventoMs;
-
-                LOG_DEBUG(LOG_COMPONENT,
-                    "ROSTRO ADD tipoPersona=" << tipoPersona
-                    << " anon=" << (personaDetectada->anonimo ? "S" : "N")
-                    << " id=" << personaDetectada->id
-                    << " deltaMs=" << deltaMs
-                    << " numId=" << trackFace->cara.identificador.getNumIdentificaciones());
+            if (!(cumpleMinimoIdentificaciones && debeReemitirEvento))
+            {
+                continue;
             }
-        }
 
-        if (!jsonRostros.empty()) {
-            string payloadEvento;
+            // throttle anonimos
+            if (anonLocal)
+            {
+                if (!shouldEmitAnonimo(idLocal, timestampEventoMs))
+                {
+                    continue;
+                }
+            }
 
-            GImage frameEscalado = frameOriginal.cloneResize(anchoVisualiza, alturaVisualiza);
+            // ✅ FILTRO PRINCIPAL: si el descriptor es inválido -> OMITIR ESTE ROSTRO
+            if (!isDescriptorFacialValido(trackFace->cara.descriptor, NUM_ELEMS_DESC_FACIAL))
+            {
+                LOG_WARN(LOG_COMPONENT,
+                    "Rostro omitido: descriptor inválido."
+                    << " tipoPersona=" << tipoPersona
+                    << " anon=" << (anonLocal ? "S" : "N")
+                    << " id=" << idLocal);
+                continue;
+            }
 
-            jpegBuffer = GDibujo::encode(frameEscalado, GDIBUJO_ENCODE_JPEG, compresionJpeg, jpegLenBytes);
-            jpegBase64 = base64_encode((const unsigned char*)jpegBuffer, jpegLenBytes, &base64LenBytes);
+            // --- A partir de aquí: el rostro SÍ se incluye en el evento ---
+
+            // FOTO rostro base64
+            jpegBuffer = GDibujo::encode(
+                trackFace->cara.fotoCara,
+                GDIBUJO_ENCODE_JPEG,
+                80,
+                jpegLenBytes);
+
+            jpegBase64 = base64_encode(
+                (const unsigned char*)jpegBuffer,
+                jpegLenBytes,
+                &base64LenBytes);
+
             free(jpegBuffer);
+            jpegBuffer = nullptr;
 
-            payloadEvento.append("{\n");
-            GStringUtils::addJsonAtt(&payloadEvento, "cuadro", jpegBase64, false);
+            json rostroJson;
+            rostroJson["foto"] = std::string(jpegBase64);
+
             free(jpegBase64);
+            jpegBase64 = nullptr;
 
-            GStringUtils::addJsonAtt(&payloadEvento, "serieEquipo", GStringUtils::trim(serieEquipo), false);
-            GStringUtils::addJsonAtt(&payloadEvento, "fecEvento", fechaEventoStr, false);
+            // Coordenadas escaladas
+            json coordenadasJson;
 
-            payloadEvento.append("\"lstRostros\":[");
-            payloadEvento.append(jsonRostros);
-            payloadEvento.append("]\n");
-            payloadEvento.append("}\n");
+            valorEscalado = ((double)trackFace->cara.deteccion.ptoSupIzq.x) * factorEscalaVisualizaX;
+            coordenadasJson["x1"] = valorEscalado;
+
+            valorEscalado = ((double)trackFace->cara.deteccion.ptoSupIzq.y) * factorEscalaVisualizaY;
+            coordenadasJson["y1"] = valorEscalado;
+
+            valorEscalado = ((double)trackFace->cara.deteccion.ptoInfDer.x) * factorEscalaVisualizaX;
+            coordenadasJson["x2"] = valorEscalado;
+
+            valorEscalado = ((double)trackFace->cara.deteccion.ptoInfDer.y) * factorEscalaVisualizaY;
+            coordenadasJson["y2"] = valorEscalado;
+
+            rostroJson["coordenadas"] = coordenadasJson;
+
+            // Descriptor facial (ya validado)
+            rostroJson["descripcionFacial"] =
+                buildDescripcionFacialJson(trackFace->cara.descriptor, NUM_ELEMS_DESC_FACIAL);
+
+            // Ids
+            if (!anonLocal)
+            {
+                rostroJson["idReconocido"] = idLocal;
+                rostroJson["idTipoRostro"] = 2;
+            }
+            else
+            {
+                rostroJson["idReconocido"] = "0";
+                rostroJson["idTipoRostro"] = 1;
+            }
+
+            // Probabilidad: respetando tu formato string con 2 decimales
+            rostroJson["probabilidad"] =
+                GStringUtils::to_string_fixed(trackFace->cara.identificador.getPromedioComparacion(), 2);
+
+            // Agregar rostro al evento
+            lstRostros.push_back(rostroJson);
+
+            // Marcar último evento SOLO si se incluyó el rostro
+            trackFace->cara.identificador.fechaUltEvento = timestampEventoMs;
 
             LOG_DEBUG(LOG_COMPONENT,
-                     "Evento generado. tipo="
-                         << (tipoPersona == 0 ? "identificados" : "no_identificados")
-                         << " total_rostros=" << totalCaras);
+                "ROSTRO ADD tipoPersona=" << tipoPersona
+                << " anon=" << (anonLocal ? "S" : "N")
+                << " id=" << idLocal
+                << " deltaMs=" << deltaMs
+                << " numId=" << trackFace->cara.identificador.getNumIdentificaciones());
+        }
 
-            if (tipoPersona == 0)
-                generadorEventos.agregarTramaIden(payloadEvento);
-            else
-                generadorEventos.agregarTramaNoIden(payloadEvento);
+        // ✅ Regla: si el evento se quedó sin rostros -> NO encolar trama
+        if (lstRostros.empty())
+        {
+            LOG_DEBUG(LOG_COMPONENT,
+                "Evento omitido: sin rostros válidos. tipoPersona="
+                    << tipoPersona
+                    << " totalCaras=" << totalCaras);
+            continue;
+        }
+
+        // Cuadro (frame) base64
+        GImage frameEscalado = frameOriginal.cloneResize(anchoVisualiza, alturaVisualiza);
+
+        jpegBuffer = GDibujo::encode(
+            frameEscalado,
+            GDIBUJO_ENCODE_JPEG,
+            compresionJpeg,
+            jpegLenBytes);
+
+        jpegBase64 = base64_encode(
+            (const unsigned char*)jpegBuffer,
+            jpegLenBytes,
+            &base64LenBytes);
+
+        free(jpegBuffer);
+        jpegBuffer = nullptr;
+
+        json payloadJson;
+        payloadJson["cuadro"] = std::string(jpegBase64);
+
+        free(jpegBase64);
+        jpegBase64 = nullptr;
+
+        payloadJson["serieEquipo"] = GStringUtils::trim(serieEquipo);
+        payloadJson["fecEvento"] = fechaEventoStr;
+        payloadJson["lstRostros"] = lstRostros;
+
+        const std::string payloadEvento = payloadJson.dump();
+
+        LOG_DEBUG(LOG_COMPONENT,
+            "Evento encolado. tipoPersona="
+                << tipoPersona
+                << " totalCaras=" << totalCaras
+                << " rostrosValidos=" << (int)lstRostros.size());
+
+        if (tipoPersona == 0)
+        {
+            generadorEventos.agregarTramaIden(payloadEvento);
+        }
+        else
+        {
+            generadorEventos.agregarTramaNoIden(payloadEvento);
         }
     }
 }

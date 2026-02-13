@@ -229,6 +229,8 @@ void GeneradorEventos::onSendFail(EventoPop& ev, const SendResult& sr)
             << " durHttp=" << sr.durMs << "ms"
             << " action=DROP_FINAL"
             << " url=" << ev.url);
+
+        cout << ev.trama << endl;
         return;
     }
 
@@ -242,6 +244,8 @@ void GeneradorEventos::onSendFail(EventoPop& ev, const SendResult& sr)
         << " durHttp=" << sr.durMs << "ms"
         << " action=" << (movedToDead ? "TO_DEAD" : "DROP_DEAD_FULL")
         << " url=" << ev.url);
+    cout << ev.trama << endl;
+
 }
 
 void GeneradorEventos::runThread()
