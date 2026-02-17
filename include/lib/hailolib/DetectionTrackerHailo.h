@@ -2,7 +2,7 @@
 #ifndef _DETECTION_TRACKER_
 #define _DETECTION_TRACKER_
 
-#include "lib/hailolib/FaceRecHailo.h"
+#include "lib/hailolib/CaraDescrita.h"
 #include "lib/general/GLinkedList.h"
 #include <opencv2/tracking.hpp>
 

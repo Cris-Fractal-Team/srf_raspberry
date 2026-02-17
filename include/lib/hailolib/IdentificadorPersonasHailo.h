@@ -12,6 +12,7 @@
 #include "lib/general/GThread.h"
 #include "lib/hailolib/FaceRecHailo.h"
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
+#include "lib/hailolib/DescPersonaExterno.h"
 
 using namespace std;
 

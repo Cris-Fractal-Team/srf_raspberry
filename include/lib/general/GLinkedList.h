@@ -60,6 +60,9 @@ class GLinkedList
 
         GLinkedList<T>& operator=(const GLinkedList<T>& other);
 
+        bool contains(T value);
+        bool contains(T value) const;
+
     private:
         GLinkedListNode<T> *head;
         GLinkedListNode<T> *tail;
@@ -401,6 +404,31 @@ GLinkedList<T>& GLinkedList<T>::operator=(const GLinkedList<T>& other)
     }
 
     return *this;
+}
+
+/**
+ * Indica si un valor existe en la lista (non-const)
+ */
+template<typename T>
+bool GLinkedList<T>::contains(T value)
+{
+    return const_cast<const GLinkedList<T>*>(this)->contains(value);
+}
+
+/**
+ * Indica si un valor existe en la lista (const)
+ */
+template<typename T>
+bool GLinkedList<T>::contains(T value) const
+{
+    int n = size();
+    for (int i = 0; i < n; i++)
+    {
+        T v = get(i);
+        if (v == value)
+            return true;
+    }
+    return false;
 }
 
 #endif

@@ -632,8 +632,6 @@ GImage ProcesoRecFacial::dibujaCaras(GImage imagen,
     GColor colorAzul(0, 0, 255);
     GColor colorBlanco(255, 255, 255);
 
-    DescPersonaExterno* datosPersona = nullptr;
-
     string etiquetaId;
 
     int yTextoCaja = 0;
@@ -656,17 +654,29 @@ GImage ProcesoRecFacial::dibujaCaras(GImage imagen,
     const int totalCaras = (int)lstCaras->size();
     for (int indiceCara = 0; indiceCara < totalCaras; indiceCara++) {
         trackFace = lstCaras->at(indiceCara);
+        if (trackFace == nullptr) continue;
 
         etiquetaId = (trackFace->id > 0) ? to_string(trackFace->id) : "";
 
         cara = &trackFace->cara;
 
-        cajaRostro.x1 = cara->deteccion.ptoSupIzq.x * escalaX;
-        cajaRostro.y1 = cara->deteccion.ptoSupIzq.y * escalaY;
-        cajaRostro.x2 = cara->deteccion.ptoInfDer.x * escalaX;
-        cajaRostro.y2 = cara->deteccion.ptoInfDer.y * escalaY;
+        cajaRostro.x1 = (int)(cara->deteccion.ptoSupIzq.x * escalaX);
+        cajaRostro.y1 = (int)(cara->deteccion.ptoSupIzq.y * escalaY);
+        cajaRostro.x2 = (int)(cara->deteccion.ptoInfDer.x * escalaX);
+        cajaRostro.y2 = (int)(cara->deteccion.ptoInfDer.y * escalaY);
 
-        datosPersona = trackFace->cara.identificador.getDatosPerIden();
+        // Clamp básico para evitar coordenadas raras
+        if (cajaRostro.x1 < 0) cajaRostro.x1 = 0;
+        if (cajaRostro.y1 < 0) cajaRostro.y1 = 0;
+        if (cajaRostro.x2 > anchoVisualiza) cajaRostro.x2 = anchoVisualiza;
+        if (cajaRostro.y2 > alturaVisualiza) cajaRostro.y2 = alturaVisualiza;
+
+        // ✅ Tomar datos estables (NO punteros colgantes)
+        const bool anonimoPrin = trackFace->cara.identificador.getAnonimoPrincipal();
+        const std::string idExternoPrin = trackFace->cara.identificador.getIdExternoPrincipal();
+        const std::string nombreExternoPrin = trackFace->cara.identificador.getNombreExternoPrincipal();
+
+        const bool tieneIdentificacion = (!idExternoPrin.empty()) || anonimoPrin;
 
         if (!trackFace->tracker.empty()) {
             cajaAux.x1 = (int)(((float)trackFace->trackerBox.x) * escalaXTrack);
@@ -679,18 +689,22 @@ GImage ProcesoRecFacial::dibujaCaras(GImage imagen,
 
         if (!cara->descCalculado) {
             GDibujo::drawRect(frameVisor, cajaRostro, colorAmarillo, 2);
-        } else if ((!cara->personaIdent) || (datosPersona == NULL)) {
+        } else if ((!cara->personaIdent) || (!tieneIdentificacion)) {
             GDibujo::drawRect(frameVisor, cajaRostro, colorRojo, 2);
         } else {
-            if (datosPersona != NULL) {
-                etiquetaId.append(" - ");
-                etiquetaId.append(GStringUtils::to_string_fixed(
-                    trackFace->cara.identificador.getPromedioComparacion(), 2));
-                etiquetaId.append(" : ");
-                etiquetaId.append(datosPersona->nombre);
-            }
+            etiquetaId.append(" - ");
+            etiquetaId.append(GStringUtils::to_string_fixed(
+                trackFace->cara.identificador.getPromedioComparacion(), 2));
+            etiquetaId.append(" : ");
 
-            if (datosPersona->anonimo)
+            if (!nombreExternoPrin.empty())
+                etiquetaId.append(nombreExternoPrin);
+            else if (!idExternoPrin.empty())
+                etiquetaId.append(idExternoPrin);
+            else
+                etiquetaId.append("ANON");
+
+            if (anonimoPrin)
                 GDibujo::drawRect(frameVisor, cajaRostro, colorRojo, 2);
             else
                 GDibujo::drawRect(frameVisor, cajaRostro, colorVerde, 2);
@@ -721,7 +735,6 @@ GImage ProcesoRecFacial::dibujaCaras(GImage imagen,
         // dibuja la caja con el ID / texto
         yTextoCaja = cajaRostro.y1 - 30;
         if (yTextoCaja < 0) {
-            // se dibuja la caja en la parte inferior
             cajaRostro.y1 = cajaRostro.y2;
             cajaRostro.y2 += 40;
         } else {
@@ -732,8 +745,12 @@ GImage ProcesoRecFacial::dibujaCaras(GImage imagen,
         cajaRostro.x2 += 100;
         cajaRostro.x1 -= 200;
         if (cajaRostro.x1 < 0) cajaRostro.x1 = 0;
+        if (cajaRostro.x2 > anchoVisualiza) cajaRostro.x2 = anchoVisualiza;
+        if (cajaRostro.y1 < 0) cajaRostro.y1 = 0;
+        if (cajaRostro.y2 > alturaVisualiza) cajaRostro.y2 = alturaVisualiza;
 
-        if (datosPersona != NULL) {
+        // ✅ antes dependías de datosPersona != NULL
+        if (tieneIdentificacion) {
             if (trackFace->cara.identificador.fechaUltEvento == 0) {
                 GDibujo::drawRect(frameVisor, cajaRostro, colorBlanco, -1);
                 GDibujo::drawText(frameVisor, cajaRostro.x1, cajaRostro.y1 + 30,
@@ -850,7 +867,6 @@ void ProcesoRecFacial::notificaDetecciones(
     double valorEscalado = 0.0;
 
     TrackedDetectionHailo* trackFace = nullptr;
-    DescPersonaExterno* personaDetectada = nullptr;
 
     char* jpegBuffer = nullptr;
     char* jpegBase64 = nullptr;
@@ -870,14 +886,12 @@ void ProcesoRecFacial::notificaDetecciones(
             trackFace = carasTrackFinal->at(indiceCara);
             if (trackFace == nullptr) continue;
 
-            personaDetectada = trackFace->cara.identificador.getDatosPerIden();
-            if (personaDetectada == NULL) continue;
+            const bool anonLocal = trackFace->cara.identificador.getAnonimoPrincipal();
+            const std::string idLocal = trackFace->cara.identificador.getIdExternoPrincipal();
+            const std::string nombreLocal = trackFace->cara.identificador.getNombreExternoPrincipal();
 
-            const bool anonLocal = personaDetectada->anonimo;
-            const std::string idLocal = personaDetectada->id;
-            const std::string nombreLocal = personaDetectada->nombre;
-            
-            // filtro por tipoPersona cuando NO hay endpoint unificado
+            if (idLocal.empty() && !anonLocal) continue;
+
             if (!generadorEventos.usarEndpointUnificado)
             {
                 const bool esAnonimo = anonLocal;
@@ -900,16 +914,12 @@ void ProcesoRecFacial::notificaDetecciones(
                 continue;
             }
 
-            // throttle anonimos
             if (anonLocal)
             {
-                if (!shouldEmitAnonimo(idLocal, timestampEventoMs))
-                {
-                    continue;
-                }
+                const std::string anonId = idLocal.empty() ? std::string("__ANON__") : idLocal;
+                if (!shouldEmitAnonimo(anonId, timestampEventoMs)) continue;
             }
 
-            // ✅ FILTRO PRINCIPAL: si el descriptor es inválido -> OMITIR ESTE ROSTRO
             if (!isDescriptorFacialValido(trackFace->cara.descriptor, NUM_ELEMS_DESC_FACIAL))
             {
                 LOG_WARN(LOG_COMPONENT,
@@ -920,9 +930,6 @@ void ProcesoRecFacial::notificaDetecciones(
                 continue;
             }
 
-            // --- A partir de aquí: el rostro SÍ se incluye en el evento ---
-
-            // FOTO rostro base64
             jpegBuffer = GDibujo::encode(
                 trackFace->cara.fotoCara,
                 GDIBUJO_ENCODE_JPEG,
@@ -943,7 +950,6 @@ void ProcesoRecFacial::notificaDetecciones(
             free(jpegBase64);
             jpegBase64 = nullptr;
 
-            // Coordenadas escaladas
             json coordenadasJson;
 
             valorEscalado = ((double)trackFace->cara.deteccion.ptoSupIzq.x) * factorEscalaVisualizaX;
@@ -960,15 +966,14 @@ void ProcesoRecFacial::notificaDetecciones(
 
             rostroJson["coordenadas"] = coordenadasJson;
 
-            // Descriptor facial (ya validado)
             rostroJson["descripcionFacial"] =
                 buildDescripcionFacialJson(trackFace->cara.descriptor, NUM_ELEMS_DESC_FACIAL);
 
-            // Ids
             if (!anonLocal)
             {
                 rostroJson["idReconocido"] = idLocal;
                 rostroJson["idTipoRostro"] = 2;
+                if (!nombreLocal.empty()) rostroJson["nombreReconocido"] = nombreLocal;
             }
             else
             {
@@ -976,14 +981,11 @@ void ProcesoRecFacial::notificaDetecciones(
                 rostroJson["idTipoRostro"] = 1;
             }
 
-            // Probabilidad: respetando tu formato string con 2 decimales
             rostroJson["probabilidad"] =
                 GStringUtils::to_string_fixed(trackFace->cara.identificador.getPromedioComparacion(), 2);
 
-            // Agregar rostro al evento
             lstRostros.push_back(rostroJson);
 
-            // Marcar último evento SOLO si se incluyó el rostro
             trackFace->cara.identificador.fechaUltEvento = timestampEventoMs;
 
             LOG_DEBUG(LOG_COMPONENT,
@@ -994,7 +996,6 @@ void ProcesoRecFacial::notificaDetecciones(
                 << " numId=" << trackFace->cara.identificador.getNumIdentificaciones());
         }
 
-        // ✅ Regla: si el evento se quedó sin rostros -> NO encolar trama
         if (lstRostros.empty())
         {
             LOG_DEBUG(LOG_COMPONENT,
@@ -1004,7 +1005,6 @@ void ProcesoRecFacial::notificaDetecciones(
             continue;
         }
 
-        // Cuadro (frame) base64
         GImage frameEscalado = frameOriginal.cloneResize(anchoVisualiza, alturaVisualiza);
 
         jpegBuffer = GDibujo::encode(
@@ -1040,13 +1040,9 @@ void ProcesoRecFacial::notificaDetecciones(
                 << " rostrosValidos=" << (int)lstRostros.size());
 
         if (tipoPersona == 0)
-        {
             generadorEventos.agregarTramaIden(payloadEvento);
-        }
         else
-        {
             generadorEventos.agregarTramaNoIden(payloadEvento);
-        }
     }
 }
 

@@ -9,7 +9,10 @@
 #include "lib/general/GThread.h"
 #include "lib/hailolib/hailo8l.h"
 #include "lib/hailolib/DetectorCaraHaloScrfd.h"
-#include "lib/hailolib/FaceRecHailo.h"
+
+#include "lib/hailolib/UnivIdenPersona.h"
+#include "lib/hailolib/DescPersonaExterno.h"
+
 #include "lib/hailolib/DetectionTrackerHailo.h"
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
 #include "app/GeneradorPingsAppWeb.h"

@@ -1,6 +1,8 @@
 
 #include "lib/hailolib/DetectionTrackerHailo.h"
 #include "lib/general/GLinkedList.h"
+#include "lib/hailolib/DescPersonaExterno.h"
+
 #include <math.h>
 #include <cstring>
 
@@ -161,11 +163,13 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacion(
         {
             detUniv = lstUnivPen.get(iu);
             
-            descPerUniv = detUniv->cara.identificador.getDatosPerIden();
-            if ( descPerUniv == NULL ) 
+            const std::string idUniv = detUniv->cara.identificador.getIdExternoPrincipal();
+            if (idUniv.empty())
                 continue;
-                
-            if (( descPerActual->anonimo== descPerUniv->anonimo ) &&  ( descPerActual->id.compare(descPerUniv->id) == 0 ))
+
+            const bool anonUniv = detUniv->cara.identificador.getAnonimoPrincipal();
+
+            if ((descPerActual->anonimo == anonUniv) && (descPerActual->id == idUniv))
             {
                 // Encontramos que la persona actual o nueva coincide con una del universo
                 idenPersona = detActual->cara.identificador.getUltimaIdentificacion();
@@ -234,205 +238,309 @@ void DetectionTrackerHailo::reset()
 }
 
 /**
- *   Analiza las detecciones actualesy reconocidas, les asigna un ID unico
+ *   Analiza las detecciones actuales y reconocidas, les asigna un ID unico
  * para poder hacer un tracking, pero principalmente para poder llevar
  * estadisticas del rostro y agrupar las detecciones adicionalmente aplica un algoritmo
- * de tracking KLT para poder identificar rostros que en la imagen anterior fueron identificados
- * pero en la actual no, pero existen rostro sin identificacion o anonimos cercano 
+ * de tracking KLT/KCF para poder identificar rostros que en la imagen anterior fueron identificados
+ * pero en la actual no, pero existen rostro sin identificacion o anonimos cercano.
+ *
+ * ✅ Versión "asegurada":
+ * - NO dereferencia DescPersonaExterno* (evita tipo incompleto y punteros colgantes).
+ * - Matching estable por (anonimo + idExternoPrincipal).
+ * - Protege accesos a getUltimaIdentificacion() y punteros nulos.
+ * - Evita remover del universo con índices inválidos tras múltiples removes.
  */
-vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacionYTracker( vector<TrackedDetectionHailo *> *lstDetActuales, GImage *imagenVisorActual, GImage *imagenPreviaVisor, float factorXVisor, float factorYVisor  )
+vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacionYTracker(
+    vector<TrackedDetectionHailo *> *lstDetActuales,
+    GImage *imagenVisorActual,
+    GImage *imagenPreviaVisor,
+    float factorXVisor,
+    float factorYVisor)
 {
-    int i,iu,n,nu;
     vector<TrackedDetectionHailo *> rpta;
-    TrackedDetectionHailo *detActual;
-    DescPersonaExterno *descPerActual, *descPerUniv;
-    IdentificacionPersona idenPersona;
 
-    n = lstDetActuales->size();
-    nu = lstUniverso.size();
+    if (lstDetActuales == nullptr || imagenVisorActual == nullptr || imagenPreviaVisor == nullptr)
+        return rpta;
 
-    if ( nu == 0 )
+    const int n = (int)lstDetActuales->size();
+    int nu = lstUniverso.size();
+
+    // Helpers locales seguros (evita crashes por indices)
+    auto safeGetUniv = [&](int idx) -> TrackedDetectionHailo* {
+        if (idx < 0 || idx >= lstUniverso.size()) return nullptr;
+        return lstUniverso.getAddr(idx);
+    };
+
+    // ------------------------------------------------------------
+    // Caso 1: Universo vacío -> asignar IDs y poblar universo
+    // ------------------------------------------------------------
+    if (nu == 0)
     {
-        // El universo esta vacio se agregan todas las detecciones y se les asigna un track unico
-        for(i=0; i<n; i++)
+        for (int i = 0; i < n; ++i)
         {
-            detActual = lstDetActuales->at(i);
+            TrackedDetectionHailo *detActual = lstDetActuales->at(i);
+            if (detActual == nullptr)
+                continue;
 
-            descPerActual = detActual->cara.identificador.getDatosPerIden();
-            if ( descPerActual == NULL )
+            const std::string idActual = detActual->cara.identificador.getIdExternoPrincipal();
+            const bool anonActual = detActual->cara.identificador.getAnonimoPrincipal();
+
+            // Si no hay ID y no es anónimo => no lo metemos al universo (solo retorno)
+            if (idActual.empty() && !anonActual)
             {
                 rpta.push_back(detActual);
                 continue;
             }
 
-            detActual->id = sgteId;
-            sgteId++;            
+            detActual->id = sgteId++;
             lstUniverso.add(*detActual);
-            detActual = lstUniverso.getAddrUltimo();
-            
-            rpta.push_back(detActual);
-        }
 
+            TrackedDetectionHailo *detUniv = lstUniverso.getAddrUltimo();
+            if (detUniv)
+                rpta.push_back(detUniv);
+            else
+                rpta.push_back(detActual);
+        }
         return rpta;
     }
 
+    // ------------------------------------------------------------
+    // Listas temporales: pendientes del universo y nuevos (anon/noid)
+    // ------------------------------------------------------------
     GLinkedList<TrackedDetectionHailo *> lstUnivPen, lstNuevos;
-    GLinkedList<int>lstUnivPenIndices;
-    TrackedDetectionHailo *detUniv;
-    bool encontro;
-    cv::Rect rc;
+    GLinkedList<int> lstUnivPenIndices;
 
-    // creamos la lista temporal
-    for(i=0; i<nu; i++)
+    // Cargar pendientes (guardamos puntero y el índice ORIGINAL)
+    for (int i = 0; i < nu; ++i)
     {
-        detUniv = lstUniverso.getAddr(i);        
-        lstUnivPen.add(lstUniverso.getAddr(i));
+        TrackedDetectionHailo *detUniv = safeGetUniv(i);
+        if (!detUniv) continue;
+        lstUnivPen.add(detUniv);
         lstUnivPenIndices.add(i);
     }
 
-    // Asociamos las detecciones actuales y las nuevas
-    for( i=0; i < n; i++)
+    // ------------------------------------------------------------
+    // Asociar detecciones actuales con universo por (anon + id)
+    // ------------------------------------------------------------
+    for (int i = 0; i < n; ++i)
     {
-        detActual = lstDetActuales->at(i);
-        descPerActual = detActual->cara.identificador.getDatosPerIden();
-        if ( descPerActual == NULL )
+        TrackedDetectionHailo *detActual = lstDetActuales->at(i);
+        if (!detActual)
+            continue;
+
+        const std::string idActual = detActual->cara.identificador.getIdExternoPrincipal();
+        const bool anonActual = detActual->cara.identificador.getAnonimoPrincipal();
+
+        // Si no tiene ID y no es anon => puede ser "no reconocido" (o no se reporta)
+        if (idActual.empty() && !anonActual)
         {
-            // es un no reconocido incluso sin descriptor facial pues no se desea
-            // reportar desconocidos
             lstNuevos.add(detActual);
             continue;
         }
-        
-        encontro = false;
-        nu = lstUnivPen.size()-1;
-        for(iu=nu; iu>=0; iu--)
-        {
-            detUniv = lstUnivPen.get(iu);
-            
-            descPerUniv = detUniv->cara.identificador.getDatosPerIden();
-            if ( descPerUniv == NULL )
-            {
-                continue;
-            }
 
-            if (( descPerActual->anonimo== descPerUniv->anonimo ) &&  ( descPerActual->id.compare(descPerUniv->id) == 0 ))
+        bool encontro = false;
+
+        // Buscar desde el final para poder remove(iu) sin romper iteración
+        for (int iu = lstUnivPen.size() - 1; iu >= 0; --iu)
+        {
+            TrackedDetectionHailo *detUniv = lstUnivPen.get(iu);
+            if (!detUniv) continue;
+
+            const std::string idUniv = detUniv->cara.identificador.getIdExternoPrincipal();
+            if (idUniv.empty()) continue;
+
+            const bool anonUniv = detUniv->cara.identificador.getAnonimoPrincipal();
+
+            if (anonActual == anonUniv && idActual == idUniv)
             {
-                // Encontramos que la persona actual o nueva coincide con una del universo
-                idenPersona = detActual->cara.identificador.getUltimaIdentificacion();
-                
+                // ✅ Coincide con una del universo
+                // Solo usar ultima ident si existe (evita segfault)
+                IdentificacionPersona idenPersona;
+                if (detActual->cara.identificador.getNumIdentificaciones() > 0)
+                    idenPersona = detActual->cara.identificador.getUltimaIdentificacion();
+                else
+                {
+                    // Si no hay identificaciones, no tocamos el identificador del universo
+                    // pero igual actualizamos foto/detección/descriptor.
+                    idenPersona.fecDet = 0;
+                    idenPersona.comparacion = 0.0f;
+                }
+
                 detUniv->cara.fotoCara = detActual->cara.fotoCara;
                 detUniv->cara.deteccion = detActual->cara.deteccion;
-                std::memcpy(detUniv->cara.descriptor, detActual->cara.descriptor, NUM_ELEMS_DESC_FACIAL*sizeof(SIMD_TYPE));
-                detUniv->cara.identificador.agregaIdentif(descPerActual, idenPersona, idenPersona.fecDet);
+
+                std::memcpy(detUniv->cara.descriptor,
+                            detActual->cara.descriptor,
+                            NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
+
+                // ✅ No dependemos de DescPersonaExterno* (puntero colgante)
+                if (idenPersona.fecDet != 0)
+                    detUniv->cara.identificador.agregaIdentif(nullptr, idenPersona, idenPersona.fecDet);
+
                 detUniv->ciclosNoDetectados = 0;
 
-                if ( detUniv->tracker.empty() == false )
-                {
-                    // si el objeto universal tenia tracking activo, se elimina pues la coinciencia de
-                    // descriptor deprecia al tracker
+                if (!detUniv->tracker.empty())
                     detUniv->tracker.release();
-                }                
 
+                // sacar de pendientes
                 lstUnivPen.remove(iu);
                 lstUnivPenIndices.remove(iu);
-                encontro = true;
 
-                idenPersona = detActual->cara.identificador.getUltimaIdentificacion();
                 rpta.push_back(detUniv);
-
+                encontro = true;
                 break;
             }
         }
 
-        
-        if ( encontro == false )
+        if (!encontro)
         {
-            // la deteccion es nueva
-            descPerActual = detActual->cara.identificador.getDatosPerIden();
-            if ( descPerActual->anonimo == false )
+            // Detección nueva: si NO es anónimo -> se guarda al universo
+            if (!anonActual)
             {
-                detActual->id = sgteId;
-                sgteId++;            
+                detActual->id = sgteId++;
                 lstUniverso.add(*detActual);
-                detActual = lstUniverso.getAddrUltimo();
 
-                if ( detActual->tracker.empty() == false )                
-                    detActual->tracker.release();
-                                     
-                rpta.push_back(detActual);
+                TrackedDetectionHailo *detUniv = lstUniverso.getAddrUltimo();
+                if (detUniv)
+                {
+                    if (!detUniv->tracker.empty())
+                        detUniv->tracker.release();
+                    rpta.push_back(detUniv);
+                }
+                else
+                {
+                    rpta.push_back(detActual);
+                }
             }
             else
             {
-                // los anonimos se guardan para ver si hay coincidencia visual
+                // anónimos se guardan para intentar coincidencia visual
                 lstNuevos.add(detActual);
-            }           
+            }
         }
     }
 
+    // ------------------------------------------------------------
+    // Analiza nuevas anónimas vs pendientes (si existe la función)
+    // ------------------------------------------------------------
     nu = lstUnivPen.size();
-    n = lstNuevos.size();
-    if (( n >= 1 ) && ( nu >= 1 ))
-        analizaDetNuevasAnonimas(&rpta,&lstUnivPen,&lstNuevos,&lstUnivPenIndices, imagenVisorActual, imagenPreviaVisor, factorXVisor, factorYVisor);
-
-    // revisamos las detecciones anterioes que no coincidieron en las detecciones
-    nu = lstUnivPen.size()-1;
-    for(iu=nu; iu>=0; iu--)
+    const int nNuevos = lstNuevos.size();
+    if ((nNuevos >= 1) && (nu >= 1))
     {
-        detUniv = lstUnivPen.get(iu);
+        analizaDetNuevasAnonimas(
+            &rpta,
+            &lstUnivPen,
+            &lstNuevos,
+            &lstUnivPenIndices,
+            imagenVisorActual,
+            imagenPreviaVisor,
+            factorXVisor,
+            factorYVisor);
+    }
+
+    // ------------------------------------------------------------
+    // Tracking para los pendientes del universo
+    // OJO: lstUniverso puede cambiar tamaño si removemos.
+    // Para hacerlo seguro, removemos en 2 fases:
+    // 1) marcamos indices a borrar
+    // 2) borramos del universo al final, en orden descendente
+    // ------------------------------------------------------------
+    vector<int> indicesParaBorrar;
+    indicesParaBorrar.reserve(lstUnivPen.size());
+
+    for (int iu = lstUnivPen.size() - 1; iu >= 0; --iu)
+    {
+        TrackedDetectionHailo *detUniv = lstUnivPen.get(iu);
+        if (!detUniv) continue;
+
         detUniv->ciclosNoDetectados++;
-        if ( detUniv->ciclosNoDetectados > maxCiclosInactivo )
-        {
-            i = lstUnivPenIndices.get(iu);
-            detUniv = lstUniverso.getAddr(i);
-            detUniv->cara.identificador.reset();
-            if ( detUniv->tracker.empty() == false )
-                detUniv->tracker.release();
 
-            lstUniverso.remove(i);
+        int idxUniv = lstUnivPenIndices.get(iu); // índice original en lstUniverso
+
+        if (detUniv->ciclosNoDetectados > maxCiclosInactivo)
+        {
+            // marca para borrar del universo
+            if (idxUniv >= 0)
+                indicesParaBorrar.push_back(idxUniv);
+
+            // no lo agregamos a rpta
+            continue;
         }
-        else
+
+        // Tracking de la imagen pendiente
+        if (detUniv->tracker.empty())
         {
-            // hacemos tracking de la imagen que aun esta pendiente
-            if ( detUniv->tracker.empty() == true ) 
-            {
-                // creamos el tracker            
-                detUniv->tracker = cv::TrackerKCF::create();
-                detUniv->trackerBox = detUniv->cara.deteccion.getOpenCV2DRectBoundingBox();
+            detUniv->tracker = cv::TrackerKCF::create();
+            detUniv->trackerBox = detUniv->cara.deteccion.getOpenCV2DRectBoundingBox();
 
-                // reducimos la escala de la recta de la deteccion a la imagen que tiene una resolucion menor
-                detUniv->trackerBox.x = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.x) / factorXVisor);
-                detUniv->trackerBox.y = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.y) / factorYVisor);
-                detUniv->trackerBox.width = (int)(((float)detUniv->cara.deteccion.getAncho()) / factorXVisor);
-                detUniv->trackerBox.height = (int)(((float)detUniv->cara.deteccion.getAltura()) / factorYVisor);
+            // Reducimos escala de bbox a visor
+            detUniv->trackerBox.x = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.x) / factorXVisor);
+            detUniv->trackerBox.y = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.y) / factorYVisor);
+            detUniv->trackerBox.width  = (int)(((float)detUniv->cara.deteccion.getAncho()) / factorXVisor);
+            detUniv->trackerBox.height = (int)(((float)detUniv->cara.deteccion.getAltura()) / factorYVisor);
 
+            // init protegido
+            if (!imagenPreviaVisor->imagenOpencv.empty())
                 detUniv->tracker->init(imagenPreviaVisor->imagenOpencv, detUniv->trackerBox);
-            }
+        }
 
-            // // hacemos que el tracker estime la nueva posicion
+        // update protegido
+        if (!imagenVisorActual->imagenOpencv.empty())
             detUniv->tracker->update(imagenVisorActual->imagenOpencv, detUniv->trackerBox);
 
-            rc = detUniv->trackerBox;
-            rc.x = (int)(((float) rc.x) * factorXVisor);
-            rc.y = (int)(((float) rc.y) * factorYVisor);
-            rc.width = (int)(((float) rc.width) * factorXVisor);
-            rc.height = (int)(((float) rc.height) * factorYVisor);            
+        // pasar bbox a escala original
+        cv::Rect rc = detUniv->trackerBox;
+        rc.x      = (int)(((float)rc.x) * factorXVisor);
+        rc.y      = (int)(((float)rc.y) * factorYVisor);
+        rc.width  = (int)(((float)rc.width) * factorXVisor);
+        rc.height = (int)(((float)rc.height) * factorYVisor);
 
-            detUniv->cara.deteccion.ptoSupIzq.x = rc.x;
-            detUniv->cara.deteccion.ptoSupIzq.y = rc.y;
-            detUniv->cara.deteccion.ptoInfDer.x = rc.x+rc.width;
-            detUniv->cara.deteccion.ptoInfDer.y = rc.y+rc.height;
+        // clamp mínimo (evita cajas negativas)
+        if (rc.width < 1) rc.width = 1;
+        if (rc.height < 1) rc.height = 1;
+        if (rc.x < 0) rc.x = 0;
+        if (rc.y < 0) rc.y = 0;
 
-            rpta.push_back(detUniv);
-        }        
+        detUniv->cara.deteccion.ptoSupIzq.x = rc.x;
+        detUniv->cara.deteccion.ptoSupIzq.y = rc.y;
+        detUniv->cara.deteccion.ptoInfDer.x = rc.x + rc.width;
+        detUniv->cara.deteccion.ptoInfDer.y = rc.y + rc.height;
+
+        rpta.push_back(detUniv);
     }
-    
+
+    // ------------------------------------------------------------
+    // Borrado seguro del universo: ordenar desc
+    // ------------------------------------------------------------
+    if (!indicesParaBorrar.empty())
+    {
+        std::sort(indicesParaBorrar.begin(), indicesParaBorrar.end());
+        indicesParaBorrar.erase(std::unique(indicesParaBorrar.begin(), indicesParaBorrar.end()),
+                                indicesParaBorrar.end());
+
+        for (int k = (int)indicesParaBorrar.size() - 1; k >= 0; --k)
+        {
+            const int idx = indicesParaBorrar[k];
+            if (idx < 0 || idx >= lstUniverso.size())
+                continue;
+
+            TrackedDetectionHailo *u = lstUniverso.getAddr(idx);
+            if (u)
+            {
+                u->cara.identificador.reset();
+                if (!u->tracker.empty())
+                    u->tracker.release();
+            }
+            lstUniverso.remove(idx);
+        }
+    }
+
     lstUnivPen.reset();
     lstNuevos.reset();
     lstUnivPenIndices.reset();
 
     return rpta;
 }
-
 
 
 
