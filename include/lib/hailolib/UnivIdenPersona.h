@@ -35,6 +35,14 @@ public:
     UnivIdenPersona();
 
     void agregaIdentif(DescPersonaExterno* descExterno, IdentificacionPersona iden, long long fecDet);
+    
+    void agregaIdentifStable(
+    const std::string &idExterno,
+    bool anonimoExterno,
+    const std::string &nombreExterno,
+    const IdentificacionPersona &iden,
+    long long fecDet);
+
     void borrarDescPersonaExterno(DescPersonaExterno* descExterno);
 
     DescPersonaExterno* getDatosPerIden();

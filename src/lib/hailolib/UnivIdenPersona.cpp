@@ -120,6 +120,88 @@ void UnivIdenPersona::agregaIdentif(DescPersonaExterno* descExterno, Identificac
     }
 }
 
+void UnivIdenPersona::agregaIdentifStable(
+    const std::string &idExterno,
+    bool anonimoExterno,
+    const std::string &nombreExterno,
+    const IdentificacionPersona &iden,
+    long long fecDet)
+{
+    // Si no hay ID estable, no hacemos nada
+    if (idExterno.empty()) return;
+
+    bool encontro = false;
+    const int n = lstGrupoIden.size();
+
+    for (int i = 0; i < n; ++i)
+    {
+        GrupoIdenPersona *g = lstGrupoIden.getAddr(i);
+        if (!g) continue;
+
+        if (g->anonimoExterno == anonimoExterno && g->idExterno == idExterno)
+        {
+            IdentificacionPersona tmp = iden;
+            tmp.fecDet = fecDet;
+            g->lstIdentificaciones.add(tmp);
+
+            // Completar nombre si faltaba
+            if (g->nombreExterno.empty() && !nombreExterno.empty())
+                g->nombreExterno = nombreExterno;
+
+            // MUY IMPORTANTE: NO tocamos g->descExterno aquí (no punteros)
+            // g->descExterno queda como estaba.
+
+            // Actualiza principal SOLO si este grupo supera al actual
+            const int len = g->lstIdentificaciones.size();
+            if (len > numIden)
+            {
+                cambioIdentificacion = (i != indiceGrupoPrin);
+                indiceGrupoPrin = i;
+                numIden = len;
+            }
+
+            encontro = true;
+            break;
+        }
+    }
+
+    if (!encontro)
+    {
+        GrupoIdenPersona nuevo;
+        nuevo.idExterno = idExterno;
+        nuevo.nombreExterno = nombreExterno;
+        nuevo.anonimoExterno = anonimoExterno;
+        nuevo.descExterno = nullptr; // NO punteros
+        nuevo.fecCrea = fecDet;
+
+        IdentificacionPersona tmp = iden;
+        tmp.fecDet = fecDet;
+        nuevo.lstIdentificaciones.add(tmp);
+
+        lstGrupoIden.add(nuevo);
+
+        // Si no había principal, lo seteamos
+        if (indiceGrupoPrin < 0)
+        {
+            indiceGrupoPrin = 0;
+            numIden = 1;
+            cambioIdentificacion = true;
+        }
+        else
+        {
+            // si el nuevo supera (normalmente arranca en 1)
+            const int idxNuevo = lstGrupoIden.size() - 1;
+            const int len = lstGrupoIden.getAddr(idxNuevo)->lstIdentificaciones.size();
+            if (len > numIden)
+            {
+                indiceGrupoPrin = idxNuevo;
+                numIden = len;
+                cambioIdentificacion = true;
+            }
+        }
+    }
+}
+
 void UnivIdenPersona::borrarDescPersonaExterno(DescPersonaExterno* descExterno)
 {
     const int idxAntes = indiceGrupoPrin;

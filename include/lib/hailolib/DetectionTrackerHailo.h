@@ -177,8 +177,14 @@ class DetectionTrackerHailo
          * busca los mas cercanos en distancia y comparacion facial, para finalmente aplicar un tracking y
          * decidir si hay o no una coincidencia
          */
-        void analizaDetNuevasAnonimas( vector<TrackedDetectionHailo *> *lstTracActual, GLinkedList<TrackedDetectionHailo *> *lstUnivPen,
-            GLinkedList<TrackedDetectionHailo *> *lstNuevos, GLinkedList<int>*lstUnivPenIndices, GImage *imagenVisorActual, GImage *imagenPreviaVisor, float factorXVisor, float factorYVisor );
+        void analizaDetNuevasAnonimas(
+            vector<TrackedDetectionHailo *> *lstTracActual,
+            GLinkedList<TrackedDetectionHailo *> *lstUnivPen,
+            GLinkedList<TrackedDetectionHailo *> *lstNuevos,
+            GImage *imagenVisorActual,
+            GImage *imagenPreviaVisor,
+            float factorXVisor,
+            float factorYVisor);
 
         /**
          * Agrega una nueva deteccion al universo de detecciones

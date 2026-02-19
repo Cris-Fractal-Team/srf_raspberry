@@ -375,7 +375,18 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacionY
 
                 // ✅ No dependemos de DescPersonaExterno* (puntero colgante)
                 if (idenPersona.fecDet != 0)
-                    detUniv->cara.identificador.agregaIdentif(nullptr, idenPersona, idenPersona.fecDet);
+                {
+                    const std::string idUniv     = detUniv->cara.identificador.getIdExternoPrincipal();
+                    const bool anonUniv          = detUniv->cara.identificador.getAnonimoPrincipal();
+                    const std::string nombreUniv = detUniv->cara.identificador.getNombreExternoPrincipal();
+
+                    if (!idUniv.empty() && idenPersona.fecDet != 0)
+                    {
+                        detUniv->cara.identificador.agregaIdentifStable(
+                            idUniv, anonUniv, nombreUniv, idenPersona, idenPersona.fecDet
+                        );
+                    }
+                }
 
                 detUniv->ciclosNoDetectados = 0;
 
@@ -431,11 +442,11 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacionY
             &rpta,
             &lstUnivPen,
             &lstNuevos,
-            &lstUnivPenIndices,
             imagenVisorActual,
             imagenPreviaVisor,
             factorXVisor,
-            factorYVisor);
+            factorYVisor
+        );
     }
 
     // ------------------------------------------------------------
@@ -549,186 +560,178 @@ vector<TrackedDetectionHailo *> DetectionTrackerHailo::analizaPorIdentificacionY
  * busca los mas cercanos en distancia y comparacion facial, para finalmente aplicar un tracking y
  * decidir si hay o no una coincidencia.
  */
-void DetectionTrackerHailo::analizaDetNuevasAnonimas( vector<TrackedDetectionHailo *> *lstTracActual, GLinkedList<TrackedDetectionHailo *> *lstUnivPen,
-    GLinkedList<TrackedDetectionHailo *> *lstNuevos, GLinkedList<int> *lstUnivPenIndices, GImage *imagenVisorActual, GImage *imagenPreviaVisor, float factorXVisor, float factorYVisor )
+void DetectionTrackerHailo::analizaDetNuevasAnonimas(
+    vector<TrackedDetectionHailo *> *lstTracActual,
+    GLinkedList<TrackedDetectionHailo *> *lstUnivPen,
+    GLinkedList<TrackedDetectionHailo *> *lstNuevos,
+    GImage *imagenVisorActual,
+    GImage *imagenPreviaVisor,
+    float factorXVisor,
+    float factorYVisor)
 {
-    int iPend,nPend;
-    int iNuevos,nNuevos;
-    int num,indiceNuevo;
-    int porcentajeInter, areaInter, areaUniv;
-    bool encontro;
-    Rect rectNuevo;
-    GLinkedList<int> lstConteoInterNuevos;
-    GLinkedList<GLinkedList<int> *> lstIndicesInterPendientesNuev;
-    GLinkedList<int> *lstIndicesNuevo;
-    GLinkedList<int> lstNuevosUsados;
-    TrackedDetectionHailo *detUniv, *detActual;
-    IdentificacionPersona idenPersona;
-    DescPersonaExterno *descPerActual;
-    cv::Rect rc;
-    
+    if (!lstTracActual || !lstUnivPen || !lstNuevos || !imagenVisorActual || !imagenPreviaVisor)
+        return;
 
-    // hacemos 0 el conteo de veces en el que los objetos nuevos tiene interseccion
-    // con el objeto trackeado de un rostro anterior
-    nNuevos = lstNuevos->size();
-    for(iNuevos=0; iNuevos<nNuevos; iNuevos++)
+    const int nNuevos = lstNuevos->size();
+    const int nPend   = lstUnivPen->size();
+    if (nNuevos <= 0 || nPend <= 0)
+        return;
+
+    // Conteo de intersecciones por nuevo
+    GLinkedList<int> conteoInterNuevos;
+    for (int i = 0; i < nNuevos; ++i)
+        conteoInterNuevos.add(0);
+
+    // Por cada pendiente: lista de indices de nuevos que intersectan
+    GLinkedList<GLinkedList<int> *> indicesInterPend;
+    for (int p = 0; p < nPend; ++p)
+        indicesInterPend.add(new GLinkedList<int>());
+
+    // 1) Trackear pendientes y medir intersección
+    for (int p = 0; p < nPend; ++p)
     {
-        lstConteoInterNuevos.add(0);
-    }
+        TrackedDetectionHailo *detUniv = lstUnivPen->get(p);
+        if (!detUniv) continue;
 
-    // creamos una lista con todos los rostros trackeados que no fueron identificados
-    // y cada lista tiene una lista de indices con los rostros nuevos con los que
-    // se ha intersectado
-    nPend = lstUnivPen->size();    
-    for(iPend=0; iPend<nPend; iPend++)
-    {
-        lstIndicesNuevo = new GLinkedList<int>(); 
-        lstIndicesInterPendientesNuev.add(lstIndicesNuevo);
-    }
+        const int areaUniv = detUniv->cara.deteccion.getArea();
+        if (areaUniv <= 0) continue;
 
-
-    // rastreamos cada deteccion del universo que no encontro persona identificada
-    // se compararan con las detecciones nuevas y si hay interseccion con la comparacion
-    // del tracker se considera la misma persona
-    for(iPend=0; iPend<nPend; iPend++)
-    {
-        detUniv = lstUnivPen->get(iPend);
-        areaUniv = detUniv->cara.deteccion.getArea();
-
-        if ( detUniv->tracker.empty() == true ) 
+        if (detUniv->tracker.empty())
         {
-        //    detUniv->tracker.release();
-
-            // creamos el tracker            
             detUniv->tracker = cv::TrackerKCF::create();
             detUniv->trackerBox = detUniv->cara.deteccion.getOpenCV2DRectBoundingBox();
 
-            // reducimos la escala de la recta de la deteccion a la imagen que tiene una resolucion menor
-            detUniv->trackerBox.x = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.x) / factorXVisor);
-            detUniv->trackerBox.y = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.y) / factorYVisor);
-            detUniv->trackerBox.width = (int)(((float)detUniv->cara.deteccion.getAncho()) / factorXVisor);
+            detUniv->trackerBox.x      = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.x) / factorXVisor);
+            detUniv->trackerBox.y      = (int)(((float)detUniv->cara.deteccion.ptoSupIzq.y) / factorYVisor);
+            detUniv->trackerBox.width  = (int)(((float)detUniv->cara.deteccion.getAncho()) / factorXVisor);
             detUniv->trackerBox.height = (int)(((float)detUniv->cara.deteccion.getAltura()) / factorYVisor);
 
-            detUniv->tracker->init(imagenPreviaVisor->imagenOpencv, detUniv->trackerBox);
+            if (!imagenPreviaVisor->imagenOpencv.empty())
+                detUniv->tracker->init(imagenPreviaVisor->imagenOpencv, detUniv->trackerBox);
         }
 
-        // // hacemos que el tracker estime la nueva posicion
-        detUniv->tracker->update(imagenVisorActual->imagenOpencv, detUniv->trackerBox);
+        if (!imagenVisorActual->imagenOpencv.empty())
+            detUniv->tracker->update(imagenVisorActual->imagenOpencv, detUniv->trackerBox);
 
-        // // eliminamos el tracker
-        // detUniv->tracker.release();
+        // Escalar bbox tracker a resolución original
+        cv::Rect rc = detUniv->trackerBox;
+        rc.x      = (int)(((float)rc.x) * factorXVisor);
+        rc.y      = (int)(((float)rc.y) * factorYVisor);
+        rc.width  = (int)(((float)rc.width) * factorXVisor);
+        rc.height = (int)(((float)rc.height) * factorYVisor);
 
-        // detUniv->trackerBox.x = 0;
-        // detUniv->trackerBox.y = 0;
-        // detUniv->trackerBox.width = 10;
-        // detUniv->trackerBox.height = 10;
-                                
-        // escalamos el rectangulo del tracker a la resolucion de las detecciones
-        // la imagen esta a una resolucion mas baja para optimizar el trackeo
-        rc = detUniv->trackerBox;
-        rc.x = (int)(((float) rc.x) * factorXVisor);
-        rc.y = (int)(((float) rc.y) * factorYVisor);
-        rc.width = (int)(((float) rc.width) * factorXVisor);
-        rc.height = (int)(((float) rc.height) * factorYVisor);
-        lstIndicesNuevo = lstIndicesInterPendientesNuev.get(iPend);
+        GLinkedList<int> *lstIdx = indicesInterPend.get(p);
+        if (!lstIdx) continue;
 
-        // comparamos cada nueva deteccion con las cara actual del universo
-        for(iNuevos=0; iNuevos<nNuevos; iNuevos++)
+        for (int i = 0; i < nNuevos; ++i)
         {
-            detActual = lstNuevos->get(iNuevos);
-            rectNuevo = detActual->cara.deteccion.getOpenCV2DRectBoundingBox();
+            TrackedDetectionHailo *detActual = lstNuevos->get(i);
+            if (!detActual) continue;
 
-            areaInter = (rc & rectNuevo).area() * 100;
-            porcentajeInter = areaInter / areaUniv ;
-            // Si la interseccion es mayor o igual a 60% se puede considerar el mismo rostro
-            if ( porcentajeInter >= 40 )
+            cv::Rect rectNuevo = detActual->cara.deteccion.getOpenCV2DRectBoundingBox();
+            const int areaInter = (rc & rectNuevo).area();
+            if (areaInter <= 0) continue;
+
+            const int porcentajeInter = (areaInter * 100) / areaUniv;
+            if (porcentajeInter >= 40)
             {
-                // incrementamos el contador porque ese objeto nuevo se intersecta
-                // en un 60% con el tracker del pendiente                
-                lstConteoInterNuevos.set(iNuevos, lstConteoInterNuevos.get(iNuevos)+1);
-
-                // Guardamos el indice del objeto nuevo que intersecta con el objeto del universo pendiente
-                lstIndicesNuevo->add(iNuevos);
+                conteoInterNuevos.set(i, conteoInterNuevos.get(i) + 1);
+                lstIdx->add(i);
             }
-        }   
+        }
     }
 
-    // Buscamos los objetos pendientes que tienen solo un objeto nuevo intersectado
-    // consideramos que es el mismo objeto
-    for(iPend=nPend-1; iPend>=0; iPend--)
-    {
-        detUniv = lstUnivPen->get(iPend);
-        lstIndicesNuevo = lstIndicesInterPendientesNuev.get(iPend);
+    // 2) Match 1-1
+    GLinkedList<int> nuevosUsados;
 
-        if ( lstIndicesNuevo->size() != 1 ) 
-            continue;
-        
-        indiceNuevo = lstIndicesNuevo->get(0);
-        // validamos que la deteccion nueva solo tenga una interseccion con un objeto pendiente del universo
-        if  ( lstConteoInterNuevos.get(indiceNuevo) != 1 ) 
-            continue;
-        
-        detActual = lstNuevos->get(indiceNuevo);
-        descPerActual = detActual->cara.identificador.getDatosPerIden();
-        if ( descPerActual != NULL )
-        {
-            // solo se copia el descriptor facial si la persona fue identificada
-            idenPersona = detActual->cara.identificador.getUltimaIdentificacion();
-            std::memcpy(detUniv->cara.descriptor, detActual->cara.descriptor, NUM_ELEMS_DESC_FACIAL*sizeof(SIMD_TYPE));
-            detUniv->cara.identificador.agregaIdentif(descPerActual, idenPersona, idenPersona.fecDet);  
-        }
-            
+    for (int p = nPend - 1; p >= 0; --p)
+    {
+        TrackedDetectionHailo *detUniv = lstUnivPen->get(p);
+        GLinkedList<int> *lstIdx = indicesInterPend.get(p);
+        if (!detUniv || !lstIdx) continue;
+
+        if (lstIdx->size() != 1) continue;
+
+        const int idxNuevo = lstIdx->get(0);
+        if (idxNuevo < 0 || idxNuevo >= nNuevos) continue;
+
+        if (conteoInterNuevos.get(idxNuevo) != 1) continue;
+
+        TrackedDetectionHailo *detActual = lstNuevos->get(idxNuevo);
+        if (!detActual) continue;
+
+        // refrescar siempre
         detUniv->cara.fotoCara = detActual->cara.fotoCara;
         detUniv->cara.deteccion = detActual->cara.deteccion;
-
         detUniv->ciclosNoDetectados = 0;
-        detUniv->cara.deteccion = detActual->cara.deteccion;
-        
-        lstUnivPen->remove(iPend);
-        lstUnivPenIndices->remove(iPend);
-        lstNuevosUsados.add(indiceNuevo);
-                                
+
+        std::memcpy(detUniv->cara.descriptor,
+                    detActual->cara.descriptor,
+                    NUM_ELEMS_DESC_FACIAL * sizeof(SIMD_TYPE));
+
+        // ✅ NO CAMBIAR IDENTIDAD: arrastramos la identidad del universo
+        if (detActual->cara.identificador.getNumIdentificaciones() > 0)
+        {
+            IdentificacionPersona iden = detActual->cara.identificador.getUltimaIdentificacion();
+
+            const std::string idUniv     = detUniv->cara.identificador.getIdExternoPrincipal();
+            const bool anonUniv          = detUniv->cara.identificador.getAnonimoPrincipal();
+            const std::string nombreUniv = detUniv->cara.identificador.getNombreExternoPrincipal();
+
+            if (!idUniv.empty())
+            {
+                detUniv->cara.identificador.agregaIdentifStable(
+                    idUniv, anonUniv, nombreUniv, iden, iden.fecDet
+                );
+            }
+        }
+
+        lstUnivPen->remove(p);
+        nuevosUsados.add(idxNuevo);
+
         lstTracActual->push_back(detUniv);
     }
 
-    // registramos los nuevos no usados como nuevas detecciones
-    nPend = lstNuevosUsados.size();
-    for(iNuevos=0; iNuevos<nNuevos; iNuevos++)
+    // 3) Agregar nuevos NO usados al universo solo si tienen ID estable
+    for (int i = 0; i < nNuevos; ++i)
     {
-        detActual = lstNuevos->get(iNuevos);        
-        encontro = false;
-
-        // validamos si el indice de la deteccion ya fue usado
-        if ( lstNuevosUsados.indexOf(iNuevos) >= 0 )
+        if (nuevosUsados.indexOf(i) >= 0)
             continue;
-        
-        descPerActual = detActual->cara.identificador.getDatosPerIden();
-        if ( descPerActual == NULL )
-            continue;    
-        
-        // la deteccion o nodo nuevo no fue usado se agrega como desconocido
-        detActual->id = sgteId;
-        sgteId++;            
+
+        TrackedDetectionHailo *detActual = lstNuevos->get(i);
+        if (!detActual) continue;
+
+        const std::string idActual = detActual->cara.identificador.getIdExternoPrincipal();
+        const bool anonActual = detActual->cara.identificador.getAnonimoPrincipal();
+
+        if (idActual.empty())
+            continue;
+
+        // RECOMENDADO: NO agregar anon al universo como "nuevo"
+        // if (anonActual) continue;
+
+        detActual->id = sgteId++;
         lstUniverso.add(*detActual);
-        detActual = lstUniverso.getAddrUltimo();
-    
-        lstTracActual->push_back(detActual);
+        TrackedDetectionHailo *u = lstUniverso.getAddrUltimo();
+        lstTracActual->push_back(u ? u : detActual);
     }
 
-    // liberamos RAM
-    nPend = lstIndicesInterPendientesNuev.size();
-    for(iPend=0; iPend<nPend; iPend++)
+    // liberar RAM de listas de índices
+    for (int p = 0; p < indicesInterPend.size(); ++p)
     {
-        lstIndicesNuevo = lstIndicesInterPendientesNuev.get(iPend);
-        lstIndicesNuevo->reset();
-        delete lstIndicesNuevo;
+        GLinkedList<int> *lstIdx = indicesInterPend.get(p);
+        if (lstIdx)
+        {
+            lstIdx->reset();
+            delete lstIdx;
+        }
     }
 
-    lstIndicesInterPendientesNuev.reset();
-    lstConteoInterNuevos.reset();
-    lstNuevosUsados.reset();
-
+    indicesInterPend.reset();
+    conteoInterNuevos.reset();
+    nuevosUsados.reset();
 }
+
 
 
 /**
