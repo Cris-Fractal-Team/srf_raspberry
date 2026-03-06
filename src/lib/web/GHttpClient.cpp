@@ -15,6 +15,8 @@
 #include <string.h>
 #include <iostream>
 
+#include <chrono>
+
 #include <resolv.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -38,6 +40,8 @@ GHttpClient::GHttpClient()
 {
     dataCabecera = (char *)malloc(TAM_MAX_CABECERA+2);
     bufferResponse = NULL;
+    bio = NULL;
+    ctx = NULL;
 }
 
 
@@ -51,6 +55,7 @@ GHttpClient::~GHttpClient()
     {
         free(bufferResponse);
     }
+    cierraConexion();
 }
 
 
@@ -66,7 +71,8 @@ GHttpClient::~GHttpClient()
  * 
  * Retorn 0 en caso de exito, -1 en caso de error, -2 error de ram
  */
-int GHttpClient::_doHttp( const char *servidor, int puerto, int usarSSL, const char* metodo, const char *url, char *data, long dataLen )
+int GHttpClient::_doHttp(const char *servidor, int puerto, int usarSSL, const char* metodo,
+                         const char *url, char *data, long dataLen)
 {
     int rptaCon;
     int post = 0;
@@ -78,79 +84,89 @@ int GHttpClient::_doHttp( const char *servidor, int puerto, int usarSSL, const c
 
     httpError = -1;
 
+    // --- CRÍTICO: limpiar cabeceras por request ---
+    cabeceraPeticion.clear();
+
     rptaCon = iniciaConexion();
-    if ( rptaCon != 0 ) 
-    {
+    if (rptaCon != 0)
         return rptaCon;
-    }        
 
-    comando = (char *)malloc(strlen(url)+strlen(servidor)+34);
-
-    if ( usarSSL == 0 )
+    comando = (char *)malloc(strlen(url) + strlen(servidor) + 64);
+    if (!comando)
     {
-        if ( puerto == 80 )
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s\r\n",metodo,url,servidor);
-        }
-        else
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s:%d\r\n",metodo,url,servidor,puerto);
-        }
+        cierraConexion();
+        return -2;
     }
+
+    if (puerto == (usarSSL ? 443 : 80))
+        sprintf(comando, "%s %s HTTP/1.1\r\nHost: %s\r\n", metodo, url, servidor);
     else
-    {
-        if ( puerto == 443 )
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s\r\n",metodo,url,servidor);
-        }
-        else
-        {
-            sprintf(comando,"%s %s HTTP/1.1\r\nHost: %s:%d\r\n",metodo,url,servidor,puerto);
-        }
-    }    
-    
-    rptaCon = writeData(comando,strlen(comando));    
+        sprintf(comando, "%s %s HTTP/1.1\r\nHost: %s:%d\r\n", metodo, url, servidor, puerto);
+
+    rptaCon = writeData(comando, strlen(comando));
     free(comando);
-    if ( rptaCon != 0 )
+
+    if (rptaCon != 0)
     {
+        cierraConexion();
         return rptaCon;
     }
 
-    if ( strcmp(metodo,"POST") == 0 )
+    // --- Connection close recomendado ---
+    cabeceraPeticion.append("Connection: close\r\n");
+
+    if (strcmp(metodo, "POST") == 0)
     {
         post = 1;
+
         cabeceraPeticion.append("Content-Length: ");
         cabeceraPeticion.append(to_string(dataLen));
         cabeceraPeticion.append("\r\n");
 
-        if ( cabeceraPeticion.find("Content-Type") == string::npos )
+        // --- CRÍTICO: Content-Type con CRLF ---
+        if (cabeceraPeticion.find("Content-Type:") == string::npos)
         {
-            cabeceraPeticion.append("Content-Type: application/x-www-form-urlencoded");
+            cabeceraPeticion.append("Content-Type: application/json\r\n");
         }
     }
 
-    if ( cabeceraPeticion.length() > 0 )
+    if (!cabeceraPeticion.empty())
     {
-        rptaCon = writeData((char *)cabeceraPeticion.c_str(),cabeceraPeticion.length());
-        if ( rptaCon != 0 )
+        rptaCon = writeData((char *)cabeceraPeticion.c_str(), cabeceraPeticion.length());
+        if (rptaCon != 0)
         {
+            cierraConexion();
             return rptaCon;
         }
     }
 
-    writeData("\r\n");
-
-    if ( post == 1 )
+    rptaCon = writeData("\r\n");
+    if (rptaCon != 0)
     {
-        writeData(data,dataLen);
+        cierraConexion();
+        return rptaCon;
     }
 
-    if ( rptaCon == 0 )
+    if (post == 1)
     {
-        leeRespuestaHttp();
+        rptaCon = writeData(data, dataLen);
+        if (rptaCon != 0)
+        {
+            cierraConexion();
+            return rptaCon;
+        }
     }
 
-    cierraConexion();    
+    int rptaLee = leeRespuestaHttp(); // <-- NO ignores esto
+    cierraConexion();
+
+    // si no pudiste leer respuesta, falla
+    if (rptaLee != 0)
+        return rptaLee;
+
+    // si el server respondió, deja el httpError con el status real
+    if (httpError < 200 || httpError >= 300)
+        return -10; // o retorna httpError si prefieres
 
     return 0;
 }
@@ -190,6 +206,7 @@ int GHttpClient::iniciaConexion()
         if(BIO_do_connect(bio) <= 0)
         {
             // cout << "Error al abrir conexion " << endl;
+            cierraConexion();
             return 2;
         }
 
@@ -200,11 +217,12 @@ int GHttpClient::iniciaConexion()
         // inicia conexion con encriptado
         ctx = SSL_CTX_new(SSLv23_client_method());
         
-        cout << "Configuracion de ubicacion de certificados" << endl;
+        // cout << "Configuracion de ubicacion de certificados" << endl;
         if(! SSL_CTX_load_verify_locations(ctx, NULL, "/usr/lib/ssl/certs"))
         {
             cout << "Error al verificar la ubicacion de los certificados" << endl;
             free(cadenaCon);
+            cierraConexion();
             return 3;
         }    
         
@@ -219,12 +237,14 @@ int GHttpClient::iniciaConexion()
         if(BIO_do_connect(bio) <= 0)
         {
             cout << "Error al abrir conexion " << endl;
+            cierraConexion();
             return 4;
         }
 
         if(SSL_get_verify_result(ssl) != X509_V_OK)
         {
             cout << "Error al verificar el certificado" << endl;
+            cierraConexion();
             return 5;
         }
 
@@ -237,17 +257,32 @@ int GHttpClient::iniciaConexion()
  */
 void GHttpClient::cierraConexion()
 {
+    
+
     if ( usarOpenSSL == 0 )
     {
-        BIO_reset(bio);
-        BIO_free_all(bio);
+        if ( bio != NULL )
+        {
+            BIO_reset(bio);
+            BIO_free_all(bio);
+        }
     }
     else
     {
-        BIO_reset(bio);
-        BIO_free_all(bio);
-        SSL_CTX_free(ctx);
+        if ( bio != NULL )
+        {
+            BIO_reset(bio);
+            BIO_free_all(bio);
+        }
+        
+        if ( ctx != NULL )
+        {
+            SSL_CTX_free(ctx);
+        }            
     }
+
+    bio = NULL;
+    ctx = NULL;
 }
 
 
@@ -271,8 +306,9 @@ int GHttpClient::writeData( char *buffer, long len )
             if(! BIO_should_retry(bio))
             {
                 // cout << "Error al enviar datos al servidor " << endl;
-                BIO_reset(bio);
-                BIO_free_all(bio);
+                // BIO_reset(bio);
+                // BIO_free_all(bio);
+                cierraConexion();
                 return -1;
             }
         }
@@ -510,6 +546,10 @@ int GHttpClient::leeDataBloques()
     int rpta;
 
     lenData = 0;
+
+    if ( bufferResponse != NULL )
+        free(bufferResponse);
+
     bufferResponse = NULL;
     buffer = NULL;
     while(1)

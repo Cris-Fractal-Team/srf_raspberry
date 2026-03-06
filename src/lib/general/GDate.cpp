@@ -14,7 +14,8 @@ using namespace std;
 GDate::GDate()
 {
     time_t ahora = time(NULL);
-    valorInterno = localtime(&ahora);
+    tm *rpta = localtime(&ahora);
+    valorInterno = *rpta;
 }
 
 /**
@@ -22,7 +23,11 @@ GDate::GDate()
  */
 GDate::~GDate()
 {
-    free(valorInterno);
+    // if ( valorInterno != NULL )
+    // {
+    //     free(valorInterno);
+    //     valorInterno = NULL;
+    // }
 }
 
 /**
@@ -38,7 +43,7 @@ string GDate::getType()
  */
 time_t GDate::toTimeStamp()
 {
-    return mktime(valorInterno);
+    return mktime(&valorInterno);
 }
 
 /**
@@ -46,7 +51,7 @@ time_t GDate::toTimeStamp()
  */
 int GDate::getYear()
 {
-    return valorInterno->tm_year+1900;
+    return valorInterno.tm_year+1900;
 }
 
 /**
@@ -54,7 +59,7 @@ int GDate::getYear()
  */
 int GDate::getMonth()
 {
-    return valorInterno->tm_mon+1;
+    return valorInterno.tm_mon+1;
 }
 
 /**
@@ -62,7 +67,7 @@ int GDate::getMonth()
  */
 int GDate::getDay()
 {
-    return valorInterno->tm_mday;
+    return valorInterno.tm_mday;
 }
 
 /**
@@ -70,7 +75,7 @@ int GDate::getDay()
  */
 int GDate::getHour()
 {
-    return valorInterno->tm_hour;
+    return valorInterno.tm_hour;
 }
 
 /**
@@ -78,7 +83,7 @@ int GDate::getHour()
  */
 int GDate::getMinute()
 {
-    return valorInterno->tm_min;
+    return valorInterno.tm_min;
 }
 
 /**
@@ -86,7 +91,7 @@ int GDate::getMinute()
  */
 int GDate::getSecond()
 {
-    return valorInterno->tm_sec;
+    return valorInterno.tm_sec;
 }
 
 /**
@@ -96,15 +101,15 @@ int GDate::getSecond()
 void GDate::setDateValue( int year, int month, int day )
 {
     if ( year != -1)
-        valorInterno->tm_year = year-1900;
+        valorInterno.tm_year = year-1900;
 
     if ( month != -1 )
-        valorInterno->tm_mon = month-1;
+        valorInterno.tm_mon = month-1;
 
     if ( day != -1 )
-        valorInterno->tm_mday = day;
+        valorInterno.tm_mday = day;
 
-    mktime(valorInterno);
+    mktime(&valorInterno);
 }
 
 /**
@@ -114,15 +119,15 @@ void GDate::setDateValue( int year, int month, int day )
 void GDate::setTimeValue( int hour, int minute, int second )
 {
     if ( hour != -1 )
-        valorInterno->tm_hour = hour;
+        valorInterno.tm_hour = hour;
 
     if ( minute != -1 )
-        valorInterno->tm_min = minute;
+        valorInterno.tm_min = minute;
 
     if ( second != -1 )
-        valorInterno->tm_sec = second;
+        valorInterno.tm_sec = second;
 
-    mktime(valorInterno);
+    mktime(&valorInterno);
 }
 
 /**
@@ -130,9 +135,9 @@ void GDate::setTimeValue( int hour, int minute, int second )
 */
 void GDate::resetTime()
 {
-    valorInterno->tm_hour = 0;
-    valorInterno->tm_min = 0;
-    valorInterno->tm_sec = 0;
+    valorInterno.tm_hour = 0;
+    valorInterno.tm_min = 0;
+    valorInterno.tm_sec = 0;
 }
 
 /**
@@ -141,10 +146,10 @@ void GDate::resetTime()
     */
 void GDate::addDate( int year, int month, int day )
 {
-    valorInterno->tm_year+= (year-1900);
-    valorInterno->tm_mon+= month;
-    valorInterno->tm_mday+= day;
-    mktime(valorInterno);
+    valorInterno.tm_year+= (year-1900);
+    valorInterno.tm_mon+= month;
+    valorInterno.tm_mday+= day;
+    mktime(&valorInterno);
 }
 
 /**
@@ -153,10 +158,10 @@ void GDate::addDate( int year, int month, int day )
     */
 void GDate::addTime( int hour, int minute, int second )
 {
-    valorInterno->tm_hour+= hour;
-    valorInterno->tm_min+= minute;
-    valorInterno->tm_sec+= second;
-    mktime(valorInterno);
+    valorInterno.tm_hour+= hour;
+    valorInterno.tm_min+= minute;
+    valorInterno.tm_sec+= second;
+    mktime(&valorInterno);
 }
 
 /**
@@ -172,9 +177,10 @@ double GDate::diff( GDate date )
  */
 void GDate::toCurrentTime()
 {
-    free(valorInterno);
+    // free(valorInterno);
     time_t ahora = time(NULL);
-    valorInterno = localtime(&ahora);
+    tm *ahora_tm  = localtime(&ahora);
+    valorInterno = *ahora_tm;
 }
 
 /**
@@ -193,7 +199,7 @@ GDate GDate::getClone()
  */
 int GDate::getWeekDay()
 {
-    return valorInterno->tm_wday;
+    return valorInterno.tm_wday;
 }
 
 /**
@@ -201,8 +207,9 @@ int GDate::getWeekDay()
  */
 void GDate::setTime( time_t time)
 {
-    free(valorInterno);
-    valorInterno = localtime(&time);
+    // free(valorInterno);
+    tm * ahora_tm = localtime(&time);
+    valorInterno = *ahora_tm;
 }
 
 /**
@@ -225,17 +232,17 @@ string GDate::toString()
 {
     string rpta;
 
-    rpta.append(to_string(valorInterno->tm_year+1900));
+    rpta.append(to_string(valorInterno.tm_year+1900));
     rpta.append("-");
-    rpta.append(to_string(valorInterno->tm_mon+1));
+    rpta.append(to_string(valorInterno.tm_mon+1));
     rpta.append("-");
-    rpta.append(to_string(valorInterno->tm_mday));
+    rpta.append(to_string(valorInterno.tm_mday));
     rpta.append(" ");
-    rpta.append(to_string(valorInterno->tm_hour));
+    rpta.append(to_string(valorInterno.tm_hour));
     rpta.append(":");
-    rpta.append(to_string(valorInterno->tm_min));
+    rpta.append(to_string(valorInterno.tm_min));
     rpta.append(":");
-    rpta.append(to_string(valorInterno->tm_sec));
+    rpta.append(to_string(valorInterno.tm_sec));
 
     return rpta;
 }
@@ -248,11 +255,11 @@ string GDate::toStringDMY( string separator )
 {
     string rpta;
 
-    rpta.append(to_string(valorInterno->tm_mday));
+    rpta.append(to_string(valorInterno.tm_mday));
     rpta.append(separator);
-    rpta.append(to_string(valorInterno->tm_mon+1));
+    rpta.append(to_string(valorInterno.tm_mon+1));
     rpta.append(separator);
-    rpta.append(to_string(valorInterno->tm_year+1900));
+    rpta.append(to_string(valorInterno.tm_year+1900));
     
     return rpta;
 }
@@ -265,17 +272,17 @@ string GDate::toStringDMYHmS( string separator )
 {
     string rpta;
 
-    rpta.append(to_string(valorInterno->tm_mday));
+    rpta.append(to_string(valorInterno.tm_mday));
     rpta.append(separator);
-    rpta.append(to_string(valorInterno->tm_mon+1));
+    rpta.append(to_string(valorInterno.tm_mon+1));
     rpta.append(separator);
-    rpta.append(to_string(valorInterno->tm_year+1900));
+    rpta.append(to_string(valorInterno.tm_year+1900));
     rpta.append(" ");
-    rpta.append(to_string(valorInterno->tm_hour));
+    rpta.append(to_string(valorInterno.tm_hour));
     rpta.append(":");
-    rpta.append(to_string(valorInterno->tm_min));
+    rpta.append(to_string(valorInterno.tm_min));
     rpta.append(":");
-    rpta.append(to_string(valorInterno->tm_sec));
+    rpta.append(to_string(valorInterno.tm_sec));
 
     return rpta;
 }
@@ -288,11 +295,11 @@ string GDate::toStringMDY( string separator )
 {
     string rpta;
 
-    rpta.append(to_string(valorInterno->tm_mon+1));
+    rpta.append(to_string(valorInterno.tm_mon+1));
     rpta.append(separator);    
-    rpta.append(to_string(valorInterno->tm_mday));
+    rpta.append(to_string(valorInterno.tm_mday));
     rpta.append(separator);
-    rpta.append(to_string(valorInterno->tm_year+1900));
+    rpta.append(to_string(valorInterno.tm_year+1900));
     
     return rpta;
 }
@@ -305,17 +312,17 @@ string GDate::toStringMDYHmS( string separator )
 {
     string rpta;
 
-    rpta.append(to_string(valorInterno->tm_mon+1));    
+    rpta.append(to_string(valorInterno.tm_mon+1));    
     rpta.append(separator);
-    rpta.append(to_string(valorInterno->tm_mday));
+    rpta.append(to_string(valorInterno.tm_mday));
     rpta.append(separator);
-    rpta.append(to_string(valorInterno->tm_year+1900));
+    rpta.append(to_string(valorInterno.tm_year+1900));
     rpta.append(" ");
-    rpta.append(to_string(valorInterno->tm_hour));
+    rpta.append(to_string(valorInterno.tm_hour));
     rpta.append(":");
-    rpta.append(to_string(valorInterno->tm_min));
+    rpta.append(to_string(valorInterno.tm_min));
     rpta.append(":");
-    rpta.append(to_string(valorInterno->tm_sec));
+    rpta.append(to_string(valorInterno.tm_sec));
 
     return rpta;
 }

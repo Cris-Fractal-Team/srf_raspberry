@@ -9,9 +9,18 @@
 #include "lib/general/GThread.h"
 #include "lib/hailolib/hailo8l.h"
 #include "lib/hailolib/DetectorCaraHaloScrfd.h"
-#include "lib/hailolib/FaceRecHailo.h"
+
+#include "lib/hailolib/UnivIdenPersona.h"
+#include "lib/hailolib/DescPersonaExterno.h"
+
 #include "lib/hailolib/DetectionTrackerHailo.h"
 #include "lib/hailolib/IdentificadorPersonasHailo.h"
+#include "app/GeneradorPingsAppWeb.h"
+#include "app/ProcDescargaDescFaciales.h"
+#include <unordered_map>
+#include <mutex>
+
+class GeneradorPingsMonitoreo;
 
 /**
  * Clase que representa todo el proceso que hace el reconocimiento facial
@@ -23,13 +32,27 @@ class ProcesoRecFacial
         /**
          * Codigo unico del equipo, coincide con el ID unico del Raspberry PI
          */
-        string idEquipo;
+        string serieEquipo;
 
         /**
          * Generador de eventos que envia los datos en paralelo
          */
         GeneradorEventos generadorEventos;
 
+        /**
+         * Generador de pings que envia los datos en paralelo
+         */
+        GeneradorPingsAppWeb generadorPingsAppWeb;
+
+        /**
+         * Generador de pings de monitoreo
+         */
+        GeneradorPingsMonitoreo* generadorPingsMonitoreo = nullptr;
+        
+        /**
+         * Hilo de descarga
+         */
+        ProcDescargaDescFaciales procDescargaDescFaciales;
         /**
          * Lista de parametros que se configuran a nivel del
          * app web de la aplicacion, es decir son variables
@@ -42,9 +65,31 @@ class ProcesoRecFacial
         IdentificadorPerHailo universoPersonas;
 
         /**
+         * Numero total de eventos 
+         */
+        int numIndentificacionesMin;
+
+        /**
+         * Indica si se debe o no extraer una zona cuadrada en la que este
+         * centrado el rostro detectado
+         */
+        string encuadrarRostros;
+
+        /**
+         * Ruta del modelo de red neuronal a usar para generar la descripcion facial
+         */
+        string pathModeloDescFacial;
+
+        /**
+         * Nombre de la ultima capa o capa de salida del modelo 
+         * para calcular el descriptor facial
+         */
+        string nombreCapaSalidaRedFacial;
+
+        /**
          * Indica si se debe o no invertira verticalmente las imagenes
          */
-        bool invertirVertical;
+        bool invertirVertical;       
         
         /**
          * Ancho minimo de un rostro para ser procesado
@@ -106,6 +151,11 @@ class ProcesoRecFacial
          * Tolerancia o acuracy para las detecciones
          */
         float toleranciaDetec;   
+
+        /**
+         * Factor para calcular contraste 
+         */
+        float paramContraste;
         
         /**
          * Tiempo en el que se debe reportar a una persona si es que ella esta mucho
@@ -115,10 +165,50 @@ class ProcesoRecFacial
         long long tiempoReEvento;
 
         /**
+         * Indica si se debe usar o no distancia euclideana para calcular similaridad
+         */
+        bool usarDistEuclideana;
+
+        /**
+         * ID del siguiente desconocido
+         */
+        long long idDesconocidoSgte;
+
+        /**
+         * Cantidad de segundos maxima que puede estar una persona no
+         * reconocida sin que se le vuelva a hacer una deteccion
+         */
+        int tiempoMaxNoReconocido;
+
+        /**
+         * Factor de compresion de JPEG el valor va de 0 a 100 , 100 maxima calidad
+         */
+        int compresionJpeg;
+
+        /**
+         * Indica si se debe o no reportar personas desconocidas
+         */
+        bool reportarDesconocidos;
+
+        /**
          * Ruta del archivo de parametros
          */
         string pathParametros;
+
+        /**
+         * Posicion Inicial X de la region de interes
+         */
+        int regionInteresInicioX;
+
+        /**
+         * Posicion Final X de la region de interes
+         */
+        int regionInteresFinX;
         
+        /**
+         * Tarea programada para marcar como completa
+         */
+        int idTareaProgramada = -1;
         /**
          * Servidor web que permite configurar el dispositivo
          */
@@ -154,10 +244,46 @@ class ProcesoRecFacial
          */
         void guardaParametros();
 
+        void setFlagProcesarImagenes( bool valor );
+
+        bool getFlagProcesarImagenes();
+
+        void setIdTareaProgramada( int valor );
+
+        int getIdTareaProgramada();
+
+        void setUsandoNPU( bool valor );
+
+        bool getUsandoNPU();
+
         /**
-         * Lee los parametros de ejecucion
-         */
-        void leeParametros( string path );
+        * Método de configuración de parámetros
+        */
+       void configure();
+
+       enum FlagsEstado : uint8_t
+        {
+            EST_APAGADO    = 1 << 0,
+            EST_ENCENDIDO  = 1 << 1,
+            EST_SUSPENDIDO = 1 << 2
+        };
+
+        void setEstadoEncendido();
+        void setEstadoApagado();
+        void setEstadoSuspendido();
+
+        bool isEncendido();
+        bool isApagado();
+        bool isSuspendido();
+
+        GImage construirFrameAviso(int ancho, int alto, const std::vector<std::string>& lineas);
+
+
+        long throttleNoIdentMs = 1000;
+        std::mutex mtxDebounceAnon;
+        std::unordered_map<std::string, long long> lastSentAnon;
+
+        bool shouldEmitAnonimo(const std::string& anonId, long long nowMs);
 
     private:        
         
@@ -175,6 +301,13 @@ class ProcesoRecFacial
          * Indica si se presento un error al iniciar el proceso
          */
         bool errorInicial;
+
+        /**
+         * Indica si se debe captura imagenes y hacer identificacion facial
+         */
+        bool flagProcesarImagenes = false;
+
+        bool usandoNpu = false;
         
         /**
          * Mutex para areas criticas
@@ -211,13 +344,28 @@ class ProcesoRecFacial
          * Dibuja las caras encontradas
          * Retorna la imagen que se debe enviar al visor
          */
-        GImage dibujaCaras( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras );
+        GImage dibujaCaras( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras  );
 
         /**
          * Notifica en caso se necesarios a un servidor de la ocurrencia de
          * una o varias detecciones
          */
         void notificaDetecciones( GImage imagen, vector<TrackedDetectionHailo *> *lstCaras );
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaX;
+
+        /**
+         * Factor de la escala X para la imagen de visualizacion o la imagen que se envia al servidor
+         */
+        double factorEscalaVisualizaY;
+        
+        uint8_t flagsEstado = EST_ENCENDIDO;
+
+        void setEstadoSolo(uint8_t flag);
+
 };
 
 

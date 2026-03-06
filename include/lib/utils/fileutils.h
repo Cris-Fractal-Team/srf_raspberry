@@ -54,4 +54,10 @@ string leeArchivoTexto( string path );
  */
 std::vector<char>leeArchivoBinario( string path );
 
+
+/**
+ * Retonra la lista de nombres de todos los archivos de un subdirectorio
+ */
+std::vector<string>listArchivosDirectorio( string path );
+
 #endif

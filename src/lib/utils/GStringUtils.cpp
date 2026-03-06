@@ -1,6 +1,8 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 #include "lib/utils/GStringUtils.h"
 #include "lib/general/GObject.h"
@@ -236,4 +238,93 @@ string GStringUtils::toUpperCase( string cadena )
     }
 
     return rpta;
+}
+
+/**
+ * Agrega un atributo JSON a una cadena que almacena un JSON
+ *      cadena:
+ *          Cadena que tiene el JSON a la que se le agrega el atributo
+ * 
+ *      atributo:
+ *          Nombre del atributo JSON
+ * 
+ *      valor:
+ *          Valor del atributo
+ * 
+ *      esNumerico:
+ *          Indica si el valor es numerico (true) y no se deben agregar comillas al rededor
+ *          del valor, o es string (false) para el que se debe agregar comillas al rededor
+ *          del valor
+ * 
+ *      agregaFinLinea:
+ *          Indica si se debe o no agregar un fin de linea o caracter \n
+ *      
+ */
+void GStringUtils::addJsonAtt( string *cadena, string atributo, string valor, bool esNumerico, bool agregaFinLinea )
+{
+    cadena->append("\"");
+    cadena->append(atributo);
+    cadena->append("\":");
+
+    if (esNumerico == false ) cadena->append("\"");
+    cadena->append(valor);
+    if (esNumerico == false ) cadena->append("\"");
+
+    if ( agregaFinLinea )
+        cadena->append(",\n");
+}
+
+/**
+ * Agrega un atributo JSON a una cadena que almacena un JSON
+ *      cadena:
+ *          Cadena que tiene el JSON a la que se le agrega el atributo
+ * 
+ *      atributo:
+ *          Nombre del atributo JSON
+ * 
+ *      valor:
+ *          Valor del atributo
+ * 
+ *      esNumerico:
+ *          Indica si el valor es numerico (true) y no se deben agregar comillas al rededor
+ *          del valor, o es string (false) para el que se debe agregar comillas al rededor
+ *          del valor
+ *  
+ *      agregaFinLinea:
+ *          Indica si se debe o no agregar un fin de linea o caracter \n
+ *      
+ */
+void GStringUtils::addJsonAtt( string *cadena, string atributo, string *valor, bool esNumerico, bool agregaFinLinea )
+{
+    cadena->append("\"");
+    cadena->append(atributo);
+    cadena->append("\":");
+    
+    if (esNumerico == false ) cadena->append("\"");
+    cadena->append(*valor);
+    if (esNumerico == false ) cadena->append("\"");
+
+    if ( agregaFinLinea )
+        cadena->append(",\n");
+}
+
+
+/**
+ * Convierte un valor decimal a un string con una cantidad de decimales de presicion
+ */
+string GStringUtils::to_string_fixed( float valor, int decimales )
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(decimales) << valor;
+    return oss.str();
+}
+
+    /**
+ * Convierte un valor decimal a un string con una cantidad de decimales de presicion
+ */
+string GStringUtils::to_string_fixed( double valor, int decimales )
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(decimales) << valor;
+    return oss.str();
 }

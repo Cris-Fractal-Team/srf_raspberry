@@ -1,6 +1,8 @@
 
 #include "lib/general/GVector.h"
 #include <string>
+#include <string>
+#include <fstream>
 
 #ifndef GLOGGIN_H
 #define GLOGGIN_H
@@ -49,6 +51,26 @@ class GLog
          */
         static void error( string sessionId, string message);
 
+        /**
+         * Cierra el archivo
+         */
+        static void close();
+
+        /**
+         * Abre el archivo de log
+         *  path : ruta del archivo
+         */
+        static void open( string path );
+
+        /**
+         * Escribe una cadena en el log, en la primera linea pone la hora
+         * de la escritura.
+         * En la segunda linea se muestra el mensaje como tal
+         *  msg: mensaje que se escribe
+         *  monstrarEnConsola: indica si se debe o no mostrar el mensaje en la consola de la aplicacion
+         */
+        static void writeSimple( string msg, bool mostrarEnConsola );
+
     private:
 
         /**
@@ -67,6 +89,12 @@ class GLog
          *  message: mensaje que se envia al log
          */
         static string getFormattedString( string type, string sessionId, string message );
+
+        
+        /**
+         * Archivo en el que se escribe
+         */
+        static std::ofstream logFile;
 };
 
 #endif

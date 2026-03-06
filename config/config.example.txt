@@ -1,0 +1,345 @@
+# =============================================================================
+#  CONFIGURACIÓN SRF - ARCHIVO DE EJEMPLO (SIN SECRETOS)
+# =============================================================================
+# Copia este archivo como "Config.txt" y ajusta los valores según tu entorno.
+#
+# Formato:
+#   clave=valor
+#
+# Convenciones:
+#   - S = Sí, N = No
+#   - Unidades: ms = milisegundos, s = segundos, px = píxeles
+# =============================================================================
+
+
+# *************************************************************************************
+#  FUENTE DE IMÁGENES
+# *************************************************************************************
+
+# Configura la fuente de las imágenes.
+# Las alternativas son:
+#   camaraint : se refiere a la cámara interna
+#   socket    : se refiere a un dispositivo que envía JPEGs codificados vía sockets
+#   onvif     : se refiere a una cámara IP con protocolo ONVIF
+#   webcam    : se refiere a una cámara web
+#   video     : se refiere a un video desde un archivo
+source=video
+
+
+# *************************************************************************************
+#  RESOLUCIÓN DE ENTRADA / VISUALIZACIÓN
+# *************************************************************************************
+
+# Configura la resolución de las imágenes de la fuente de datos.
+# Para algunas fuentes como la cámara interna o la cámara web,
+# se puede cambiar con esta opción la resolución con la que
+# se extraen las imágenes desde la fuente. Para las otras fuentes,
+# esta es la resolución con la que la fuente envía las imágenes.
+anchoImgFuente=1920
+alturaImgFuente=1080
+
+#anchoImgFuente=3840
+#alturaImgFuente=2160
+
+# Configura la resolución con la que se visualizan los datos,
+# y con la que se envían en caso se solicite ver las imágenes.
+anchoImgVisualizacion=1280
+alturaImgVisualizacion=720
+
+
+# *************************************************************************************
+#  UMBRALES DE CARA (VISUALIZACIÓN / RECONOCIMIENTO)
+# *************************************************************************************
+
+# Configura la resolución mínima de una cara para visualizar el recuadro alrededor de ella.
+#anchoMinCaraVis=70
+#alturaMinCaraVis=70
+anchoMinCaraVis=70
+alturaMinCaraVis=70
+
+# Configura la resolución mínima de una cara para procesarla y realizar reconocimiento facial.
+#anchoMinCaraRec=90
+#alturaMinCaraRec=90
+anchoMinCaraRec=70
+alturaMinCaraRec=70
+
+
+# *************************************************************************************
+#  REGIÓN DE INTERÉS (ROI)
+# *************************************************************************************
+
+# Indica la posición X inicial a partir de la cual el sistema detectará rostros.
+regionInteresInicioX=0
+
+# Indica la posición X final hasta la cual el sistema detectará rostros.
+regionInteresFinX=1920
+
+
+# *************************************************************************************
+#  NORMALIZACIÓN / FRONTALIDAD / EVENTOS
+# *************************************************************************************
+
+# Configura la resolución de las caras a las que se realiza reconocimiento facial.
+# Todas las caras, sin importar su resolución original, se escalan a esta resolución.
+anchoCaraRec=112
+alturaCaraRec=112
+
+# Indica qué tan similar debe ser un rostro a uno frontal.
+# Un valor de 5 suele representar un contraste (según tu lógica interna).
+similaridadFrontal=10
+
+# Número de identificaciones exitosas requeridas para generar un evento
+# y llamar al web service.
+numIndentificacionesMin=3
+
+
+# *************************************************************************************
+#  PARÁMETROS QUE CONTROLAN LA DETECCIÓN E IDENTIFICACIÓN
+# *************************************************************************************
+
+# Diferencia máxima entre un rostro desconocido frontal y un rostro conocido.
+deltaRostroMax=0.65
+
+# Diferencia máxima entre un rostro desconocido no frontal y un rostro conocido.
+# Debido a que existe giro en el rostro, se requiere un umbral diferente.
+deltaRostroMovidoMax=0.80
+
+# Ángulo mínimo de desviación horizontal o vertical para considerar un rostro no frontal.
+# Un rostro con desviación mayor o igual a este ángulo se evalúa con deltaRostroMovidoMax.
+anguloRostroMovido=35
+
+# Precisión (accuracy) de la detección de rostros.
+presicionDeteccion=0.50
+
+# Tiempo de revalidación de rostros detectados (ms).
+tiempoRevalidacion=1000
+
+# Indica si se usa distancia euclídea (S) o similitud de coseno (N).
+usarDistEcuclideana=N
+
+# Establece cuántos threads se usan para realizar la identificación de personas.
+numThreadsIdentificacion=4
+
+# Indica si se deben reportar personas desconocidas.
+reportarDesconocidos=N
+
+
+# *************************************************************************************
+#  MODELO DE DESCRIPTORES FACIALES
+# *************************************************************************************
+
+# Ruta del modelo que genera los descriptores faciales.
+# (Este valor debe apuntar a un .hef válido en tu entorno.)
+pathModeloDescFacial=./models/CHANGE_ME.hef
+
+# Nombre de la capa final del modelo que genera el descriptor facial.
+nombreUltimaCapaRedNeuronal=CHANGE_ME/fc1
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN DE LOGS
+# *************************************************************************************
+
+# Ruta del archivo de logs de invocaciones de eventos.
+logEventos=./data/log_eventos.txt
+
+# Indica si se debe o no generar log de eventos: S=Sí, N=No.
+generarLogEventos=N
+
+
+# *************************************************************************************
+#  BASE DE PERSONAS (DESCRIPTORES CONOCIDOS)
+# *************************************************************************************
+
+# Ruta del archivo con la base de datos de personas.
+pathBDPersonas=./data/rostros_conocidos.txt
+
+# pathBDPersonas=./data/personas-fractal.txt
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN PARA CÁMARAS ONVIF
+# *************************************************************************************
+
+# Parte final o sufijo del URL para cámaras Dahua.
+urlServidor=/cam/realmonitor?channel=1&subtype=0
+
+# Parte final o sufijo del URL para cámaras TAPO TP-Link.
+# urlServidor=/stream1
+
+onvifLogin=admin
+onvifPassword=CHANGE_ME
+onvifIP=192.168.0.10
+onvifPuerto=554
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN PARA PREVISUALIZAR IMÁGENES
+# *************************************************************************************
+
+# Indica si se desea previsualizar la imagen que se envía al detector de rostros.
+previsualizaImgParaDeteccion=N
+
+# Indica si se desea esperar la presión de una tecla y luego previsualizar
+# la imagen que se envía al detector de rostros.
+esperarPrevImgParaDeteccion=N
+
+# Indica si se desea previsualizar la cara original y la centrada
+# antes de generar un descriptor facial.
+previsualizaImgReconocimiento=N
+
+# Indica si se desea esperar la presión de una tecla y luego previsualizar
+# las imágenes para reconocimiento facial.
+esperarPrevImgReconocimiento=N
+
+# Indica si se debe procesar la tecla presionada luego de visualizar
+# las caras para reconocimiento.
+# Si se presiona la tecla "g" o "G" se guarda un PNG del rostro alineado.
+guardarPrevImgReconocimiento=N
+
+# Prefijo que se agrega a las imágenes de reconocimiento que se guardan.
+prefijoImgReconocimiento=oficial_
+
+# Indica si se deben guardar las fotos frontales alineadas.
+guardarCarasFrontalesAlineadas=N
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN DE MODIFICACIÓN DE IMÁGENES
+# *************************************************************************************
+
+# Indica si se debe girar horizontalmente la imagen.
+girar=N
+
+# Indica si se debe reflejar verticalmente la imagen. Esto es útil para casos
+# donde la cámara está invertida, generalmente porque se ancla desde el techo.
+reflejarVerticalmente=N
+
+
+# ***************************************************************************************
+#  CONFIGURACIÓN DE LOS WEB SERVICES A LOS QUE SE EMITEN LOS EVENTOS
+# ***************************************************************************************
+
+# Ajusta estas URLs a tu backend real (DEV / STAGING / PROD).
+urlBaseServidorIden=http://127.0.0.1:8080/api/sensor/eventoSensor
+urlBaseServidorNoIden=http://127.0.0.1:8080/api/sensor/eventoDesconocidoSensor
+urlBaseServidorUnificado=http://127.0.0.1:8080/api/sensor/eventoDesconocidoSensor
+
+
+# Nivel de calidad JPEG.
+compresionJpeg=80
+
+# Tiempo que debe pasar para generar nuevamente un evento de detección (s).
+tiempoReEvento=1
+
+# Tiempo máximo en segundos que una persona desconocida, sin eventos,
+# debe permanecer en RAM.
+tiempoMaxNoReconocido=20
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN DE LA CÁMARA INTERNA DEL RASPBERRY PI
+# *************************************************************************************
+
+horaInicio1=0
+horaFin1=5
+brillo1=0
+contraste1=1
+exposicion1=30000
+
+horaInicio2=6
+horaFin2=18
+brillo2=0.15
+contraste2=1.15
+exposicion2=7000
+
+horaInicio3=19
+horaFin3=23
+brillo3=0.45
+contraste3=1.45
+exposicion3=25000
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN DE CÁMARA CUYAS IMÁGENES SE CARGAN DESDE UN VIDEO
+# *************************************************************************************
+
+# Ruta del video.
+videoPath=./videos/demo.mp4
+
+# Cantidad de imágenes por segundo del video.
+videoVelocidadImgPorSegundo=2
+
+# Indica si se debe reiniciar automáticamente el video.
+videoInfinito=N
+
+# Cuadro o imagen inicial de la primera vez que se muestra el video.
+videoCuadroInicial=0
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN PARA LA CREACIÓN DE LA BD DE PERSONAS CONOCIDAS
+# *************************************************************************************
+
+# Indica si se deben unificar los descriptores cuando se detecte el mismo ID externo.
+unificarDescriptores=N
+
+# Píxeles de Gaussian blur aplicado a las imágenes.
+pixelSuavizado=0
+
+# Porcentaje entre 0 y 1 que se debe reducir y luego restaurar a 100% la imagen
+# con el propósito de eliminar detalles.
+resizeSuavizado=0
+
+# Suavizado del JPEG que genera artefactos de compresión.
+jpegSuavizado=50
+
+# Parámetro del nivel de contraste que se genera.
+paramContraste=0
+
+# Indica si se debe extraer una zona cuadrada, dentro de la cual esté centrado el rostro detectado.
+# Valores válidos son:
+#   S : crea un cuadrado con la dimensión máxima
+#   M : crea un cuadrado con la dimensión mínima
+#   N : no encuadra el rostro
+encuadrarRostros=S
+
+# Altura a la que se escalan las imágenes antes de detectar rostros.
+# Esto también elimina detalles.
+alturaImagenBase=800
+
+
+# *************************************************************************************
+#  CONFIGURACIÓN DE PING
+# *************************************************************************************
+
+appWebUrl=https://YOUR_APP_WEB_URL
+generarLogPingAppWeb=true
+pathLogPingAppWeb=./pings_app_web.log
+pingIntervalMsAppWeb=300000
+
+dotnetUrl=http://127.0.0.1:8080/api
+dotnetEndpointMonitoreo=/ping/log/
+dotnetEndpointCompletado=/ping/completo/
+
+generarLogPingMonitoreo=false
+pathLogPingMonitoreo=./pings_app_monitoreo.log
+pingIntervalMsMonitoreo=30000
+
+zipEndpoint=/srf/sensor/descargarZip
+authEndpoint=/srf/auth/login
+
+
+# Credenciales
+username=CHANGE_ME
+password=CHANGE_ME
+
+
+# Extractor Config
+directorioExtraccion=./descriptores_faciales/
+archivoIndice=datos.txt
+archivoFinal=rostros_conocidos_final.txt
+
+
+#Logger
+logLevel=INFO

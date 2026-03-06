@@ -3,9 +3,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <filesystem>
 
 #include "lib/utils/fileutils.h"
 #include "lib/utils/GStringUtils.h"
+
+namespace fs = std::filesystem;
 
 /**
  * Lee un archivo de configuracion y todos los pametros los retorna como string.
@@ -44,7 +47,6 @@ shared_ptr<GHashMap> leeArchivoConfig(  string path, bool convierteNombresLowerC
     }
 
     string line,nombre,valor;
-    float *datos;
     int pos;
 
     while( getline(file, line))
@@ -170,4 +172,37 @@ void guardaArchivoConfig(string  path, shared_ptr<GHashMap>lstParams )
     }
 
     guardaArchivoTexto(path, data);
+}
+
+/**
+ * Retonra la lista de nombres de todos los archivos de un subdirectorio
+ */
+std::vector<string>listArchivosDirectorio( string path )
+{
+    fs::path dir(path);
+    std::error_code ec;
+    std::vector<string> lstArchivos;
+    fs::directory_entry entry; 
+    string rutaArchivo;
+
+    if ( !fs::exists(dir) || !fs::is_directory(dir) )
+        return lstArchivos;
+
+    fs::directory_iterator dir_it(dir, fs::directory_options::skip_permission_denied), finLista;
+    
+    while( true )
+    {
+        dir_it.increment(ec);
+        if ( dir_it == finLista ) 
+            break;
+
+        entry = *dir_it;
+        if ( entry.is_directory() )
+            continue;
+        
+        rutaArchivo = entry.path();
+        lstArchivos.push_back(rutaArchivo);
+    }
+
+    return lstArchivos;
 }

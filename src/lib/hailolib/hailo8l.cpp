@@ -9,7 +9,15 @@ Hailo8LRunner::Hailo8LRunner()
 {
     estadoEjec = H8LR_LIB_ESTADO_NUEVO;
     estadoInferencia = H8LR_LIB_INF_PENDIENTE;
+
+    device = nullptr;
+    inferData = nullptr;
+    inferDataSize = 0;
+    inferNumber = 1;
+    errorEjec = 0;
+
 }
+
 
 
 /**
@@ -18,12 +26,7 @@ Hailo8LRunner::Hailo8LRunner()
 Hailo8LRunner::~Hailo8LRunner()
 {
     cout << "Destructor de Hailo8LRunner" << endl;
-    if ( isFinalizado() == false )
-    {
-        cout << "Se solicita finalizar thread" << endl;
-        finalizar();
-    }
-    sleep(1);
+    finalizarYEsperar();
 }
 
 /**
@@ -149,6 +152,14 @@ void Hailo8LRunner::runThread()
     //     return;
     // }
 
+    if (device == nullptr || !(*device))
+    {
+        cerr << "Error: device no inicializado en runner" << endl;
+        errorEjec = H8LR_LIB_ERR_CREAR_DISPOSITIVO;
+        setEstadoEjec(H8LR_LIB_ESTADO_ERROR_CARGA_RED);
+        return;
+    }
+
     mtxBloquea();
     path = pathModelo;
     mtxLibera();
@@ -176,6 +187,7 @@ void Hailo8LRunner::runThread()
         return;
     }    
     outVStreamsInfo = output_vstream_info.value();
+    // printInfoStreamSalida();
 
     // crea los parametros por defecto
     hailort::Expected<hailort::NetworkGroupsParamsMap> parametros = (*device).value()->create_configure_params(hef.value()); 
@@ -267,8 +279,6 @@ void Hailo8LRunner::runThread()
             sleepMS(1);
             continue;
         }
-
-        // auto inicio = std::chrono::high_resolution_clock::now(); // Inicia el cronómetro
         
         mtxBloquea();
         data = inferData;
@@ -285,23 +295,22 @@ void Hailo8LRunner::runThread()
         auto output_vstreams = pipeline->get_output_vstreams();
         std::map<std::string, std::vector<uint8_t>> output_data;
         std::map<std::string, hailort::MemoryView> output_data_mem_views;
+
+        size_t numBytesOutput;
         
         for (const auto &output_vstream : output_vstreams) {
-            output_data[output_vstream.get().name()] = std::vector<uint8_t>(output_vstream.get().get_frame_size());
-            output_data_mem_views.emplace(output_vstream.get().name(), hailort::MemoryView(output_data[output_vstream.get().name()].data(), output_vstream.get().get_frame_size()));
+            numBytesOutput = output_vstream.get().get_frame_size() * inferNumber;
+            output_data[output_vstream.get().name()] = std::vector<uint8_t>(numBytesOutput);            
+            output_data_mem_views.emplace(output_vstream.get().name(), hailort::MemoryView(output_data[output_vstream.get().name()].data(), numBytesOutput));
         }
         mtxLibera();
 
-        // auto inicio1 = std::chrono::high_resolution_clock::now(); // Inicia el cronómetro
 
         // Ejecutar la inferencia
         mtxBloquea();
-        hailo_status status = pipeline->infer(input_data_mem_views, output_data_mem_views, 1);
+        hailo_status status = pipeline->infer(input_data_mem_views, output_data_mem_views, inferNumber);
         mtxLibera();
 
-        // auto fin1 = std::chrono::high_resolution_clock::now(); // Finaliza el cronómetro
-        // auto duracion1 = std::chrono::duration_cast<std::chrono::microseconds>(fin1 - inicio1);
-        // std::cout << "Tiempo de Inferencia : " << duracion1.count() << " ms\n";
 
         mtxBloquea();
         lastOutputData = output_data;
@@ -316,11 +325,6 @@ void Hailo8LRunner::runThread()
         {
             setEstadoInf(H8LR_LIB_INF_ESPERA_DATA);
         }
-
-        // auto fin = std::chrono::high_resolution_clock::now(); // Finaliza el cronómetro
-        // auto duracion = std::chrono::duration_cast<std::chrono::microseconds>(fin - inicio);
-        // 
-        // std::cout << "Tiempo de ejecución interno: " << duracion.count() << " ms\n";
         
     }
     
@@ -397,14 +401,15 @@ int Hailo8LRunner::getError()
  /**
  * Ejecuta la inferencia sobre los datos que se pasan
  */
-bool Hailo8LRunner::ejecutarInferencia( uint8_t *data, uint32_t dataSize )
+bool Hailo8LRunner::ejecutarInferencia( uint8_t *data, uint32_t dataSize, uint32_t num_inferencias )
 {       
     int estado;
-    // auto inicio = std::chrono::high_resolution_clock::now(); // Inicia el cronómetro
+    auto inicio = std::chrono::high_resolution_clock::now(); // Inicia el cronómetro
 
     mtxBloquea();
     inferData = data;
     inferDataSize = dataSize;
+    inferNumber = num_inferencias;
     mtxLibera();
 
     setEstadoInf(H8LR_LIB_INF_ESPERA_INF);
@@ -416,8 +421,8 @@ bool Hailo8LRunner::ejecutarInferencia( uint8_t *data, uint32_t dataSize )
         estado = getEstadoInf();
     }
 
-    // auto fin = std::chrono::high_resolution_clock::now(); // Finaliza el cronómetro
-    // auto duracion = std::chrono::duration_cast<std::chrono::microseconds>(fin - inicio);
+    auto fin = std::chrono::high_resolution_clock::now(); // Finaliza el cronómetro
+    auto duracion = std::chrono::duration_cast<std::chrono::microseconds>(fin - inicio);
     // std::cout << "Tiempo de ejecución interno: " << duracion.count() << " ms\n";
 
     if ( estado == H8LR_LIB_INF_ESPERA_DATA )

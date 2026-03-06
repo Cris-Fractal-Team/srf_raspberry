@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <csignal>
 
+
 #include "lib/general/GThread.h"
 #include "lib/general/GThreadPool.h"
 
@@ -27,10 +28,14 @@ GThread::GThread()
     threadPool = NULL;
     th = NULL;
 
-    // signal(SIGPIPE, sigpipe_handler_thread);
-        
-    // th = new thread( &GThread::bucleThread,this);
     thName = "";
+
+    nucleoAsociado = -1;
+    esDemonio = false;
+
+    ocupado = false;
+    finalizado = true;   // aún no corre
+    thCreado = false;    // si lo tienes
 }
 
 /**
@@ -42,11 +47,48 @@ GThread::GThread( string nombre )
     threadPool = NULL;
     thName = nombre;
     th = NULL;
+    nucleoAsociado = -1;
+    esDemonio = false;
 
     // signal(SIGPIPE, sigpipe_handler_thread);
         
     // th = new thread( &GThread::bucleThread,this);
 }
+
+
+/**
+ * Destructor
+ */
+GThread::~GThread()
+{
+    finalizarYEsperar();
+}
+
+void GThread::finalizarYEsperar()
+{
+    finalizar();
+
+    mtxBloquea();
+    ocupado = true;
+    mtxLibera();
+
+    if (th == NULL)
+        return;
+
+    if (esDemonio)
+    {
+        delete th;
+        th = NULL;
+        return;
+    }
+
+    if (th->joinable())
+        th->join();
+
+    delete th;
+    th = NULL;
+}
+
 
 /**
  * Genera una pausa de milisegundos
@@ -83,6 +125,8 @@ void GThread::sleepSeg( int pausa )
  */
 void GThread::bucleThread()
 {
+    asociaThreadNucleo();
+
     mtxBloquea();
     finalizado = false;
     // ocupado = false;
@@ -149,6 +193,10 @@ void GThread::start()
     if ( th == NULL )
     {
         th = new thread( &GThread::bucleThread,this);
+        if ( esDemonio )
+        {
+            th->detach();
+        }
     }
     else
     {
@@ -172,16 +220,18 @@ bool GThread::isOcupado()
 
 /**
  * Reporta si ha terminado su ejecucion o no
+ * 
+ *      bloquear:
+ *          Indica si se debe o no bloquear el mutex para leer el valor
  */
-bool GThread::isFinalizado()
+bool GThread::isFinalizado( bool bloquear )
 {
-    bool rpta;
-
-    mtxBloquea();
-    rpta = finalizado;
-    mtxLibera();
-
-    return rpta;
+    if ( bloquear == false ) return finalizado;
+    
+    {
+        auto lock = getLock();
+        return finalizado;
+    }
 }
 
 /**
@@ -227,4 +277,42 @@ void GThread::runThread()
 double GThread::getTiempoSinUso()
 {
     return difftime(time(NULL),fechaUltimoUso);
+}
+
+
+/**
+ * Asocia el thread a un nucle fijo del sistema operativo
+ */
+void GThread::asociaThreadNucleo()
+{
+    if ( nucleoAsociado < 0 ) return;
+
+    // Establecer afinidad al núcleo deseado
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(nucleoAsociado, &cpuset);
+
+    pthread_t current_thread = pthread_self();
+    int rc = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+    if (rc != 0) 
+    {
+        std::cerr << "Error setting thread affinity: " << rc << std::endl;
+    }
+}
+
+
+/**
+ * Retorna un bloqueo del mutex de forma mas segura
+ */
+std::unique_lock<std::mutex> GThread::getLock() 
+{
+    return std::unique_lock<std::mutex>(mtx);
+}
+
+/**
+ * Retorna una referencia al mutex
+ */
+std::mutex& GThread::getMutexRef() 
+{
+    return mtx;
 }
